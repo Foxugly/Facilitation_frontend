@@ -61,13 +61,22 @@
     @if (handVisible()) {
       <div class="hand">
         <span class="hand-label">{{ 'room.your_hand' | transloco }}</span>
-        <app-delegation-deck
-          [deck]="deck"
-          [lang]="lang()"
-          [myVote]="socket.myVote()"
-          [votable]="votable()"
-          (vote)="socket.castVote($event)"
-        />
+        <!-- Des boutons, plus un eventail de cartes. Le nom du niveau est ce
+             qu'on choisit reellement — la carte n'en etait qu'une mise en scene,
+             et son libelle devenait illisible des que la rangee se resserrait.
+             Le libelle accessible reste le nom du niveau : les scenarios e2e,
+             qui cliquent « Advise », continuent de fonctionner tels quels. -->
+        <div class="choices">
+          @for (card of deck.cards; track card.value) {
+            <button type="button" class="choice"
+                    [class.chosen]="socket.myVote() === card.value"
+                    [disabled]="!votable()"
+                    (click)="socket.castVote(card.value)">
+              <span class="choice-value">{{ card.value }}</span>
+              <span class="choice-name">{{ cardName(card) }}</span>
+            </button>
+          }
+        </div>
       </div>
     }
 
