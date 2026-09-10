@@ -290,6 +290,6 @@ export class AboutComponent {
   protected readonly ui = computed(() => getAboutUiText(this.language.active()));
 
   protected emailClick(): void {
-    openContactEmail('[Poker]');
+    openContactEmail('[Facilitation]');
   }
 }

@@ -5,7 +5,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
 
 /**
  * Privacy notice — a short, real privacy statement (not lorem) covering what
- * data Poker handles, why, retention/hosting, GDPR rights and contact. Public
+ * data Facilitation handles, why, retention/hosting, GDPR rights and contact. Public
  * page (no auth guard); it is the target of the footer's Privacy link. Content
  * is localized via the Transloco `privacy.*` keys in public/i18n/*.json.
  */
