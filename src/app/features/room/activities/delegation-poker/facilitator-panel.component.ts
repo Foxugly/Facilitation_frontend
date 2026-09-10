@@ -10,6 +10,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { LanguageService } from '../../../../core/i18n/language.service';
 import { RoomSocketService } from '../../../../core/realtime/room-socket.service';
 import { SnapshotCard } from '../../../../core/realtime/protocol';
+import { resolveActivity } from '../activity-registry';
 
 const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
 
@@ -46,6 +47,18 @@ export class DelegationPokerFacilitatorPanelComponent {
 
   readonly lang = this.language.active;
   readonly state = this.socket.roundState;
+
+  /** Ce que l'activite courante DECLARE proposer, plutot qu'une liste d'options
+   * codee ici. Une activite sans notion de duree ne declare pas `timer`, et le
+   * reglage disparait sans qu'on ait a le prevoir dans ce composant.
+   *
+   * La declaration ne se substitue pas au DROIT : une option n'apparait que si
+   * l'activite l'expose ET que la salle y a droit (equipe, offre payante). Le
+   * registre dit ce qui est possible, le serveur ce qui est permis. */
+  private readonly activity = computed(() => resolveActivity(this.socket.deckSnapshot()?.voteType));
+  readonly offersDeck = computed(() => this.activity().teamOptions.includes('deck'));
+  readonly offersAnonymous = computed(() => this.activity().teamOptions.includes('anonymous'));
+  readonly offersTimer = computed(() => this.activity().teamOptions.includes('timer'));
 
   // --- Brouillons locaux, appliques ensemble par prepare() -------------------
   readonly subjectDraft = signal('');

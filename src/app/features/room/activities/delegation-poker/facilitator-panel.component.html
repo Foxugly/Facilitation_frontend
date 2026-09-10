@@ -51,7 +51,7 @@
 
           <!-- Always offered: an anonymous room carries the whole standard
                catalogue, a team room its enabled decks. -->
-          @if (availableDecks().length > 0) {
+          @if (offersDeck() && availableDecks().length > 0) {
             <div class="panel-block deck-settings">
               <p-select [options]="deckOptions()" optionLabel="label" optionValue="value"
                         [ngModel]="deckDraft() ?? currentDeckId()" (ngModelChange)="onDeckChange($event)"
@@ -59,7 +59,7 @@
             </div>
           }
 
-          @if (socket.revealMode().canAnonymise) {
+          @if (offersAnonymous() && socket.revealMode().canAnonymise) {
             <div class="panel-block reveal-settings">
               <div class="reveal-row">
                 <p-toggleswitch [ngModel]="anonymousDraft()" (ngModelChange)="onRevealModeChange($event)" />
@@ -72,7 +72,7 @@
           }
 
           <!-- Timer: team-only feature — an anonymous room never sees it. -->
-          @if (socket.isTeam()) {
+          @if (offersTimer() && socket.isTeam()) {
             <div class="panel-block timer-settings">
               <div class="timer-row">
                 <p-toggleswitch [ngModel]="timerEnabledDraft()" (ngModelChange)="onTimerEnabledChange($event)" />
