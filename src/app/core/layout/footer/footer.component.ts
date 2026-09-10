@@ -6,7 +6,7 @@ import { TranslocoModule } from '@jsverse/transloco';
  * Fleet footer (core/layout, STANDARD-frontend-layout.md §Footer): full-width
  * band, inner capped on the content grid, BEM `footer__*`. Segments: brand ·
  * tagline · (fill) · «Version {x}» · © {year} Foxugly (logo → foxugly.com) ·
- * Privacy · rights. Version is injected at deploy time (`window.__POKER_VERSION`
+ * Privacy · rights. Version is injected at deploy time (`window.__FACILITATION_VERSION`
  * via SSM), else `dev`. Colours come from the design tokens (dark mode auto).
  */
 @Component({
@@ -21,5 +21,5 @@ export class FooterComponent {
   readonly year = new Date().getFullYear();
   /** Runtime build version injected at deploy time; `dev` in local builds. */
   readonly version =
-    (globalThis as { __POKER_VERSION?: string }).__POKER_VERSION || 'dev';
+    (globalThis as { __FACILITATION_VERSION?: string }).__FACILITATION_VERSION || 'dev';
 }
