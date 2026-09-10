@@ -100,6 +100,7 @@ jobs:
           GB="git -C $APP -c safe.directory=$APP show origin/main"
           cat > /tmp/ssm-params.json <<EOF
           { "commands": [
+            "set -eu",
             "chown -R django:www-data $APP",
             "sudo -u django bash -c 'umask 027; cd $APP && git fetch --quiet origin main && git reset --hard --quiet origin/main'",
             "$GB:deploy/systemd/facilitation-frontend-runtime-fetch.service > /etc/systemd/system/facilitation-frontend-runtime-fetch.service",
@@ -109,6 +110,7 @@ jobs:
             "env AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_CONFIG_FILE=/dev/null aws s3 cp s3://$BUCKET/builds/facilitation-frontend/$SHA.tar.gz /tmp/facilitationfe.tar.gz --region eu-west-1",
             "rm -rf /tmp/facilitationfe && mkdir -p /tmp/facilitationfe && tar -xzf /tmp/facilitationfe.tar.gz -C /tmp/facilitationfe",
             "rm -rf $APP/dist/.bundle-prev; [ -d $APP/dist/.bundle-current ] && mv $APP/dist/.bundle-current $APP/dist/.bundle-prev || true",
+            "mkdir -p $APP/dist",
             "rm -rf $APP/dist/.bundle-current && cp -a /tmp/facilitationfe $APP/dist/.bundle-current",
             "mkdir -p $DOC && rsync -a --delete $APP/dist/.bundle-current/ $DOC/",
             "[ -d $APP/dist/.bundle-prev ] && rsync -a --ignore-existing $APP/dist/.bundle-prev/ $DOC/ || true",
