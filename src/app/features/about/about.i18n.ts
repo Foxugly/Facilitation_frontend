@@ -53,7 +53,7 @@ const FR: AboutUiText = {
   },
 
   companyTitle: 'Société',
-  companyIntro: 'Informations légales et coordonnées de la société qui édite et exploite Poker.',
+  companyIntro: 'Informations légales et coordonnées de la société qui édite et exploite Facilitation.',
   company: {
     contactLabel: 'Contact',
     companyLabel: 'Société',
@@ -66,12 +66,12 @@ const FR: AboutUiText = {
   },
 
   legalTitle: 'Mentions légales & protection des données',
-  legalIntro: 'Poker respecte la réglementation européenne en matière de protection des données personnelles.',
+  legalIntro: 'Facilitation respecte la réglementation européenne en matière de protection des données personnelles.',
   legalSections: [
     {
       title: 'Responsable du traitement',
       content: [
-        'Le responsable du traitement des données est l\'administrateur de l\'instance Poker déployée.',
+        'Le responsable du traitement des données est l\'administrateur de l\'instance Facilitation déployée.',
         'Pour toute question relative à vos données personnelles, contactez l\'administrateur de votre instance.',
       ],
     },
@@ -121,7 +121,7 @@ const FR: AboutUiText = {
     {
       title: 'Cookies',
       content: [
-        'Poker n\'utilise pas de cookies de traçage ni de cookies publicitaires.',
+        'Facilitation n\'utilise pas de cookies de traçage ni de cookies publicitaires.',
         'Seuls des cookies techniques strictement nécessaires au fonctionnement (session, préférence de langue) sont utilisés.',
       ],
     },
@@ -171,7 +171,7 @@ const EN: AboutUiText = {
   },
 
   companyTitle: 'Company',
-  companyIntro: 'Legal information and contact details of the company that operates Poker.',
+  companyIntro: 'Legal information and contact details of the company that operates Facilitation.',
   company: {
     contactLabel: 'Contact',
     companyLabel: 'Company',
@@ -184,12 +184,12 @@ const EN: AboutUiText = {
   },
 
   legalTitle: 'Legal notice & data protection',
-  legalIntro: 'Poker complies with European regulations on personal data protection.',
+  legalIntro: 'Facilitation complies with European regulations on personal data protection.',
   legalSections: [
     {
       title: 'Data controller',
       content: [
-        'The data controller is the administrator of the deployed Poker instance.',
+        'The data controller is the administrator of the deployed Facilitation instance.',
         'For any question regarding your personal data, contact the administrator of your instance.',
       ],
     },
@@ -239,7 +239,7 @@ const EN: AboutUiText = {
     {
       title: 'Cookies',
       content: [
-        'Poker does not use tracking cookies or advertising cookies.',
+        'Facilitation does not use tracking cookies or advertising cookies.',
         'Only strictly necessary technical cookies (session, language preference) are used.',
       ],
     },
@@ -289,7 +289,7 @@ const NL: AboutUiText = {
   },
 
   companyTitle: 'Bedrijf',
-  companyIntro: 'Juridische informatie en contactgegevens van het bedrijf dat Poker uitbaat.',
+  companyIntro: 'Juridische informatie en contactgegevens van het bedrijf dat Facilitation uitbaat.',
   company: {
     contactLabel: 'Contact',
     companyLabel: 'Bedrijf',
@@ -302,12 +302,12 @@ const NL: AboutUiText = {
   },
 
   legalTitle: 'Juridische informatie & gegevensbescherming',
-  legalIntro: 'Poker voldoet aan de Europese regelgeving inzake de bescherming van persoonsgegevens.',
+  legalIntro: 'Facilitation voldoet aan de Europese regelgeving inzake de bescherming van persoonsgegevens.',
   legalSections: [
     {
       title: 'Verwerkingsverantwoordelijke',
       content: [
-        'De verwerkingsverantwoordelijke is de beheerder van de geinstalleerde Poker-instantie.',
+        'De verwerkingsverantwoordelijke is de beheerder van de geinstalleerde Facilitation-instantie.',
         'Neem voor vragen over uw persoonsgegevens contact op met de beheerder van uw instantie.',
       ],
     },
@@ -357,7 +357,7 @@ const NL: AboutUiText = {
     {
       title: 'Cookies',
       content: [
-        'Poker maakt geen gebruik van tracking- of advertentiecookies.',
+        'Facilitation maakt geen gebruik van tracking- of advertentiecookies.',
         'Alleen strikt noodzakelijke technische cookies (sessie, taalvoorkeur) worden gebruikt.',
       ],
     },
@@ -407,7 +407,7 @@ const IT: AboutUiText = {
   },
 
   companyTitle: 'Società',
-  companyIntro: 'Informazioni legali e contatti della società che gestisce Poker.',
+  companyIntro: 'Informazioni legali e contatti della società che gestisce Facilitation.',
   company: {
     contactLabel: 'Contatto',
     companyLabel: 'Società',
@@ -420,12 +420,12 @@ const IT: AboutUiText = {
   },
 
   legalTitle: 'Note legali e protezione dei dati',
-  legalIntro: 'Poker rispetta la normativa europea sulla protezione dei dati personali.',
+  legalIntro: 'Facilitation rispetta la normativa europea sulla protezione dei dati personali.',
   legalSections: [
     {
       title: 'Titolare del trattamento',
       content: [
-        'Il titolare del trattamento e l\'amministratore dell\'istanza Poker installata.',
+        'Il titolare del trattamento e l\'amministratore dell\'istanza Facilitation installata.',
         'Per qualsiasi domanda sui dati personali, contattare l\'amministratore della propria istanza.',
       ],
     },
@@ -475,7 +475,7 @@ const IT: AboutUiText = {
     {
       title: 'Cookie',
       content: [
-        'Poker non utilizza cookie di tracciamento ne cookie pubblicitari.',
+        'Facilitation non utilizza cookie di tracciamento ne cookie pubblicitari.',
         'Vengono utilizzati solo cookie tecnici strettamente necessari (sessione, preferenza linguistica).',
       ],
     },
@@ -525,7 +525,7 @@ const ES: AboutUiText = {
   },
 
   companyTitle: 'Empresa',
-  companyIntro: 'Información legal y datos de contacto de la empresa que opera Poker.',
+  companyIntro: 'Información legal y datos de contacto de la empresa que opera Facilitation.',
   company: {
     contactLabel: 'Contacto',
     companyLabel: 'Empresa',
@@ -538,12 +538,12 @@ const ES: AboutUiText = {
   },
 
   legalTitle: 'Aviso legal y proteccion de datos',
-  legalIntro: 'Poker cumple con la normativa europea sobre proteccion de datos personales.',
+  legalIntro: 'Facilitation cumple con la normativa europea sobre proteccion de datos personales.',
   legalSections: [
     {
       title: 'Responsable del tratamiento',
       content: [
-        'El responsable del tratamiento de datos es el administrador de la instancia Poker desplegada.',
+        'El responsable del tratamiento de datos es el administrador de la instancia Facilitation desplegada.',
         'Para cualquier consulta sobre sus datos personales, contacte con el administrador de su instancia.',
       ],
     },
@@ -593,7 +593,7 @@ const ES: AboutUiText = {
     {
       title: 'Cookies',
       content: [
-        'Poker no utiliza cookies de rastreo ni cookies publicitarias.',
+        'Facilitation no utiliza cookies de rastreo ni cookies publicitarias.',
         'Solo se utilizan cookies tecnicas estrictamente necesarias (sesion, preferencia de idioma).',
       ],
     },
