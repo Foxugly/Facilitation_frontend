@@ -126,9 +126,6 @@
   .room-body.has-panel {
     grid-template-columns: minmax(0, 1fr);
   }
-  .fac-panel {
-    min-width: 0;
-  }
 }
 
 
@@ -623,183 +620,6 @@
 }
 
 /* --- Facilitator panel --- */
-.fac-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-  padding: var(--s-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
-  align-self: start;
-  position: sticky;
-  top: 16px;
-
-  h3 {
-    margin: 0;
-    font-size: 1rem;
-    color: var(--ink);
-    padding-bottom: var(--s-2);
-    border-bottom: 1px solid var(--border);
-  }
-}
-.panel-block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-
-  label {
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-  input {
-    width: 100%;
-  }
-  .current-subject {
-    margin: 0;
-    color: var(--ink);
-    font-weight: 600;
-  }
-}
-.panel-block.guard {
-  border: 1px solid #f59e0b;
-  border-radius: var(--radius);
-  padding: var(--s-3);
-  gap: var(--s-2);
-}
-
-/* Two-step round panel: the compose form (step 1) and the launch summary (step 2). */
-.round-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
-}
-.round-ready {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-.round-ready .ready-subject {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-
-/* Inline rows: an input/select that grows + a compact action button beside it. */
-.add-subject-row,
-.act-row,
-.timer-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--s-2);
-}
-/* A clear gap on each side of the clock icon: from the on/off switch (left) and
-   from the duration control (right). */
-.timer-row .timer-icon {
-  margin-left: var(--s-3);
-  margin-right: var(--s-2);
-  color: var(--muted);
-}
-/* The duration control fills the rest of the row after the switch + clock icon. */
-.timer-row :is(p-inputnumber, p-inputNumber) {
-  flex: 1 1 auto;
-  width: auto;
-  min-width: 0;
-}
-/* The inner <input> (rendered by PrimeNG, so its rule lives in global styles.scss —
-   emulated encapsulation can't reach a child component's internals) is constrained
-   there to stop it overflowing this fixed-width control. */
-.add-subject-row .grow,
-.act-row .grow,
-.timer-row .grow {
-  flex: 1;
-  min-width: 0;
-}
-
-/* --- Scenario agenda --- */
-.agenda {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.agenda-empty {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-style: italic;
-  padding: var(--s-2) 0;
-}
-.agenda-line {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  padding: var(--s-2);
-  cursor: pointer;
-  text-align: left;
-  color: var(--ink);
-  font-size: 0.9rem;
-
-  &:hover:not(:disabled) {
-    background: var(--surface-2, rgba(0, 0, 0, 0.04));
-  }
-  &:disabled {
-    cursor: default;
-  }
-
-  .pi {
-    font-size: 0.8rem;
-    flex-shrink: 0;
-  }
-  .pi-circle {
-    color: var(--muted);
-  }
-  .pi-check-circle {
-    color: var(--accent);
-  }
-}
-.agenda-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.agenda-item.current .agenda-line {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--ink);
-  font-weight: 600;
-
-  .pi-caret-right {
-    color: var(--accent);
-  }
-}
-.agenda-item.done .agenda-text {
-  color: var(--muted);
-}
-.agenda-result {
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  padding: 1px 7px;
-  border-radius: 999px;
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Reveal mode: the badge is deliberately always visible, not only when anonymous —
-   a voter must be able to tell the mode at a glance before playing a card. */
 .reveal-badge {
   display: inline-flex;
   align-items: center;
@@ -814,26 +634,6 @@
   color: var(--accent);
   border-color: var(--accent);
 }
-.reveal-row {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-}
-.reveal-mode-name {
-  color: var(--ink);
-  font-size: 0.9rem;
-}
-
-/* --- Mobile : la main d'abord, la table en defilant ---------------------------
-
-   Sur un ecran etroit, faire tenir la table ET la main dans la fenetre ne laissait
-   que des cartes de 39px, et 14px avec vingt joueurs. On change donc de strategie :
-   ce qu'on voit en arrivant, c'est SA MAIN, en cartes larges reparties sur plusieurs
-   rangees ; la table se decouvre en defilant.
-
-   Les deux tailles cessent d'etre egales ici, et ce n'est pas un renoncement : une
-   carte de 88px sur la table exigerait un tapis de ~600px, impossible sur 390px de
-   large. La table garde donc sa plus grande taille possible, la main la sienne. */
 @media (max-width: 768px) {
   /* La coquille elle-meme est liberee dans _shell.scss : encapsules, les styles d'un
      composant ne peuvent pas atteindre un element qui lui est exterieur. */
@@ -935,4 +735,48 @@
   max-width: min(70vw, 320px);
   text-align: center;
   color: var(--ink-soft);
+}
+
+// --- Duplique depuis le panneau facilitateur -------------------------------
+// Le shell conserve l'encart « reprendre le role », rendu aux NON-facilitateurs
+// quand personne ne tient le role. Il porte `class="fac-panel"` puis
+// `class="panel-block guard"` : ces trois regles vivent donc des DEUX cotes,
+// styles encapsules obligent. Toute retouche ici se reporte dans
+// facilitator-panel.component.scss.
+.fac-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  align-self: start;
+  position: sticky;
+  top: 16px;
+}
+
+@media (max-width: 768px) {
+  .fac-panel {
+    min-width: 0;
+  }
+}
+
+// Le shell conserve l'encart « reprendre le role » (rendu aux NON-facilitateurs
+// quand personne ne tient le role), qui porte `class="panel-block guard"`. Ces
+// deux regles sont parties avec le panneau ; les styles etant encapsules par
+// composant, elles doivent exister des deux cotes. Toute retouche ici doit etre
+// reportee dans facilitator-panel.component.scss.
+.panel-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.panel-block.guard {
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius);
+  padding: var(--s-3);
+  gap: var(--s-2);
 }
