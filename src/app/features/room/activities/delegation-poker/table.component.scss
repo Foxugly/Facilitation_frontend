@@ -668,3 +668,25 @@
   }
 }
 
+
+
+// --- Regles heritees du shell, converties en :host-context ------------------
+// Ces deux selecteurs vivaient dans room.component.scss sous la forme
+// `.room--custom-bg .subject-view` et `.room:fullscreen .stage`. L'encapsulation
+// Angular les rendait INOPERANTS des que le plateau est passe dans son propre
+// composant : un selecteur descendant ne franchit pas la frontiere.
+//
+// `:host-context()` est fait pour ce cas — il interroge les ancetres de l'hote
+// sans que le parent ait a percer son encapsulation.
+//
+// A noter : le harnais de captures ne photographie PAS le plein ecran ni un fond
+// d'equipe personnalise. Ces deux regressions seraient donc passees inapercues.
+:host-context(.room--custom-bg) .subject-view {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border-radius: var(--radius);
+  padding: var(--s-2) var(--s-3);
+}
+
+:host-context(.room:fullscreen) .stage {
+  min-height: 0;
+}

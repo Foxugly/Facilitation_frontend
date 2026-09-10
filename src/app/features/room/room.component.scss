@@ -37,8 +37,7 @@
 }
 
 
-.room--custom-bg .room-header,
-.room--custom-bg .subject-view {
+.room--custom-bg .room-header {
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   border-radius: var(--radius);
   padding: var(--s-2) var(--s-3);
@@ -64,10 +63,6 @@
   flex: 1;
   min-height: 0;
   align-items: stretch;
-}
-
-.room:fullscreen .stage {
-  min-height: 0;
 }
 
 .room:fullscreen {
