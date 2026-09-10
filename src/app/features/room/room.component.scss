@@ -1,0 +1,938 @@
+/* Emerald table felt by default — overridable per team in the paid tier via these
+   CSS variables (set on the room, later, from team branding). */
+:host {
+  --table-felt: #10b981;
+  /* Edges/rail derive from the felt so a custom team colour recolours the whole table
+     from a single override of --table-felt. */
+  --table-felt-edge: color-mix(in srgb, var(--table-felt) 68%, black);
+  --table-rail: color-mix(in srgb, var(--table-felt) 42%, black);
+}
+
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  /* A bit wider than the standard page so the table has more room. */
+  max-width: 1400px;
+  /* Trim the space below the hand (the .page default is larger). */
+  padding-bottom: var(--s-2);
+  /* La coquille donne une hauteur definie a une salle (voir _shell.scss) : on la
+     remplit exactement, ni plus — rien ne defile, le pied de page reste visible. */
+  height: 100%;
+  min-height: 0;
+
+  /* Bornes de la taille d'une carte (voir --card sur la scene). Le plancher garde
+     une cible tactile utilisable ; le plafond evite qu'un deck de trois cartes ne
+     les etale de maniere absurde sur un tres grand ecran. */
+  --card-min: 52px;
+  --card-cap: 190px;
+
+  /* Fond pose par l'equipe. Sans valeur — mode Theme, ou salle ouverte avant la
+     fonctionnalite, dont le snapshot fige n'a pas le champ — rien n'est peint et
+     la page garde le fond du theme. */
+  background-color: var(--room-bg, transparent);
+  background-image: var(--room-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius);
+}
+
+/* Un fond pose par l'equipe passe sous du texte dont elle ne choisit pas la
+   couleur : l'en-tete et le bandeau de sujet se posent alors sur un voile de la
+   surface courante, qui garde le contraste dans les deux themes. Sans fond, la
+   classe est absente et rien ne change. */
+.room--custom-bg .room-header,
+.room--custom-bg .subject-view {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border-radius: var(--radius);
+  padding: var(--s-2) var(--s-3);
+}
+
+/* Fullscreen: the room fills the screen exactly — no page scroll. */
+.room:fullscreen {
+  max-width: none;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: var(--s-4);
+  /* Pas le raccourci `background` : il effacerait l'image de fond posee sur .room.
+     Le fond de l'equipe prime, et --surface-2 reste le repli. */
+  background-color: var(--room-bg, var(--surface-2));
+  border-radius: 0;
+}
+.room:fullscreen .room-body {
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+.room:fullscreen .stage {
+  min-height: 0;
+}
+/* En plein ecran, le chrome vertical se reduit : ni en-tete d'application, ni pied
+   de page. La table peut donc grandir d'autant. */
+.room:fullscreen {
+  --chrome-h: 200px;
+}
+
+/* --- Room header: back left, title centred, actions right --- */
+.room-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--s-3);
+}
+.rh-left {
+  justify-self: start;
+}
+.rh-right {
+  justify-self: end;
+  display: flex;
+  gap: var(--s-2);
+}
+.rh-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .room-header {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .rh-left,
+  .rh-right {
+    justify-self: center;
+  }
+}
+
+.room-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-6);
+  align-items: start;
+}
+.room-body.has-panel {
+  grid-template-columns: 1fr 300px;
+}
+@media (max-width: 768px) {
+  /* `1fr` vaut `minmax(auto, 1fr)` : la piste ne descend jamais sous le minimum de
+     son contenu, et le panneau facilitateur — 377px au minimum — debordait donc
+     l'ecran, barre de defilement horizontale a la clef. */
+  .room-body.has-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fac-panel {
+    min-width: 0;
+  }
+}
+
+
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+  /* Prend la hauteur que la salle lui laisse, sans jamais la depasser. C'etait
+     auparavant `min-height: calc(100dvh - 150px)` : une constante qui ignorait
+     l'en-tete de l'application et le pied de page, et faisait donc defiler la page
+     en poussant le pied sous la ligne de flottaison. */
+  flex: 1;
+  min-height: 0;
+  /* Le surplus se repartit en haut et en bas plutot qu'en grands vides autour de
+     la table. */
+  justify-content: center;
+
+  /* --- Une seule taille de carte, sur la table comme dans la main ---------------
+
+     Les deux se contraignent mutuellement : agrandir les cartes fait monter la main,
+     ce qui abaisse la table, ce qui abaisse la taille qu'une carte de siege peut
+     prendre. Plutot que d'empiler des bornes approximatives, on resout l'egalite.
+
+     Soit H la hauteur libre, f la part qu'une carte peut occuper sur le tapis, r le
+     ratio du tapis, et c la largeur d'une carte (sa hauteur vaut 7/5 c) :
+
+         tapis    = (H - 7/5 c) * r
+         carte    = tapis * f
+     =>  c        = f * r * H / (1 + 7/5 * f * r)
+
+     C'est --card-optimal. La taille finale est la plus petite de quatre bornes :
+     cet optimum en hauteur, ce que la LARGEUR du tapis autorise, la part de rangee
+     qui revient a chaque carte de la main, et un plafond absolu. Le plancher, lui,
+     fait passer la main a la ligne plutot que de rendre les cartes intouchables. */
+  /* La scene est un CONTENEUR : `cqw` y designe toujours sa largeur, ou que la
+     variable soit ensuite utilisee. Un pourcentage ne convient pas ici — il se
+     resout a l'endroit de son USAGE, donc `100%` valait la largeur du tapis sur une
+     carte de siege et celle de la scene dans la main : --card prenait deux valeurs
+     differentes, et les cartes n'etaient pas de la meme taille. */
+  container-type: inline-size;
+
+  --gap: var(--s-3);
+  /* Place laissee de part et d'autre du tapis aux ETIQUETTES des joueurs, posees a
+     l'exterieur du bord : sans elle, une table occupant toute la scene les pousserait
+     hors de l'ecran, barre de defilement horizontale a la clef.
+     48px suffisaient quand l'etiquette etait posee sur une ellipse fixe ; elle est
+     desormais ecartee de sa propre carte, ce qui l'eloigne d'autant plus que la table
+     est petite — la moitie d'une carte compte dans cet ecart, mais la moitie de
+     l'etiquette, elle, ne retrecit jamais. */
+  --seat-reserve: 96px;
+  --k: calc(var(--seat-frac, 0.09) * var(--felt-aspect, 2.2));
+  --card-optimal: calc(var(--k) * (100dvh - var(--chrome-h, 300px)) / (1 + 1.4 * var(--k)));
+
+  /* Ce qu'une carte peut mesurer sur la TABLE : l'optimum en hauteur, ce que la
+     largeur du tapis autorise, et un plafond absolu.
+     Aucun plancher : un plancher fixe finit toujours par ecraser la limite
+     geometrique — a 20 sieges, 52px suffisaient a faire se chevaucher les cartes
+     alors que la table n'en autorisait que 49. */
+  --card-table-max: min(
+    var(--card-optimal),
+    calc((100cqw - var(--seat-reserve)) * var(--seat-frac, 0.09)),
+    var(--card-cap, 190px)
+  );
+
+  /* Sur grand ecran, une seule taille partout : celle de la table, encore bornee
+     par la part de rangee qui revient a chaque carte de la main. */
+  --card: min(
+    var(--card-table-max),
+    calc((100cqw - (var(--deck-n, 7) - 1) * var(--gap)) / var(--deck-n, 7))
+  );
+  --card-hand: var(--card);
+
+  /* La table decoule de la carte retenue : la hauteur libre moins la place de la
+     main, convertie en largeur par le ratio, sans deborder de la scene.
+
+     La largeur disponible est amputee de --seat-reserve : voir plus haut. */
+  --felt-w: min(
+    calc(100cqw - var(--seat-reserve)),
+    calc((100dvh - var(--chrome-h, 300px) - var(--card) * 7 / 5) * var(--felt-aspect, 2.2))
+  );
+}
+
+/* --- Subject (read-only, everyone) --- */
+.subject-view {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--ink);
+  }
+}
+
+/* --- Round timer (cosmetic countdown, next to the subject) --- */
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px var(--s-2);
+
+  .pi-clock {
+    font-size: 0.72rem;
+  }
+}
+.timer-badge.expired {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+/* --- Table (smaller, neutral) --- */
+.table-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Natural height (the felt); the stage centres the whole block instead of this
+     ballooning to fill and leaving big gaps above/below the table. */
+  flex: 0 1 auto;
+}
+.felt {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.6;
+  margin: var(--s-2) 0;
+  /* La table se dimensionne sur la HAUTEUR disponible : ce qui reste une fois retires
+     le chrome vertical et la place des cartes. Elle etait auparavant plafonnee en
+     largeur, ce qui laissait d'immenses vides au-dessus et au-dessous.
+
+     On passe par max-width, JAMAIS par height : imposer une hauteur fait perdre
+     l'aspect-ratio des que la largeur devient limitante, et les sieges — places en
+     JavaScript pour un ratio donne — decrochent alors du bord de la table.
+
+     La part des cartes est derivee de leur plafond plutot qu'ecrite en dur : sinon
+     agrandir la main rognerait la table sans que personne ne s'en apercoive. Elle
+     suppose les cartes a leur plafond, donc on sur-reserve sur un ecran etroit —
+     sans consequence, la table y etant de toute facon limitee par la largeur.
+
+     Le calcul lui-meme vit sur la scene (--felt-w) : la main s'en sert aussi, pour
+     que ses cartes soient exactement de la taille de celles de la table. */
+  max-width: var(--felt-w);
+}
+.felt::before {
+  content: '';
+  position: absolute;
+  inset: 13% 11%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, var(--table-felt) 0%, var(--table-felt-edge) 100%);
+  border: 6px solid var(--table-rail);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.4), var(--shadow-card);
+}
+/* Felt image, when the team picked one. Layered OVER the colour rather than
+   replacing it, so the rail and inner shadow still read the same, and a missing
+   or slow image degrades to the colour instead of a bare hole. */
+.felt::after {
+  content: '';
+  position: absolute;
+  inset: 13% 11%;
+  border-radius: 999px;
+  background-image: var(--table-felt-image, none);
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+/* Participant (avatar + name) on the OUTSIDE of the table.
+
+   Pose depuis SA carte, et non sur une ellipse a lui : l'ecart necessaire pour la
+   degager n'est pas le meme selon l'axe — la moitie d'une carte, c'est 62px de large
+   mais 87px de haut. Un ecart radial unique, en pourcentage, laissait donc les
+   etiquettes des sieges DIAGONAUX mordre sur les cartes (visible des huit joueurs).
+
+   Le composant fournit la direction, normalisee pour que sa composante dominante
+   vaille 1 ; chaque axe est ensuite ecarte de la demi-carte plus la demi-etiquette,
+   en pixels reels. Deux rectangles etant disjoints des qu'ils le sont sur UN axe,
+   l'axe dominant suffit a la garantie, et la marge finit le travail a l'oeil. */
+.seat-person {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 78px;
+  /* Hauteur de l'etiquette : pastille (28px) + interligne + une ligne de nom, jamais
+     davantage — le nom est tronque plutot que replie. */
+  --person-h: 46px;
+  --seat-margin: 8px;
+  transform: translate(-50%, -50%)
+    translate(
+      calc(var(--seat-ux, 0) * ((var(--card) + 78px) / 2 + var(--seat-margin))),
+      calc(var(--seat-uy, 0) * ((var(--card) * 7 / 5 + var(--person-h)) / 2 + var(--seat-margin)))
+    );
+}
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+.seat-name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.seat-name .pi-star-fill {
+  color: var(--accent);
+  font-size: 0.72rem;
+}
+.seat-transfer {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0 2px;
+  font-size: 0.72rem;
+}
+.seat-transfer:hover {
+  color: var(--accent);
+}
+/* Card near the table (radially inside the participant). */
+.seat-card {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  /* La MEME taille que dans la main : c'est tout l'objet de --card, dont la valeur
+     tient deja compte de ce que la table peut accueillir sans chevauchement. */
+  width: var(--card);
+}
+.empty-slot {
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  border: 1.5px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- Table centre: l'avancement du vote, et rien d'autre ---------------------
+   Le depouillement y tenait dans 210px, sous les cartes des sieges et sur le vert du
+   tapis ; il vit desormais dans la bande de la main (voir .outcome). */
+.table-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  text-align: center;
+
+  .count {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .center-hint {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+  }
+}
+
+/* --- Hand (bigger cards) --- */
+.hand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  /* Sits right under the table (the stage centres the block); no auto push-down. */
+  padding-top: var(--s-3);
+  padding-bottom: 0;
+  /* Le trait separateur est porte par le libelle lui-meme (voir .hand-label), pas
+     par ce bloc : le libelle occupait sinon une ligne a lui seul, au-dessus du
+     trait, pour une hauteur perdue au detriment des cartes. */
+}
+/* The deck host is inline by default — force a full-width block so its columns
+   don't collapse. Plus de plafond de 760px : la main occupe toute la largeur de la
+   scene, les cartes se dimensionnant elles-memes entre leurs deux bornes. */
+.hand app-delegation-deck {
+  display: block;
+  width: 100%;
+}
+/* Le libelle EST le separateur : un trait le prolonge de part et d'autre, a la
+   maniere d'une legende de fieldset. Le libelle et le trait occupaient auparavant
+   deux lignes distinctes ; les fondre en une seule rend cette hauteur aux cartes. */
+/* Meme trait-legende pour la main et pour le depouillement qui lui succede : les
+   deux bandes se relaient au meme endroit, elles doivent s'annoncer pareil. */
+.hand-label,
+.outcome-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.hand-label::before,
+.hand-label::after,
+.outcome-label::before,
+.outcome-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* --- Depouillement : la meme bande, une fois les votes reveles ----------------
+
+   La main devient injouable a la revelation ; le resultat prend sa place plutot que
+   de s'entasser au centre du tapis. La bande garde EXACTEMENT la hauteur qu'avait la
+   main — celle d'une carte, plus son libelle — pour que la table ne bouge pas d'un
+   pixel au moment de reveler. C'est ce budget fixe qui dicte la taille des cartes
+   ci-dessous : le compte et la liste des votants prennent leur part dessus. */
+.outcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding-top: var(--s-3);
+  /* Ce que le compte et les votants retirent a la carte, sous elle. */
+  --outcome-text-h: 34px;
+}
+.outcome-spread {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+.outcome-hint {
+  font-size: 0.7rem;
+  font-style: italic;
+}
+
+/* Mise en page A (defaut) : les cartes jouees. */
+.outcome-cards {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--gap);
+  width: 100%;
+}
+.outcome-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  /* Plus large que sa carte : la liste des votants tient alors sur une ligne, la
+     place horizontale ne manquant pas (au plus sept piles, comme la main). */
+  min-width: 130px;
+}
+/* La bande garde la hauteur d'une carte : ce que le texte prend sous elle, la carte
+   le rend. Les cartes sont la pour etre lues, pas cliquees. */
+.outcome-group app-delegation-card,
+.decided app-delegation-card {
+  display: block;
+  width: calc((var(--card) * 7 / 5 - var(--outcome-text-h)) * 5 / 7);
+  pointer-events: none;
+}
+.og-count {
+  font-size: 0.85rem;
+}
+.og-count--top {
+  color: var(--accent);
+}
+.og-voters {
+  font-size: 0.75rem;
+  max-width: 190px;
+}
+
+/* Mise en page B : le recapitulatif chiffre.
+
+   Les lignes se PARTAGENT le budget de la bande — la hauteur d'une carte — au lieu
+   de s'empiler librement : a sept valeurs distinctes, sept lignes de 22px passaient
+   sous le pied de page, la salle tenant dans un ecran sans defiler. Le nombre de
+   lignes arrive du composant (--tl-rows), la CSS seule ne sachant pas compter. */
+.tally-list {
+  display: flex;
+  flex-direction: column;
+  --tl-gap: 6px;
+  --tl-row-h: clamp(
+    14px,
+    calc((var(--card) * 7 / 5 - (var(--tl-rows, 3) - 1) * var(--tl-gap)) / var(--tl-rows, 3)),
+    22px
+  );
+  gap: var(--tl-gap);
+  width: 100%;
+  max-width: 720px;
+}
+.tl-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 130px) 1fr auto;
+  align-items: center;
+  gap: var(--s-3);
+  height: var(--tl-row-h);
+}
+.tl-name {
+  font-weight: 700;
+  text-align: right;
+}
+.tl-bar {
+  height: 100%;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+.tl-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent);
+  border-radius: 6px;
+}
+/* Les noms se lisent par-dessus la barre : sur une ligne serree, une colonne de plus
+   les aurait reduits a quelques caracteres. */
+.tl-bar span {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 0;
+  line-height: var(--tl-row-h);
+  font-size: min(0.78rem, calc(var(--tl-row-h) - 4px));
+  font-weight: 600;
+  color: var(--ink);
+  mix-blend-mode: luminosity;
+}
+/* Une seule regle pour tout ce qui se lit dans la bande : meme encre, et une taille
+   qui suit la ligne quand elle se resserre — sinon le texte la ferait regrandir, et
+   le partage du budget de hauteur ne servirait a rien. */
+.og-count,
+.og-voters,
+.outcome-hint,
+.tl-name,
+.tl-count,
+.tl-bar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.og-count,
+.tl-name,
+.tl-count {
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.tl-name,
+.tl-count {
+  font-size: min(0.95rem, calc(var(--tl-row-h) - 3px));
+}
+.og-voters,
+.outcome-hint {
+  color: var(--muted);
+}
+
+/* La decision prise : une seule carte, celle qui a ete retenue. */
+.decided {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+.decided-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* --- Facilitator panel --- */
+.fac-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  align-self: start;
+  position: sticky;
+  top: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--ink);
+    padding-bottom: var(--s-2);
+    border-bottom: 1px solid var(--border);
+  }
+}
+.panel-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+
+  label {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  input {
+    width: 100%;
+  }
+  .current-subject {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 600;
+  }
+}
+.panel-block.guard {
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius);
+  padding: var(--s-3);
+  gap: var(--s-2);
+}
+
+/* Two-step round panel: the compose form (step 1) and the launch summary (step 2). */
+.round-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.round-ready {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.round-ready .ready-subject {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Inline rows: an input/select that grows + a compact action button beside it. */
+.add-subject-row,
+.act-row,
+.timer-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--s-2);
+}
+/* A clear gap on each side of the clock icon: from the on/off switch (left) and
+   from the duration control (right). */
+.timer-row .timer-icon {
+  margin-left: var(--s-3);
+  margin-right: var(--s-2);
+  color: var(--muted);
+}
+/* The duration control fills the rest of the row after the switch + clock icon. */
+.timer-row :is(p-inputnumber, p-inputNumber) {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+/* The inner <input> (rendered by PrimeNG, so its rule lives in global styles.scss —
+   emulated encapsulation can't reach a child component's internals) is constrained
+   there to stop it overflowing this fixed-width control. */
+.add-subject-row .grow,
+.act-row .grow,
+.timer-row .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Scenario agenda --- */
+.agenda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.agenda-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  padding: var(--s-2) 0;
+}
+.agenda-line {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  padding: var(--s-2);
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+  font-size: 0.9rem;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-2, rgba(0, 0, 0, 0.04));
+  }
+  &:disabled {
+    cursor: default;
+  }
+
+  .pi {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  .pi-circle {
+    color: var(--muted);
+  }
+  .pi-check-circle {
+    color: var(--accent);
+  }
+}
+.agenda-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.agenda-item.current .agenda-line {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--ink);
+  font-weight: 600;
+
+  .pi-caret-right {
+    color: var(--accent);
+  }
+}
+.agenda-item.done .agenda-text {
+  color: var(--muted);
+}
+.agenda-result {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  padding: 1px 7px;
+  border-radius: 999px;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Reveal mode: the badge is deliberately always visible, not only when anonymous —
+   a voter must be able to tell the mode at a glance before playing a card. */
+.reveal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.reveal-badge.anonymous {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.reveal-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.reveal-mode-name {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+/* --- Mobile : la main d'abord, la table en defilant ---------------------------
+
+   Sur un ecran etroit, faire tenir la table ET la main dans la fenetre ne laissait
+   que des cartes de 39px, et 14px avec vingt joueurs. On change donc de strategie :
+   ce qu'on voit en arrivant, c'est SA MAIN, en cartes larges reparties sur plusieurs
+   rangees ; la table se decouvre en defilant.
+
+   Les deux tailles cessent d'etre egales ici, et ce n'est pas un renoncement : une
+   carte de 88px sur la table exigerait un tapis de ~600px, impossible sur 390px de
+   large. La table garde donc sa plus grande taille possible, la main la sienne. */
+@media (max-width: 768px) {
+  /* La coquille elle-meme est liberee dans _shell.scss : encapsules, les styles d'un
+     composant ne peuvent pas atteindre un element qui lui est exterieur. */
+  .fox-shell:has(.room) .room {
+    height: auto;
+  }
+  .stage {
+    /* La table n'est plus bridee par la rangee de la main, qui passe a la ligne. */
+    --card: var(--card-table-max);
+    /* Quatre cartes par rangee : la plus grande taille qui reste confortable au
+       pouce sur un telephone courant. */
+    --card-hand: calc((100cqw - 3 * var(--gap)) / 4);
+    justify-content: flex-start;
+  }
+  /* Autour d'un tapis de 230px, huit etiquettes de 78px ne peuvent pas tenir sans se
+     marcher dessus : elles se resserrent. Elargir la reserve a la place aurait ecrase
+     la table — a 176px elle tombait a 151px de large, et les etiquettes se
+     chevauchaient malgre tout. Mesure a huit joueurs : ni carte ni etiquette touchee,
+     et la plus grande table possible dans ces conditions. */
+  .seat-person {
+    width: 56px;
+    --person-h: 44px;
+  }
+  .seat-name {
+    font-size: 0.66rem;
+    max-width: 56px;
+  }
+  /* Les etiquettes debordent aussi vers le haut : sans cette respiration, celle du
+     siege du haut se posait sur la ligne du sujet. */
+  .table-wrap {
+    padding: 26px 0;
+  }
+
+  /* La main passe avant la table dans le flux : c'est elle qu'on voit en arrivant.
+     Le depouillement prend sa place, donc son rang. */
+  .hand,
+  .outcome {
+    order: -1;
+  }
+  /* Rien ne contraint plus la hauteur ici — la page defile : les cartes du
+     depouillement reprennent la taille confortable de la main et passent a la ligne
+     plutot que de se serrer sur une seule rangee. */
+  .outcome-cards {
+    flex-wrap: wrap;
+  }
+  .outcome-group {
+    min-width: 0;
+  }
+  .outcome-group app-delegation-card,
+  .decided app-delegation-card {
+    width: var(--card-hand);
+  }
+  .og-voters {
+    max-width: var(--card-hand);
+  }
+}
+
+/* QR de jointure. Meme facture que la loupe des catalogues d'apparence : voile
+   plein ecran qui ferme au clic, contenu centre. */
+.qr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: var(--s-6);
+}
+.qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+/* Un bouton, pas une image nue : le QR se copie au clic, donc il doit etre
+   atteignable au clavier et s'annoncer comme actionnable. */
+.qr-image {
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+.qr-image img {
+  display: block;
+  width: min(70vw, 320px);
+  height: auto;
+  border-radius: var(--radius);
+}
+/* Le texte vit dans la carte, pas sur le voile : en --muted sur fond sombre il
+   etait a peine lisible. */
+.qr-hint {
+  margin: 0;
+  max-width: min(70vw, 320px);
+  text-align: center;
+  color: var(--ink-soft);
+}

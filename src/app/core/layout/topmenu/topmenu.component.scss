@@ -1,0 +1,172 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar {
+  background:
+    linear-gradient(135deg, rgba(8, 47, 73, 0.98), rgba(15, 23, 42, 0.98)),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.18), rgba(16, 185, 129, 0.12));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+  color: var(--chrome-ink);
+}
+
+.topbar__inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0 0.85rem;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  min-height: 60px;
+  padding: 0.45rem var(--content-pad);
+  box-sizing: border-box;
+}
+
+.topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.topbar__brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+}
+
+.topbar__brand-icon img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.topbar__brand-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.topbar__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--chrome-ink);
+  cursor: pointer;
+}
+
+.topbar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+}
+
+.topbar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: rgba(226, 232, 240, 0.88);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.45rem 0.75rem;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.topbar__link i {
+  font-size: 0.82rem;
+}
+
+.topbar__link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.topbar__link--active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.topbar__link--support {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  border-color: transparent;
+  color: #052e16;
+}
+
+.topbar__link--support:hover,
+.topbar__link--support.topbar__link--active {
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  color: #052e16;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+// Collapse to a hamburger drawer at the `lg` breakpoint (1024px, fleet scale).
+@media (max-width: 1024px) {
+  .topbar__inner {
+    grid-template-columns: 1fr auto;
+  }
+  .topbar__toggle {
+    display: inline-flex;
+  }
+  .topbar__nav,
+  .topbar__actions {
+    display: none;
+    grid-column: 1 / -1;
+  }
+  .topbar__inner.open {
+    row-gap: 0.85rem;
+  }
+  .topbar__inner.open .topbar__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 0.75rem;
+  }
+  .topbar__inner.open .topbar__link {
+    justify-content: flex-start;
+  }
+  .topbar__inner.open .topbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.55rem;
+    padding: 0 0.25rem 0.5rem;
+  }
+}

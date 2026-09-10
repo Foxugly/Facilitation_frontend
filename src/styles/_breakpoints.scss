@@ -1,0 +1,17 @@
+// =============================================================================
+// Breakpoints — flotte Foxugly (référence : STANDARD-frontend-layout.md)
+// En variables SCSS : les custom properties (--var) NE fonctionnent PAS dans
+// les `@media`. Utiliser le mixin `below()` pour les media queries.
+// =============================================================================
+
+$bp-sm: 640px; // téléphone large / petite tablette
+$bp-md: 768px; // tablette
+$bp-lg: 1024px; // petit desktop — collapse du topmenu
+$bp-xl: 1280px; // desktop (= --content-max)
+
+// Usage : `@include below($bp-lg) { ... }`
+@mixin below($bp) {
+  @media (max-width: $bp) {
+    @content;
+  }
+}

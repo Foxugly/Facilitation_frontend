@@ -1,0 +1,49 @@
+.hero {
+  text-align: center;
+  margin-bottom: var(--s-6);
+}
+.hero h2 {
+  margin: 0 0 var(--s-3);
+  font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.card--action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.card--action:hover {
+  border-color: var(--accent);
+}
+.card--action h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+}
+.card--action h2 i {
+  color: var(--accent);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.code-input {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.home-actions {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}

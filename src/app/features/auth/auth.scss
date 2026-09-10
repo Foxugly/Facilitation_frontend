@@ -1,0 +1,154 @@
+// Shared styles for the projected content of every auth page. The card chrome
+// (border / shadow / centring) lives in <app-auth-card>; these classes style
+// the form, links and messages projected into it (login, register, forgot,
+// reset, magic-link, confirm-email).
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.lead {
+  color: var(--muted);
+  margin: 0 0 var(--s-6);
+  text-align: center;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.field:last-of-type {
+  margin-bottom: 0;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+}
+
+.actions {
+  margin-top: var(--s-4);
+}
+
+.turnstile-widget {
+  margin: 0.75rem 0;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-6);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.links a,
+.link {
+  color: var(--accent-strong);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.links a:hover,
+.link:hover {
+  text-decoration: underline;
+}
+
+.err {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: var(--s-1) 0 0;
+}
+
+.err a {
+  color: var(--danger);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ok {
+  color: var(--accent-strong);
+}
+
+.note {
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--muted);
+  margin: 0;
+}
+
+// Login "meta" row: remember-me (left) + forgot-password (right), same line.
+.auth-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.check-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+// "──── ou ────" divider before the magic-link button.
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: var(--s-1) 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+// "No account yet? Create an account" — last line of the card.
+.auth-alt {
+  margin: var(--s-6) 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+:host ::ng-deep .u-full {
+  width: 100%;
+}
+
+// Magic-link button — full-width, emerald-outlined (soft fill).
+:host ::ng-deep .magic-btn.p-button {
+  justify-content: center;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  box-shadow: none;
+}
+
+:host ::ng-deep .magic-btn.p-button:not(:disabled):hover {
+  background: color-mix(in srgb, var(--accent-soft) 65%, var(--accent) 35%);
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+}

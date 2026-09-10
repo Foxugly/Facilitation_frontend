@@ -1,0 +1,69 @@
+.hero {
+  max-width: 720px;
+  margin: 0 auto var(--s-6);
+  text-align: center;
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin: 0 0 var(--s-2);
+  }
+  h1 {
+    margin: 0 0 var(--s-3);
+    color: var(--ink);
+  }
+  .lead {
+    color: var(--muted);
+    margin: 0;
+  }
+}
+
+.table-card {
+  padding: 0;
+  overflow-x: auto;
+}
+
+.compare {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: var(--s-3) var(--s-4);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--surface-2);
+  }
+  .feature-col {
+    text-align: left;
+    color: var(--ink);
+  }
+  .plan {
+    display: block;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .plan--paid {
+    color: var(--accent);
+  }
+  .plan-desc {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .yes {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .no {
+    color: var(--muted);
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}

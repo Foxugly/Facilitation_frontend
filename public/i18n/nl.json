@@ -1,0 +1,510 @@
+{
+  "app": {
+    "title": "Poker",
+    "tagline": "Samen beslissen, in realtime — Poker Planning & Delegation Poker."
+  },
+  "footer": {
+    "version_label": "Versie {{version}}",
+    "author": "Foxugly",
+    "privacy": "Privacy",
+    "rights": "Alle rechten voorbehouden."
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Functies",
+    "pricing": "Tarieven",
+    "support": "Steunen",
+    "about": "Over",
+    "teams": "Teams",
+    "account": "Mijn account"
+  },
+  "field": {
+    "username": "Je naam"
+  },
+  "action": {
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "quit": "Verlaten",
+    "back": "Terug"
+  },
+  "teams": {
+    "title": "Teams",
+    "create": "Team aanmaken",
+    "new_session": "Nieuwe sessie",
+    "name": "Teamnaam",
+    "empty": "Je hebt nog geen team. Maak er een om leden uit te nodigen.",
+    "members": "Leden",
+    "invitations": "Uitnodigingen",
+    "invite": "Uitnodigen",
+    "invited": "Uitnodiging verstuurd.",
+    "already_member": "Deze persoon is al lid.",
+    "revoke": "Intrekken",
+    "remove": "Verwijderen",
+    "manage": "Team hernoemen",
+    "rename_label": "Nieuwe naam",
+    "tab_members": "Leden en uitnodigingen",
+    "appearance": "Uiterlijk",
+    "felt_color": "Kleur van het laken",
+    "back_color": "Kleur van de achterkant",
+    "appearance_saved": "Uiterlijk opgeslagen.",
+    "delete": "Team verwijderen",
+    "delete_confirm": "Dit team definitief verwijderen?",
+    "role": {
+      "owner": "Eigenaar",
+      "manager": "Beheerder",
+      "member": "Lid"
+    },
+    "accept": {
+      "pending": "Uitnodiging accepteren…",
+      "error_title": "Ongeldige uitnodiging",
+      "error_lead": "Deze uitnodiging is ongeldig, verlopen of al gebruikt.",
+      "email_mismatch": "Meld je aan met het e-mailadres waarnaar de uitnodiging is gestuurd."
+    },
+    "deck": {
+      "tab": "Pokertype",
+      "title": "Pokertype",
+      "loading": "Laden…",
+      "intro": "De pokertypes die in de sessies van dit team gespeeld kunnen worden. De facilitator kiest per ronde welke in de room wordt gebruikt.",
+      "custom": "Eigen kaartspel",
+      "in_use": "In gebruik",
+      "saved": "Pokertypes opgeslagen.",
+      "create": "Kaartspel maken",
+      "create_soon": "Eigen kaartspellen maken komt binnenkort.",
+      "create_paid": "Eigen kaartspellen zijn beschikbaar voor teams met een abonnement.",
+      "backs_title": "Achterkanten",
+      "back_saved": "Achterkant opgeslagen.",
+      "enabled": "Ingeschakeld",
+      "none_enabled": "Geen type ingeschakeld: sessies gebruiken het standaardspel."
+    },
+    "surface": {
+      "felt": "Tafelkleed",
+      "style_color": "Effen kleur",
+      "style_image": "Afbeelding",
+      "no_felt": "Nog geen kleedafbeelding beschikbaar.",
+      "table": "Tafeldecoratie",
+      "back_models": "Beschikbare modellen",
+      "no_back": "Nog geen achterkant beschikbaar.",
+      "upload": "Afbeelding uploaden",
+      "upload_hint": "PNG, JPEG of WebP, max. 3 MB.",
+      "upload_invalid": "Afbeelding geweigerd.",
+      "delete": "Verwijderen",
+      "delete_confirm": "Deze geüploade afbeelding verwijderen?",
+      "zoom": "Vergroten",
+      "preview": "Voorbeeld",
+      "reset": "Standaardwaarde herstellen"
+    },
+    "background": {
+      "tab": "Achtergrond",
+      "style_theme": "Thema",
+      "theme_hint": "De ruimte behoudt de lichte of donkere achtergrond van elke deelnemer. Dit is de standaardinstelling.",
+      "color": "Achtergrondkleur",
+      "none": "Nog geen achtergrondafbeelding — upload er een.",
+      "upload_hint": "PNG, JPEG of WebP, max. 6 MB."
+    },
+    "rename_action": "Team hernoemen",
+    "delete_intro": "Het verwijderen van het team is definitief.",
+    "result_layout": {
+      "tab": "Uitslag",
+      "intro": "Wat spelers in plaats van hun hand zien zodra de stemmen onthuld zijn.",
+      "cards": "De gespeelde kaarten",
+      "cards_hint": "Elke gespeelde kaart, het aantal stemmen en wie ze koos. De enige leesbare vorm voor een pictogramspel.",
+      "summary": "Het cijfermatige overzicht",
+      "summary_hint": "Eén regel per kaart, met een evenredige balk. Namen passen volledig."
+    }
+  },
+  "home": {
+    "eyebrow": "Samen beslissen",
+    "title": "Beslis samen, in realtime",
+    "intro": "Poker verenigt Poker Planning en Delegation Poker: maak een kamer, nodig je team uit, stem en onthul de resultaten samen.",
+    "create_title": "Kamer maken",
+    "room_title": "Kamertitel (optioneel)",
+    "create_cta": "Kamer maken",
+    "join_title": "Kamer binnengaan",
+    "join_intro": "Heb je een kamercode of link? Doe mee met het lopende spel.",
+    "join_cta": "Deelnemen"
+  },
+  "support": {
+    "title": "Steunen",
+    "why_title": "Waarom Poker steunen?",
+    "reasons": {
+      "free": {
+        "title": "Gratis voor het essentiële",
+        "desc": "Realtime anonieme kamers blijven gratis, zonder account."
+      },
+      "infra": {
+        "title": "Hosting & infrastructuur",
+        "desc": "Servers, SSL-certificaten en e-mailbezorging brengen reële kosten mee."
+      },
+      "maintenance": {
+        "title": "Doorlopend onderhoud",
+        "desc": "Beveiligingsupdates, bugfixes, compatibiliteit."
+      },
+      "features": {
+        "title": "Nieuwe functies",
+        "desc": "Elke bijdrage versnelt de ontwikkeling."
+      }
+    },
+    "cta_title": "Een gift doen",
+    "cta_desc": "Giften verlopen via GitHub Sponsors: een eenmalig gebaar of regelmatige steun, in jouw tempo.",
+    "cta_button": "Steun op GitHub Sponsors",
+    "cta_note": "Je wordt in een nieuw tabblad naar GitHub Sponsors geleid.",
+    "thanks_title": "Bedankt!",
+    "thanks_desc": "Bedankt dat je een onafhankelijke tool in leven houdt — geen advertenties, geen tracking."
+  },
+  "pricing": {
+    "title": "Tarieven",
+    "intro": "Maak in enkele seconden gratis een kamer. Ga over op een teamformule voor het Delegation Board, geschiedenis en aangepast uiterlijk.",
+    "free_title": "Gratis",
+    "free_f1": "Delegation Poker & Poker Planning in realtime",
+    "free_f2": "Tot 15 personen per kamer",
+    "free_f3": "Geen account nodig",
+    "team1_title": "1 team",
+    "team5_title": "5 teams",
+    "team5_f1": "Tot 5 teams",
+    "per_month": "/maand",
+    "per_year": "/jaar",
+    "save": "2 maanden gratis",
+    "or": "of",
+    "paid_f1": "Delegation Board (AS-IS / TO-BE)",
+    "paid_f2": "Geschiedenis + e-mailbezorging",
+    "paid_f3": "Aangepast uiterlijk",
+    "paid_f4": "Tot 20 leden per team",
+    "note": "Max. 15 personen per kamer · max. 20 leden per team.",
+    "cta_free": "Kamer maken",
+    "cta_paid": "Abonneren",
+    "excl_vat": "excl. btw",
+    "vat_note": "Prijzen zijn exclusief btw. De btw van uw land wordt bij het afrekenen toegevoegd."
+  },
+  "about": {
+    "title": "Over",
+    "tab_company": "Bedrijf",
+    "tab_legal": "Juridische vermeldingen",
+    "tab_technical": "Technisch",
+    "company_body": "Poker wordt uitgegeven door Foxugly SRL, een Belgisch bedrijf. Wij bouwen eenvoudige tools voor teams die samen beslissen.",
+    "legal_body": "Uitgever: Foxugly SRL — België. Contact: info@foxugly.com. Hosting: Amazon Web Services (Ierland, regio eu-west-1). Anonieme kamers zijn tijdelijk en verlopen na een periode van inactiviteit.",
+    "technical_body": "Een realtime-applicatie: backend met Django en Django Channels (WebSocket), frontend met Angular en PrimeNG. Meertalig (5 talen), lichte en donkere thema's."
+  },
+  "privacy": {
+    "title": "Privacy",
+    "intro": "Deze verklaring legt uit welke gegevens Poker verwerkt, waarom en hoe we ze beschermen. Poker wordt beheerd door Foxugly SRL (België).",
+    "updated": "Laatst bijgewerkt: juli 2026.",
+    "sections": {
+      "data": {
+        "title": "Gegevens die we verwerken",
+        "body": "Anonieme kamers werken zonder account: we bewaren alleen een tijdelijke bijnaam en je stemmen voor de duur van de sessie. Als je een account aanmaakt, bewaren we je e-mailadres, weergavenaam en teams."
+      },
+      "usage": {
+        "title": "Gebruik van gegevens",
+        "body": "Je gegevens worden uitsluitend gebruikt om de dienst te laten werken: authenticatie, teambeheer, sessiegeschiedenis en transactionele e-mails. We verkopen of verhuren je gegevens nooit en tonen geen advertenties."
+      },
+      "retention": {
+        "title": "Bewaring en hosting",
+        "body": "Anonieme kamers zijn tijdelijk en verlopen na een periode van inactiviteit. Accountgegevens worden bewaard zolang het account bestaat. De hosting wordt verzorgd door Amazon Web Services binnen de Europese Unie (Ierland, regio eu-west-1)."
+      },
+      "rights": {
+        "title": "Je rechten",
+        "body": "Op grond van de AVG kun je toegang tot, correctie of verwijdering van je gegevens vragen, evenals het sluiten van je account. Neem contact met ons op om deze rechten uit te oefenen."
+      }
+    },
+    "contact_title": "Contact",
+    "contact_lead": "Voor vragen over privacy of om je rechten uit te oefenen, neem contact met ons op via:"
+  },
+  "join": {
+    "title": "Kamer binnengaan",
+    "code": "Kamercode",
+    "cta": "Deelnemen"
+  },
+  "features": {
+    "eyebrow": "Gratis & Betaald",
+    "title": "Functies",
+    "intro": "Begin gratis met realtime anonieme kamers. Ga betaald voor teams, geschiedenis en het delegatiebord.",
+    "feature": "Functie",
+    "free": "Gratis",
+    "free_desc": "Anonieme kamers, geen account",
+    "paid": "Betaald",
+    "paid_desc": "Teams, per abonnement",
+    "rows": {
+      "anon_rooms": "Tijdelijke anonieme kamers",
+      "standard_deck": "Standaard Delegation Poker-deck",
+      "realtime": "Realtime stemmen & gelijktijdige onthulling",
+      "langs": "5 talen (FR/NL/EN/IT/ES)",
+      "accounts": "Accounts & teams",
+      "history": "Sessiegeschiedenis",
+      "board": "Delegatiebord (AS-IS / TO-BE)",
+      "custom_decks": "Aangepaste decks",
+      "custom_back": "Aangepaste kaartachterkant",
+      "prepared_votes": "Vooraf voorbereide stemmingen",
+      "export": "CSV / PDF-export",
+      "email_history": "Geschiedenis per e-mail versturen"
+    }
+  },
+  "auth": {
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "new_password": "Nieuw wachtwoord",
+    "display_name": "Weergavenaam",
+    "logout": "Afmelden",
+    "back_to_login": "Terug naar aanmelden",
+    "back_to_password": "Terug naar wachtwoord",
+    "remember_me": "Onthoud mij",
+    "or": "of",
+    "login": {
+      "title": "Aanmelden",
+      "lead": "Toegang tot je team en geschiedenis.",
+      "cta": "Aanmelden",
+      "forgot": "Wachtwoord vergeten?",
+      "magic": "Stuur me een aanmeldlink per e-mail",
+      "no_account": "Nog geen account?",
+      "not_confirmed": "Bevestig eerst je e-mail.",
+      "resend": "Link opnieuw sturen",
+      "resent": "Als dat account bestaat, is een nieuwe link verstuurd."
+    },
+    "register": {
+      "title": "Account aanmaken",
+      "lead": "Maak je account om een team te beheren.",
+      "cta": "Account aanmaken",
+      "have_account": "Heb je al een account?",
+      "done_title": "Controleer je inbox",
+      "done_lead": "We hebben je een link gestuurd om je adres te bevestigen."
+    },
+    "forgot": {
+      "title": "Wachtwoord vergeten",
+      "lead": "Voer je e-mail in om een herstellink te ontvangen.",
+      "cta": "Link versturen",
+      "sent": "Als dat adres bestaat, is een herstellink verstuurd."
+    },
+    "reset": {
+      "title": "Wachtwoord opnieuw instellen",
+      "cta": "Opnieuw instellen",
+      "done": "Wachtwoord opnieuw ingesteld. Je kunt je nu aanmelden."
+    },
+    "confirm": {
+      "pending": "Bevestigen…",
+      "ok_title": "E-mail bevestigd",
+      "ok_lead": "Doorverwijzen…",
+      "error_title": "Ongeldige link",
+      "error_lead": "Deze bevestigingslink is ongeldig of verlopen."
+    },
+    "magic": {
+      "title": "Aanmeldlink",
+      "lead": "Voer je e-mail in en we sturen je een link om je aan te melden.",
+      "cta": "Link versturen",
+      "sent": "Als dat account bestaat, is een aanmeldlink verstuurd.",
+      "verifying": "Aanmelden…",
+      "error_title": "Ongeldige link",
+      "error_lead": "Deze link is ongeldig, verlopen of al gebruikt.",
+      "request_new": "Nieuwe link aanvragen"
+    },
+    "errors": {
+      "invalid_credentials": "Onjuist e-mailadres of wachtwoord.",
+      "password_short": "Minstens 8 tekens.",
+      "generic": "Er ging iets mis. Probeer opnieuw.",
+      "reset_invalid": "Ongeldige of verlopen link.",
+      "captcha": "Voltooi de captcha."
+    }
+  },
+  "vote_state": {
+    "idle": "Wachten",
+    "open": "Stemming open",
+    "revealed": "Onthuld",
+    "acted": "Resultaat vastgelegd"
+  },
+  "room": {
+    "untitled": "Kamer",
+    "no_subject": "Geen onderwerp ingesteld",
+    "set_subject": "Stel het stemonderwerp in",
+    "share": "Link delen",
+    "open_vote": "Stemming openen",
+    "reveal": "Onthullen",
+    "reveal_votes_count": "{{count}} stemmen",
+    "reveal_anonymous_hint": "Stemmen zijn anoniem",
+    "reset": "Opnieuw",
+    "new_round": "Nieuwe ronde",
+    "acted_result": "Gekozen niveau",
+    "choose_result": "Kies het gekozen niveau",
+    "act": "Vastleggen",
+    "participants": "Deelnemers",
+    "facilitator_absent": "De facilitator is afwezig.",
+    "claim": "Rol overnemen",
+    "give_facilitator": "Facilitator maken",
+    "your_hand": "Je hand",
+    "waiting_facilitator": "Wachten op de facilitator",
+    "scenario": "Scenario",
+    "agenda_empty": "Nog geen onderwerpen. Voeg er een toe om te starten.",
+    "add_subject": "Onderwerp toevoegen",
+    "add": "Toevoegen",
+    "send": "Versturen",
+    "vote_title": "Titel van de stemming",
+    "code_copied": "Code gekopieerd",
+    "link_copied": "Link gekopieerd",
+    "qr": {
+      "open": "QR-code voor toegang",
+      "copy_hint": "Klik op de QR-code om die naar het klembord te kopiëren",
+      "copied": "QR-code gekopieerd"
+    },
+    "fullscreen": "Volledig scherm",
+    "exit_fullscreen": "Volledig scherm sluiten",
+    "timer": {
+      "label": "Timer",
+      "seconds": "Duur (seconden)",
+      "remaining": "Resterende tijd",
+      "expired": "Tijd is om",
+      "sec_suffix": " sec"
+    },
+    "deck": {
+      "label": "Pokertype",
+      "locked": "Rond de ronde af om van type te wisselen.",
+      "type": {
+        "delegation_poker": "Delegation Poker",
+        "poker_planning": "Planning Poker",
+        "fist_of_five": "Fist of Five",
+        "roman_vote": "Romeinse stemming"
+      }
+    },
+    "reveal_mode": {
+      "label": "Onthulling",
+      "mode_nominative": "Met naam",
+      "mode_anonymous": "Anoniem",
+      "locked": "Alleen instelbaar voordat de stemming opent.",
+      "badge_nominative": "Stem met naam",
+      "badge_anonymous": "Anonieme stem"
+    },
+    "prepare": "Stemming voorbereiden",
+    "launch": "Stemming starten",
+    "edit": "Bewerken",
+    "queue_add": "Aan wachtrij toevoegen",
+    "reveal_title": "Uitslag"
+  },
+  "billing": {
+    "title": "Abonnement",
+    "active": "Abonnement actief.",
+    "inactive": "Geen actief abonnement.",
+    "subscribe": "Abonneren",
+    "manage": "Abonnement beheren",
+    "success": "Bedankt! Je abonnement is actief.",
+    "canceled": "Betaling geannuleerd.",
+    "choose": "Kies een formule om teams te maken en te beheren.",
+    "teams": "team(s)",
+    "per_month": "maand",
+    "per_year": "jaar",
+    "quota": "Teams",
+    "quota_reached": "quota bereikt",
+    "offered_access": "Gratis toegang",
+    "offered_access_hint": "Je account heeft gratis toegang: er is geen abonnement nodig."
+  },
+  "board": {
+    "title": "Delegation Board",
+    "topic": "Onderwerp",
+    "as_is": "AS-IS",
+    "to_be": "TO-BE",
+    "place": "Plaatsen:",
+    "add_topic": "Onderwerp toevoegen",
+    "add": "Toevoegen",
+    "empty": "Nog geen onderwerpen. Voeg er een toe en plaats de post-its.",
+    "export_csv": "CSV exporteren",
+    "export_pdf": "PDF exporteren",
+    "export_failed": "Export mislukt."
+  },
+  "history": {
+    "title": "Geschiedenis",
+    "empty": "Nog geen resultaten.",
+    "results": "resultaten",
+    "email": "Per e-mail versturen",
+    "email_sent": "Geschiedenis verzonden naar {{count}} lid/leden."
+  },
+  "staff": {
+    "nav": {
+      "users": "Accounts"
+    },
+    "users": {
+      "title": "Accountbeheer",
+      "search": "Zoeken",
+      "search_placeholder": "E-mail of naam",
+      "fields": {
+        "email": "E-mail",
+        "name": "Naam",
+        "bypass": "Gratis toegang",
+        "note": "Reden",
+        "note_placeholder": "Waarom deze toegang wordt aangeboden"
+      },
+      "actions": {
+        "saved": "Account bijgewerkt."
+      },
+      "errors": {
+        "load_failed": "Laden van accounts mislukt.",
+        "save_failed": "Bijwerken van account mislukt."
+      }
+    }
+  },
+  "errors": {
+    "username_required": "Je naam is verplicht.",
+    "code_required": "De kamercode is verplicht.",
+    "create_room": "Kan de kamer niet maken.",
+    "room_not_found": "Kamer niet gevonden of verlopen.",
+    "room_full": "Deze kamer is vol (maximaal 15 personen)."
+  },
+  "common": {
+    "skip_to_content": "Naar de inhoud"
+  },
+  "me": {
+    "title": "Mijn account",
+    "identity": "Identiteit",
+    "email_confirmed": "Geverifieerd",
+    "email_unconfirmed": "Niet geverifieerd",
+    "email_readonly": "Je e-mailadres identificeert het account; wijzigen vereist een nieuwe verificatie.",
+    "role": "Rol",
+    "staff": "Foxugly-team",
+    "display_name": "Weergavenaam",
+    "display_name_hint": "De naam die andere deelnemers in rooms zien.",
+    "saved": "Profiel opgeslagen.",
+    "account": "Mijn account",
+    "subscription_link": "Abonnement",
+    "no_name": "Geen naam",
+    "avatar_change": "Avatar wijzigen",
+    "avatar_remove": "Avatar verwijderen",
+    "avatar_hint": "PNG, JPEG of WebP, max. 3 MB.",
+    "avatar_saved": "Avatar opgeslagen.",
+    "avatar_invalid": "Afbeelding geweigerd."
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "loading": "Laden…",
+    "billing_off": "Facturatie is nog niet actief.",
+    "current": "Huidig abonnement",
+    "none": "Je hebt geen abonnement.",
+    "see_plans": "Formules bekijken",
+    "offered": "Gratis toegang",
+    "offered_hint": "Je account heeft de betaalde functies zonder abonnement.",
+    "plan": "Formule",
+    "status": "Status",
+    "quota": "Gebruikte teams",
+    "interval_monthly": "maandelijks",
+    "interval_yearly": "jaarlijks",
+    "status_active": "Actief",
+    "status_trialing": "Proefperiode",
+    "status_canceled": "Opgezegd",
+    "status_past_due": "Achterstallig",
+    "status_incomplete": "Onvolledig",
+    "status_unpaid": "Onbetaald",
+    "history": "Abonnementsgeschiedenis",
+    "no_history": "Geen eerder abonnement.",
+    "started": "Begin",
+    "ended": "Einde",
+    "invoices": "Facturen",
+    "no_invoices": "Geen factuur.",
+    "invoice_number": "Nummer",
+    "date": "Datum",
+    "amount": "Bedrag",
+    "invoice_paid": "Betaald",
+    "invoice_open": "Openstaand",
+    "invoice_draft": "Concept",
+    "invoice_void": "Geannuleerd",
+    "invoice_uncollectible": "Oninbaar",
+    "pdf": "PDF",
+    "view": "Bekijken"
+  },
+  "appUpdate": {
+    "title": "Nieuwe versie beschikbaar",
+    "detail": "De app is bijgewerkt terwijl u bezig was. Herlaad de pagina om verder te gaan."
+  }
+}

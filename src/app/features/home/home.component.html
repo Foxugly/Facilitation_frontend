@@ -1,0 +1,67 @@
+<section class="page page--narrow">
+  <div class="hero">
+    <p class="eyebrow">{{ 'home.eyebrow' | transloco }}</p>
+    <h2>{{ 'home.title' | transloco }}</h2>
+    <p class="lead">{{ 'home.intro' | transloco }}</p>
+  </div>
+
+  <div class="home-actions">
+    <!-- Create a room (in evidence) -->
+    <div class="card card--action">
+      <h2><i class="pi pi-plus-circle"></i> {{ 'home.create_title' | transloco }}</h2>
+      <div class="fields">
+        <div>
+          <label class="meta-label">{{ 'home.room_title' | transloco }}</label>
+          <input pInputText class="w-full" [ngModel]="title()" (ngModelChange)="title.set($event)" />
+        </div>
+        <div>
+          <label class="meta-label">{{ 'field.username' | transloco }} *</label>
+          <input pInputText class="w-full" [ngModel]="username()" (ngModelChange)="username.set($event)" (keyup.enter)="createRoom()" />
+          @if (submitted() && !username().trim()) {
+            <p class="meta-hint--error">{{ 'errors.username_required' | transloco }}</p>
+          }
+        </div>
+        <!-- Une salle sans compte ne choisit rien ici : le type de poker se change en
+             salle, et le dos des cartes est impose. -->
+        <p-button
+          [label]="'home.create_cta' | transloco"
+          icon="pi pi-plus"
+          severity="success"
+          size="large"
+          styleClass="w-full"
+          [loading]="creating()"
+          (onClick)="createRoom()"
+        />
+      </div>
+    </div>
+
+    <!-- Join a room (in evidence, inline fields) -->
+    <div class="card card--action">
+      <h2><i class="pi pi-sign-in"></i> {{ 'home.join_title' | transloco }}</h2>
+      <div class="fields">
+        <div>
+          <label class="meta-label">{{ 'join.code' | transloco }} *</label>
+          <input pInputText class="w-full code-input" [ngModel]="joinCode()" (ngModelChange)="onJoinCode($event)" (keyup.enter)="joinRoom()" />
+          @if (joinSubmitted() && !joinCode().trim()) {
+            <p class="meta-hint--error">{{ 'errors.code_required' | transloco }}</p>
+          }
+        </div>
+        <div>
+          <label class="meta-label">{{ 'field.username' | transloco }} *</label>
+          <input pInputText class="w-full" [ngModel]="joinName()" (ngModelChange)="joinName.set($event)" (keyup.enter)="joinRoom()" />
+          @if (joinSubmitted() && !joinName().trim()) {
+            <p class="meta-hint--error">{{ 'errors.username_required' | transloco }}</p>
+          }
+        </div>
+        <p-button
+          [label]="'home.join_cta' | transloco"
+          icon="pi pi-sign-in"
+          size="large"
+          styleClass="w-full"
+          [loading]="joining()"
+          (onClick)="joinRoom()"
+        />
+      </div>
+    </div>
+  </div>
+</section>

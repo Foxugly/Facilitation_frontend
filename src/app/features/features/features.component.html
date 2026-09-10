@@ -1,0 +1,45 @@
+<section class="page">
+  <div class="hero">
+    <h2>{{ 'features.title' | transloco }}</h2>
+    <p class="lead">{{ 'features.intro' | transloco }}</p>
+  </div>
+
+  <div class="card table-card">
+    <table class="compare">
+      <thead>
+        <tr>
+          <th class="feature-col">{{ 'features.feature' | transloco }}</th>
+          <th>
+            <span class="plan">{{ 'features.free' | transloco }}</span>
+            <span class="plan-desc">{{ 'features.free_desc' | transloco }}</span>
+          </th>
+          <th>
+            <span class="plan plan--paid">{{ 'features.paid' | transloco }}</span>
+            <span class="plan-desc">{{ 'features.paid_desc' | transloco }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.key) {
+          <tr>
+            <td class="feature-col">{{ 'features.rows.' + row.key | transloco }}</td>
+            <td>
+              @if (row.free) {
+                <i class="pi pi-check yes" aria-label="yes"></i>
+              } @else {
+                <span class="no" aria-label="no">—</span>
+              }
+            </td>
+            <td>
+              @if (row.paid) {
+                <i class="pi pi-check yes" aria-label="yes"></i>
+              } @else {
+                <span class="no" aria-label="no">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,76 @@
+<section class="page board-page">
+  <app-page-header [icon]="'pi-th-large'" [title]="'board.title' | transloco">
+    <p-button slot="left" [label]="'action.back' | transloco" icon="pi pi-arrow-left" [outlined]="true"
+              severity="secondary" (onClick)="back()" />
+    <span slot="right" class="page-header__actions">
+      @if (rows().length) {
+        <p-button [label]="'board.export_csv' | transloco" icon="pi pi-file" [outlined]="true" severity="secondary" (onClick)="exportCsv()" />
+        <p-button [label]="'board.export_pdf' | transloco" icon="pi pi-file-pdf" [outlined]="true" severity="secondary" (onClick)="exportPdf()" />
+      }
+    </span>
+  </app-page-header>
+
+  <p class="team-label">{{ teamName() }}</p>
+
+  @if (loading()) {
+    <p class="meta">…</p>
+  } @else {
+    @if (isManager()) {
+      <div class="controls">
+        <div class="place-mode">
+          <span class="place-label">{{ 'board.place' | transloco }}</span>
+          <p-selectButton [options]="modeOptions()" [ngModel]="mode()" (ngModelChange)="mode.set($event)"
+                          optionLabel="label" optionValue="value" [allowEmpty]="false" />
+        </div>
+        <div class="add-row">
+          <input pInputText [placeholder]="'board.add_topic' | transloco" [ngModel]="newTopic()"
+                 (ngModelChange)="newTopic.set($event)" (keyup.enter)="addRow()" />
+          <p-button icon="pi pi-plus" [ariaLabel]="'board.add' | transloco" [disabled]="!newTopic().trim()" (onClick)="addRow()" />
+        </div>
+      </div>
+    }
+
+    <div class="legend">
+      <span class="postit as-is">{{ 'board.as_is' | transloco }}</span>
+      <span class="postit to-be">{{ 'board.to_be' | transloco }}</span>
+    </div>
+
+    @if (!rows().length) {
+      <p style="color: var(--muted)">{{ 'board.empty' | transloco }}</p>
+    } @else {
+      <div class="grid-scroll">
+        <div class="grid" [style.grid-template-columns]="'minmax(160px, 1.4fr) repeat(' + levels().length + ', minmax(84px, 1fr))'">
+          <!-- header -->
+          <div class="corner">{{ 'board.topic' | transloco }}</div>
+          @for (level of levels(); track level.value) {
+            <div class="col-head"><span class="lvl-num">{{ level.value }}</span>{{ levelName(level) }}</div>
+          }
+
+          <!-- rows -->
+          @for (row of rows(); track row.id) {
+            <div class="topic-cell">
+              @if (editingId() === row.id) {
+                <input pInputText class="topic-edit" [ngModel]="editTopic()" (ngModelChange)="editTopic.set($event)"
+                       (keyup.enter)="saveEdit(row)" (blur)="saveEdit(row)" />
+              } @else {
+                <span class="topic-text">{{ row.topic }}</span>
+                @if (isManager()) {
+                  <span class="topic-actions">
+                    <button type="button" [title]="'action.save' | transloco" (click)="startEdit(row)"><i class="pi pi-pencil"></i></button>
+                    <button type="button" class="danger" [title]="'teams.remove' | transloco" (click)="deleteRow(row)"><i class="pi pi-times"></i></button>
+                  </span>
+                }
+              }
+            </div>
+            @for (level of levels(); track level.value) {
+              <button type="button" class="cell" [class.clickable]="isManager()" [disabled]="!isManager()" (click)="place(row, level)">
+                @if (row.asIs === level.value) { <span class="postit as-is">{{ 'board.as_is' | transloco }}</span> }
+                @if (row.toBe === level.value) { <span class="postit to-be">{{ 'board.to_be' | transloco }}</span> }
+              </button>
+            }
+          }
+        </div>
+      </div>
+    }
+  }
+</section>

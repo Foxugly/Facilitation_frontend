@@ -1,0 +1,34 @@
+[Unit]
+Description=Delegation Poker frontend — fetch runtime config from AWS SSM into nginx snippet
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+# oneshot + RemainAfterExit: fetch at boot, then stay active. The deploy restarts
+# it to apply an SSM rotation. Manual: sudo systemctl restart facilitation-frontend-runtime-fetch
+Type=oneshot
+RemainAfterExit=yes
+User=root
+
+# Force the EC2 instance role over IMDS by blanking root's static certbot-route53
+# keys. Frontend config is public String → no kms:Decrypt needed.
+Environment=AWS_SHARED_CREDENTIALS_FILE=/dev/null
+Environment=AWS_CONFIG_FILE=/dev/null
+Environment=AWS_REGION=eu-west-1
+
+# §3.10: runs as root → the script lives OUTSIDE the django tree
+# (/usr/local/sbin, installed by the deploy from the committed git blob).
+PrivateTmp=yes
+ProtectSystem=full
+ReadWritePaths=/etc/nginx/snippets
+ProtectHome=yes
+NoNewPrivileges=yes
+RestrictSUIDSGID=yes
+TimeoutStartSec=120
+
+ExecStart=/usr/local/sbin/facilitation-frontend-runtime-fetch.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

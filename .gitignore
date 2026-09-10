@@ -1,0 +1,60 @@
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# Playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Secrets : `.env` seul ne couvre que le nom exact. Un `.env.e2e-backup`
+# porteur de SECRET_KEY / DB_PASSWORD a ete trouve non ignore sur
+# trainingmanager_server le 2026-07-31 — un `git add -A` l'aurait commite.
+.env
+.env.*
+
+# Config locale de l'outillage (deja ignoree sur QuizOnline et
+# trainingmanager_frontend) — rien a partager entre postes.
+.claude/

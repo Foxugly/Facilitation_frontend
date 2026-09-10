@@ -1,0 +1,62 @@
+// Shell partagé (public-layout ; futur main-layout) — réf FoxRunner_frontend.
+// Note : les pages poker portent leur propre largeur (`.page` / `.public-*`),
+// donc `.main-container` ne fixe QUE le flex — pas de max-width/padding ici pour
+// éviter une double-contrainte de largeur. (unification largeur = suivi.)
+
+.fox-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-container {
+  flex: 1;
+}
+
+// Une salle de poker tient dans l'ecran : rien ne defile et le pied de page reste
+// visible, en vue normale comme en plein ecran. La hauteur devient DEFINIE (et non
+// un simple minimum) pour que la salle puisse s'y ajuster : sans cela, son contenu
+// faisait grandir la coquille et poussait le pied sous la ligne de flottaison.
+// `min-height: 0` autorise le conteneur flex a retrecir sous la taille de son
+// contenu — sans lui, `flex: 1` ne descend jamais en dessous.
+.fox-shell:has(.room) {
+  height: 100dvh;
+}
+.fox-shell:has(.room) .main-container {
+  min-height: 0;
+}
+
+// Sur mobile la salle ne tient PAS dans l'ecran — c'est assume : on y voit sa main
+// d'abord, la table en defilant. La coquille doit donc reprendre une hauteur libre,
+// sans quoi elle reste haute d'un ecran et le contenu passe SOUS le pied de page.
+//
+// Cette regle vivait dans la feuille du composant salle, ou elle n'a jamais rien
+// fait : les styles y sont encapsules, et `.fox-shell` n'appartient pas a la salle —
+// le selecteur se retrouvait affuble d'un attribut que cet element ne porte pas.
+@media (max-width: 768px) {
+  .fox-shell:has(.room) {
+    height: auto;
+  }
+}
+
+// Skip-to-content (a11y) : caché, révélé au focus clavier.
+.fox-skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 1200;
+  transform: translateY(-150%);
+  background: var(--surface);
+  color: var(--accent-strong);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.18);
+  text-decoration: none;
+  transition: transform 120ms ease;
+
+  &:focus {
+    transform: translateY(0);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,62 @@
+// =============================================================================
+// Design tokens — flotte Foxugly (référence : STANDARD-frontend-layout.md)
+// Nommage SÉMANTIQUE (pas d'app-préfixe type --fox-*, pas de --mat-sys-*).
+// Toute couleur / largeur / rayon passe par une variable ci-dessous.
+// =============================================================================
+
+:root {
+  // ── Accent : emerald, l'unique accent de la flotte ──────────────────────
+  --accent: #10b981;
+  --accent-strong: #059669;
+  --accent-soft: #d1fae5;
+  --accent-contrast: #ffffff;
+
+  // ── Neutres / surfaces (thème clair) ────────────────────────────────────
+  --ink: #0f172a; // texte principal
+  --ink-soft: #334155; // texte secondaire fort
+  --muted: #64748b; // texte muté
+  --surface: #ffffff; // fond cartes / panneaux
+  --surface-2: #f8fafc; // fond page / zones atténuées
+  --border: #e2e8f0;
+
+  // ── Chrome sombre (fond topbar / footer, indépendant du dark mode) ───────
+  --chrome-bg: #0f172a;
+  --chrome-bg-2: #082f49;
+  --chrome-ink: #e2e8f0;
+  --chrome-ink-strong: #ffffff;
+  --chrome-accent: #6ee7b7;
+
+  // ── Couleurs sémantiques (distinctes de l'accent) ───────────────────────
+  --success: #059669;
+  --success-soft: #d1fae5;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+
+  // ── Layout / grille de contenu ──────────────────────────────────────────
+  --content-max: 80rem; // 1280px — largeur unique (topbar / page / footer)
+  --content-pad: 1.5rem; // 24px — padding horizontal partagé
+  --radius: 0.5rem;
+  --radius-lg: 0.875rem;
+
+  // ── Extras app-level (échelle d'espacement + ombre carte) ───────────────
+  --radius-sm: 0.375rem;
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+}
+
+// ── Overrides thème sombre (classe .dark-mode sur <html>) ──────────────────
+.dark-mode {
+  --ink: #e5e7eb;
+  --ink-soft: #cbd5e1;
+  --muted: #94a3b8;
+  --surface: #1e293b;
+  --surface-2: #0f172a;
+  --border: #334155;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+}

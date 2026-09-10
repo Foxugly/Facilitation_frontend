@@ -1,0 +1,510 @@
+{
+  "app": {
+    "title": "Poker",
+    "tagline": "Shared decision-making, in real time — Poker Planning & Delegation Poker."
+  },
+  "footer": {
+    "version_label": "Version {{version}}",
+    "author": "Foxugly",
+    "privacy": "Privacy",
+    "rights": "All rights reserved."
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "support": "Support",
+    "about": "About",
+    "teams": "Teams",
+    "account": "My account"
+  },
+  "field": {
+    "username": "Your name"
+  },
+  "action": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "quit": "Leave",
+    "back": "Back"
+  },
+  "teams": {
+    "title": "Teams",
+    "create": "Create a team",
+    "new_session": "New session",
+    "name": "Team name",
+    "empty": "You have no team yet. Create one to invite members.",
+    "members": "Members",
+    "invitations": "Invitations",
+    "invite": "Invite",
+    "invited": "Invitation sent.",
+    "already_member": "That person is already a member.",
+    "revoke": "Revoke",
+    "remove": "Remove",
+    "manage": "Rename team",
+    "rename_label": "New name",
+    "tab_members": "Members and invitations",
+    "appearance": "Appearance",
+    "felt_color": "Felt colour",
+    "back_color": "Card-back colour",
+    "appearance_saved": "Appearance saved.",
+    "delete": "Delete team",
+    "delete_confirm": "Permanently delete this team?",
+    "role": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "member": "Member"
+    },
+    "accept": {
+      "pending": "Accepting the invitation…",
+      "error_title": "Invalid invitation",
+      "error_lead": "This invitation is invalid, expired, or already used.",
+      "email_mismatch": "Sign in with the email the invitation was sent to."
+    },
+    "deck": {
+      "tab": "Poker type",
+      "title": "Poker type",
+      "loading": "Loading…",
+      "intro": "The poker types playable in this team's sessions. The facilitator picks which one to use in the room, round by round.",
+      "custom": "Custom deck",
+      "in_use": "In use",
+      "saved": "Poker types saved.",
+      "create": "Create a deck",
+      "create_soon": "Custom deck creation is coming soon.",
+      "create_paid": "Custom decks are available to teams with a subscription.",
+      "backs_title": "Card backs",
+      "back_saved": "Card back saved.",
+      "enabled": "Enabled",
+      "none_enabled": "No type enabled: sessions will use the standard deck."
+    },
+    "surface": {
+      "felt": "Table felt",
+      "style_color": "Flat colour",
+      "style_image": "Image",
+      "no_felt": "No felt image available yet.",
+      "table": "Table decoration",
+      "back_models": "Available models",
+      "no_back": "No card back available yet.",
+      "upload": "Upload an image",
+      "upload_hint": "PNG, JPEG or WebP, 3 MB max.",
+      "upload_invalid": "Image rejected.",
+      "delete": "Delete",
+      "delete_confirm": "Delete this uploaded image?",
+      "zoom": "Zoom",
+      "preview": "Preview",
+      "reset": "Restore the default"
+    },
+    "background": {
+      "tab": "Background",
+      "style_theme": "Theme",
+      "theme_hint": "The room keeps each participant's light or dark background. This is the default.",
+      "color": "Background colour",
+      "none": "No background image yet — upload one.",
+      "upload_hint": "PNG, JPEG or WebP, 6 MB max."
+    },
+    "rename_action": "Rename the team",
+    "delete_intro": "Deleting the team is permanent.",
+    "result_layout": {
+      "tab": "Tally",
+      "intro": "What players see in place of their hand once the votes are revealed.",
+      "cards": "The played cards",
+      "cards_hint": "Every played card, its vote count and who picked it. The only readable form for a pictogram deck.",
+      "summary": "The tallied summary",
+      "summary_hint": "One line per card, with a proportional bar. Names fit in full."
+    }
+  },
+  "home": {
+    "eyebrow": "Shared decision-making",
+    "title": "Decide together, in real time",
+    "intro": "Poker brings together Poker Planning and Delegation Poker: create a room, invite your team, vote and reveal the results together.",
+    "create_title": "Create a room",
+    "room_title": "Room title (optional)",
+    "create_cta": "Create the room",
+    "join_title": "Join a room",
+    "join_intro": "Got a room code or a link? Jump into the ongoing game.",
+    "join_cta": "Join"
+  },
+  "support": {
+    "title": "Support",
+    "why_title": "Why support Poker?",
+    "reasons": {
+      "free": {
+        "title": "Free for the essentials",
+        "desc": "Real-time anonymous rooms stay free, no account needed."
+      },
+      "infra": {
+        "title": "Hosting & infrastructure",
+        "desc": "Servers, SSL certificates and email delivery have a real cost."
+      },
+      "maintenance": {
+        "title": "Ongoing maintenance",
+        "desc": "Security updates, bug fixes, compatibility."
+      },
+      "features": {
+        "title": "New features",
+        "desc": "Every contribution accelerates development."
+      }
+    },
+    "cta_title": "Make a donation",
+    "cta_desc": "Donations go through GitHub Sponsors: a one-off gesture or regular support, at your own pace.",
+    "cta_button": "Support on GitHub Sponsors",
+    "cta_note": "You'll be redirected to GitHub Sponsors in a new tab.",
+    "thanks_title": "Thank you!",
+    "thanks_desc": "Thank you for keeping an independent tool alive — no ads, no tracking."
+  },
+  "pricing": {
+    "title": "Pricing",
+    "intro": "Create a room for free in seconds. Move to a team plan for the Delegation Board, history and custom appearance.",
+    "free_title": "Free",
+    "free_f1": "Delegation Poker & Poker Planning in real time",
+    "free_f2": "Up to 15 people per room",
+    "free_f3": "No account required",
+    "team1_title": "1 team",
+    "team5_title": "5 teams",
+    "team5_f1": "Up to 5 teams",
+    "per_month": "/month",
+    "per_year": "/year",
+    "save": "2 months free",
+    "or": "or",
+    "paid_f1": "Delegation Board (AS-IS / TO-BE)",
+    "paid_f2": "History + email delivery",
+    "paid_f3": "Custom appearance",
+    "paid_f4": "Up to 20 members per team",
+    "note": "15 people max per room · 20 members max per team.",
+    "cta_free": "Create a room",
+    "cta_paid": "Subscribe",
+    "excl_vat": "excl. VAT",
+    "vat_note": "Prices exclude VAT. The VAT applicable to your country is added at checkout."
+  },
+  "about": {
+    "title": "About",
+    "tab_company": "Company",
+    "tab_legal": "Legal notice",
+    "tab_technical": "Technical",
+    "company_body": "Poker is published by Foxugly SRL, a Belgian company. We build simple tools for teams that decide together.",
+    "legal_body": "Publisher: Foxugly SRL — Belgium. Contact: info@foxugly.com. Hosting: Amazon Web Services (Ireland, eu-west-1 region). Anonymous rooms are temporary and expire after a period of inactivity.",
+    "technical_body": "A real-time application: Django and Django Channels (WebSocket) backend, Angular and PrimeNG frontend. Multilingual (5 languages), light and dark themes."
+  },
+  "privacy": {
+    "title": "Privacy",
+    "intro": "This notice explains what data Poker handles, why, and how we protect it. Poker is operated by Foxugly SRL (Belgium).",
+    "updated": "Last updated: July 2026.",
+    "sections": {
+      "data": {
+        "title": "Data we handle",
+        "body": "Anonymous rooms work without an account: we only keep a temporary nickname and your votes for the duration of the session. If you create an account, we store your email address, display name and teams."
+      },
+      "usage": {
+        "title": "How we use data",
+        "body": "Your data is used solely to run the service: authentication, team management, session history and transactional emails. We never sell or rent your data, and we show no advertising."
+      },
+      "retention": {
+        "title": "Retention and hosting",
+        "body": "Anonymous rooms are temporary and expire after a period of inactivity. Account data is kept for as long as the account exists. Hosting is provided by Amazon Web Services within the European Union (Ireland, eu-west-1 region)."
+      },
+      "rights": {
+        "title": "Your rights",
+        "body": "Under the GDPR, you can request access to, correction or deletion of your data, as well as closure of your account. Contact us to exercise these rights."
+      }
+    },
+    "contact_title": "Contact",
+    "contact_lead": "For any privacy question or to exercise your rights, contact us at:"
+  },
+  "join": {
+    "title": "Join a room",
+    "code": "Room code",
+    "cta": "Join"
+  },
+  "features": {
+    "eyebrow": "Free & Paid",
+    "title": "Features",
+    "intro": "Start free with real-time anonymous rooms. Go paid for teams, history and the delegation board.",
+    "feature": "Feature",
+    "free": "Free",
+    "free_desc": "Anonymous rooms, no account",
+    "paid": "Paid",
+    "paid_desc": "Teams, by subscription",
+    "rows": {
+      "anon_rooms": "Ephemeral anonymous rooms",
+      "standard_deck": "Standard Delegation Poker deck",
+      "realtime": "Real-time voting & simultaneous reveal",
+      "langs": "5 languages (FR/NL/EN/IT/ES)",
+      "accounts": "Accounts & teams",
+      "history": "Session history",
+      "board": "Delegation Board (AS-IS / TO-BE)",
+      "custom_decks": "Custom decks",
+      "custom_back": "Custom card back",
+      "prepared_votes": "Votes prepared in advance",
+      "export": "CSV / PDF export",
+      "email_history": "Email the history"
+    }
+  },
+  "auth": {
+    "email": "Email address",
+    "password": "Password",
+    "new_password": "New password",
+    "display_name": "Display name",
+    "logout": "Sign out",
+    "back_to_login": "Back to sign in",
+    "back_to_password": "Back to password",
+    "remember_me": "Remember me",
+    "or": "or",
+    "login": {
+      "title": "Sign in",
+      "lead": "Access your team and history.",
+      "cta": "Sign in",
+      "forgot": "Forgot your password?",
+      "magic": "Email me a sign-in link",
+      "no_account": "No account yet?",
+      "not_confirmed": "Please confirm your email first.",
+      "resend": "Resend the link",
+      "resent": "If that account exists, a new link has been sent."
+    },
+    "register": {
+      "title": "Create an account",
+      "lead": "Create your account to manage a team.",
+      "cta": "Create account",
+      "have_account": "Already have an account?",
+      "done_title": "Check your inbox",
+      "done_lead": "We've sent you a link to confirm your address."
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "lead": "Enter your email to receive a reset link.",
+      "cta": "Send the link",
+      "sent": "If that address exists, a reset link has been sent."
+    },
+    "reset": {
+      "title": "Reset password",
+      "cta": "Reset",
+      "done": "Password reset. You can now sign in."
+    },
+    "confirm": {
+      "pending": "Confirming…",
+      "ok_title": "Email confirmed",
+      "ok_lead": "Redirecting…",
+      "error_title": "Invalid link",
+      "error_lead": "This confirmation link is invalid or has expired."
+    },
+    "magic": {
+      "title": "Sign-in link",
+      "lead": "Enter your email and we'll send you a link to sign in.",
+      "cta": "Send the link",
+      "sent": "If that account exists, a sign-in link has been sent.",
+      "verifying": "Signing in…",
+      "error_title": "Invalid link",
+      "error_lead": "This link is invalid, expired, or already used.",
+      "request_new": "Request a new link"
+    },
+    "errors": {
+      "invalid_credentials": "Incorrect email or password.",
+      "password_short": "At least 8 characters.",
+      "generic": "Something went wrong. Please try again.",
+      "reset_invalid": "Invalid or expired link.",
+      "captcha": "Please complete the captcha."
+    }
+  },
+  "vote_state": {
+    "idle": "Waiting",
+    "open": "Vote open",
+    "revealed": "Revealed",
+    "acted": "Result set"
+  },
+  "room": {
+    "untitled": "Room",
+    "no_subject": "No subject set",
+    "set_subject": "Set the vote subject",
+    "share": "Share link",
+    "open_vote": "Open vote",
+    "reveal": "Reveal",
+    "reveal_votes_count": "{{count}} votes",
+    "reveal_anonymous_hint": "Votes are anonymous",
+    "reset": "Reset",
+    "new_round": "New round",
+    "acted_result": "Chosen level",
+    "choose_result": "Choose the chosen level",
+    "act": "Set result",
+    "participants": "Participants",
+    "facilitator_absent": "The facilitator is away.",
+    "claim": "Take the role",
+    "give_facilitator": "Make facilitator",
+    "your_hand": "Your hand",
+    "waiting_facilitator": "Waiting for the facilitator",
+    "scenario": "Scenario",
+    "agenda_empty": "No subjects yet. Add one to get started.",
+    "add_subject": "Add a subject",
+    "add": "Add",
+    "send": "Send",
+    "vote_title": "Vote title",
+    "code_copied": "Code copied",
+    "link_copied": "Link copied",
+    "qr": {
+      "open": "Access QR code",
+      "copy_hint": "Click the QR code to copy it to the clipboard",
+      "copied": "QR code copied"
+    },
+    "fullscreen": "Fullscreen",
+    "exit_fullscreen": "Exit fullscreen",
+    "timer": {
+      "label": "Timer",
+      "seconds": "Duration (seconds)",
+      "remaining": "Time left",
+      "expired": "Time is up",
+      "sec_suffix": " sec"
+    },
+    "deck": {
+      "label": "Poker type",
+      "locked": "Finish the round to switch type.",
+      "type": {
+        "delegation_poker": "Delegation Poker",
+        "poker_planning": "Planning Poker",
+        "fist_of_five": "Fist of Five",
+        "roman_vote": "Roman Vote"
+      }
+    },
+    "reveal_mode": {
+      "label": "Reveal",
+      "mode_nominative": "Nominative",
+      "mode_anonymous": "Anonymous",
+      "locked": "Can only be set before the vote opens.",
+      "badge_nominative": "Named vote",
+      "badge_anonymous": "Anonymous vote"
+    },
+    "prepare": "Prepare the vote",
+    "launch": "Launch the vote",
+    "edit": "Edit",
+    "queue_add": "Add to queue",
+    "reveal_title": "Tally"
+  },
+  "billing": {
+    "title": "Subscription",
+    "active": "Subscription active.",
+    "inactive": "No active subscription.",
+    "subscribe": "Subscribe",
+    "manage": "Manage subscription",
+    "success": "Thank you! Your subscription is active.",
+    "canceled": "Payment canceled.",
+    "choose": "Pick a plan to create and manage teams.",
+    "teams": "team(s)",
+    "per_month": "month",
+    "per_year": "year",
+    "quota": "Teams",
+    "quota_reached": "quota reached",
+    "offered_access": "Offered access",
+    "offered_access_hint": "Your account has offered access: no subscription is required."
+  },
+  "board": {
+    "title": "Delegation Board",
+    "topic": "Subject",
+    "as_is": "AS-IS",
+    "to_be": "TO-BE",
+    "place": "Place:",
+    "add_topic": "Add a subject",
+    "add": "Add",
+    "empty": "No subjects yet. Add one and place the post-its.",
+    "export_csv": "Export CSV",
+    "export_pdf": "Export PDF",
+    "export_failed": "Export failed."
+  },
+  "history": {
+    "title": "History",
+    "empty": "No results yet.",
+    "results": "results",
+    "email": "Send by email",
+    "email_sent": "History sent to {{count}} member(s)."
+  },
+  "staff": {
+    "nav": {
+      "users": "Accounts"
+    },
+    "users": {
+      "title": "Account administration",
+      "search": "Search",
+      "search_placeholder": "Email or name",
+      "fields": {
+        "email": "Email",
+        "name": "Name",
+        "bypass": "Offered access",
+        "note": "Reason",
+        "note_placeholder": "Why this access is offered"
+      },
+      "actions": {
+        "saved": "Account updated."
+      },
+      "errors": {
+        "load_failed": "Failed to load accounts.",
+        "save_failed": "Failed to update account."
+      }
+    }
+  },
+  "errors": {
+    "username_required": "Your name is required.",
+    "code_required": "The room code is required.",
+    "create_room": "Could not create the room.",
+    "room_not_found": "Room not found or expired.",
+    "room_full": "This room is full (15 people maximum)."
+  },
+  "common": {
+    "skip_to_content": "Skip to content"
+  },
+  "me": {
+    "title": "My account",
+    "identity": "Identity",
+    "email_confirmed": "Verified",
+    "email_unconfirmed": "Unverified",
+    "email_readonly": "Your email identifies the account; changing it requires a new verification.",
+    "role": "Role",
+    "staff": "Foxugly team",
+    "display_name": "Display name",
+    "display_name_hint": "The name other participants see in rooms.",
+    "saved": "Profile saved.",
+    "account": "My account",
+    "subscription_link": "Subscription",
+    "no_name": "No name",
+    "avatar_change": "Change avatar",
+    "avatar_remove": "Remove avatar",
+    "avatar_hint": "PNG, JPEG or WebP, 3 MB max.",
+    "avatar_saved": "Avatar saved.",
+    "avatar_invalid": "Image rejected."
+  },
+  "subscription": {
+    "title": "Subscription",
+    "loading": "Loading…",
+    "billing_off": "Billing is not active yet.",
+    "current": "Current subscription",
+    "none": "You have no subscription.",
+    "see_plans": "See plans",
+    "offered": "Complimentary access",
+    "offered_hint": "Your account has the paid features without a subscription.",
+    "plan": "Plan",
+    "status": "Status",
+    "quota": "Teams used",
+    "interval_monthly": "monthly",
+    "interval_yearly": "yearly",
+    "status_active": "Active",
+    "status_trialing": "Trial",
+    "status_canceled": "Cancelled",
+    "status_past_due": "Past due",
+    "status_incomplete": "Incomplete",
+    "status_unpaid": "Unpaid",
+    "history": "Subscription history",
+    "no_history": "No past subscription.",
+    "started": "Started",
+    "ended": "Ended",
+    "invoices": "Invoices",
+    "no_invoices": "No invoice.",
+    "invoice_number": "Number",
+    "date": "Date",
+    "amount": "Amount",
+    "invoice_paid": "Paid",
+    "invoice_open": "Open",
+    "invoice_draft": "Draft",
+    "invoice_void": "Void",
+    "invoice_uncollectible": "Uncollectible",
+    "pdf": "PDF",
+    "view": "View"
+  },
+  "appUpdate": {
+    "title": "A new version is available",
+    "detail": "The app was updated while you were here. Reload the page to continue."
+  }
+}

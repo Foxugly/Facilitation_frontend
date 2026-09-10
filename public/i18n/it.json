@@ -1,0 +1,510 @@
+{
+  "app": {
+    "title": "Poker",
+    "tagline": "Decisioni condivise, in tempo reale — Poker Planning e Delegation Poker."
+  },
+  "footer": {
+    "version_label": "Versione {{version}}",
+    "author": "Foxugly",
+    "privacy": "Privacy",
+    "rights": "Tutti i diritti riservati."
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Funzionalità",
+    "pricing": "Prezzi",
+    "support": "Sostieni",
+    "about": "Info",
+    "teams": "Team",
+    "account": "Il mio account"
+  },
+  "field": {
+    "username": "Il tuo nome"
+  },
+  "action": {
+    "cancel": "Annulla",
+    "save": "Salva",
+    "quit": "Esci",
+    "back": "Indietro"
+  },
+  "teams": {
+    "title": "Team",
+    "create": "Crea un team",
+    "new_session": "Nuova sessione",
+    "name": "Nome del team",
+    "empty": "Non hai ancora un team. Creane uno per invitare membri.",
+    "members": "Membri",
+    "invitations": "Inviti",
+    "invite": "Invita",
+    "invited": "Invito inviato.",
+    "already_member": "Questa persona è già membro.",
+    "revoke": "Revoca",
+    "remove": "Rimuovi",
+    "manage": "Rinomina il team",
+    "rename_label": "Nuovo nome",
+    "tab_members": "Membri e inviti",
+    "appearance": "Aspetto",
+    "felt_color": "Colore del panno",
+    "back_color": "Colore del dorso",
+    "appearance_saved": "Aspetto salvato.",
+    "delete": "Elimina team",
+    "delete_confirm": "Eliminare definitivamente questo team?",
+    "role": {
+      "owner": "Proprietario",
+      "manager": "Gestore",
+      "member": "Membro"
+    },
+    "accept": {
+      "pending": "Accettazione dell'invito…",
+      "error_title": "Invito non valido",
+      "error_lead": "Questo invito non è valido, è scaduto o è già stato usato.",
+      "email_mismatch": "Accedi con l'email a cui è stato inviato l'invito."
+    },
+    "deck": {
+      "tab": "Tipo di poker",
+      "title": "Tipo di poker",
+      "loading": "Caricamento…",
+      "intro": "I tipi di poker giocabili nelle sessioni di questo team. Il facilitatore sceglie quale usare nella stanza, round dopo round.",
+      "custom": "Mazzo personalizzato",
+      "in_use": "In uso",
+      "saved": "Tipi di poker salvati.",
+      "create": "Crea un mazzo",
+      "create_soon": "La creazione di mazzi personalizzati arriverà presto.",
+      "create_paid": "I mazzi personalizzati sono riservati ai team con un abbonamento.",
+      "backs_title": "Retro delle carte",
+      "back_saved": "Retro salvato.",
+      "enabled": "Attivo",
+      "none_enabled": "Nessun tipo attivo: le sessioni useranno il mazzo standard."
+    },
+    "surface": {
+      "felt": "Panno del tavolo",
+      "style_color": "Tinta unita",
+      "style_image": "Immagine",
+      "no_felt": "Nessuna immagine di panno disponibile per ora.",
+      "table": "Decorazione del tavolo",
+      "back_models": "Modelli disponibili",
+      "no_back": "Nessun retro disponibile per ora.",
+      "upload": "Carica un’immagine",
+      "upload_hint": "PNG, JPEG o WebP, max 3 MB.",
+      "upload_invalid": "Immagine rifiutata.",
+      "delete": "Elimina",
+      "delete_confirm": "Eliminare questa immagine caricata?",
+      "zoom": "Ingrandisci",
+      "preview": "Anteprima",
+      "reset": "Ripristina il valore predefinito"
+    },
+    "background": {
+      "tab": "Sfondo",
+      "style_theme": "Tema",
+      "theme_hint": "La stanza mantiene lo sfondo chiaro o scuro di ogni partecipante. È l'impostazione predefinita.",
+      "color": "Colore dello sfondo",
+      "none": "Nessuna immagine di sfondo per ora: caricane una.",
+      "upload_hint": "PNG, JPEG o WebP, max 6 MB."
+    },
+    "rename_action": "Rinomina il team",
+    "delete_intro": "L'eliminazione del team è definitiva.",
+    "result_layout": {
+      "tab": "Spoglio",
+      "intro": "Ciò che i giocatori vedono al posto della loro mano, una volta rivelati i voti.",
+      "cards": "Le carte giocate",
+      "cards_hint": "Ogni carta giocata, il numero di voti e chi l'ha scelta. L'unica forma leggibile per un mazzo a pittogrammi.",
+      "summary": "Il riepilogo numerico",
+      "summary_hint": "Una riga per carta, con una barra proporzionale. I nomi entrano per intero."
+    }
+  },
+  "home": {
+    "eyebrow": "Decisioni condivise",
+    "title": "Decidete insieme, in tempo reale",
+    "intro": "Poker unisce Poker Planning e Delegation Poker: crea una stanza, invita il team, votate e rivelate i risultati insieme.",
+    "create_title": "Crea una stanza",
+    "room_title": "Titolo della stanza (opzionale)",
+    "create_cta": "Crea la stanza",
+    "join_title": "Entra in una stanza",
+    "join_intro": "Hai un codice stanza o un link? Unisciti alla partita in corso.",
+    "join_cta": "Entra"
+  },
+  "support": {
+    "title": "Sostieni",
+    "why_title": "Perché sostenere Poker?",
+    "reasons": {
+      "free": {
+        "title": "Gratis per l'essenziale",
+        "desc": "Le stanze anonime in tempo reale restano gratuite, senza account."
+      },
+      "infra": {
+        "title": "Hosting e infrastruttura",
+        "desc": "Server, certificati SSL e invio email hanno un costo reale."
+      },
+      "maintenance": {
+        "title": "Manutenzione continua",
+        "desc": "Aggiornamenti di sicurezza, correzioni di bug, compatibilità."
+      },
+      "features": {
+        "title": "Nuove funzionalità",
+        "desc": "Ogni contributo accelera lo sviluppo."
+      }
+    },
+    "cta_title": "Fare una donazione",
+    "cta_desc": "Le donazioni passano da GitHub Sponsors: un gesto una tantum o un sostegno regolare, al tuo ritmo.",
+    "cta_button": "Sostieni su GitHub Sponsors",
+    "cta_note": "Sarai reindirizzato a GitHub Sponsors in una nuova scheda.",
+    "thanks_title": "Grazie!",
+    "thanks_desc": "Grazie per mantenere vivo uno strumento indipendente — senza pubblicità né tracciamento."
+  },
+  "pricing": {
+    "title": "Prezzi",
+    "intro": "Crea una stanza gratis in pochi secondi. Passa a un piano team per il Delegation Board, la cronologia e l'aspetto personalizzato.",
+    "free_title": "Gratis",
+    "free_f1": "Delegation Poker e Poker Planning in tempo reale",
+    "free_f2": "Fino a 15 persone per stanza",
+    "free_f3": "Nessun account richiesto",
+    "team1_title": "1 team",
+    "team5_title": "5 team",
+    "team5_f1": "Fino a 5 team",
+    "per_month": "/mese",
+    "per_year": "/anno",
+    "save": "2 mesi gratis",
+    "or": "o",
+    "paid_f1": "Delegation Board (AS-IS / TO-BE)",
+    "paid_f2": "Cronologia + invio email",
+    "paid_f3": "Aspetto personalizzato",
+    "paid_f4": "Fino a 20 membri per team",
+    "note": "Massimo 15 persone per stanza · massimo 20 membri per team.",
+    "cta_free": "Crea una stanza",
+    "cta_paid": "Abbonati",
+    "excl_vat": "IVA escl.",
+    "vat_note": "I prezzi sono al netto dell'IVA. L'IVA applicabile al suo paese viene aggiunta al pagamento."
+  },
+  "about": {
+    "title": "Info",
+    "tab_company": "Società",
+    "tab_legal": "Note legali",
+    "tab_technical": "Tecnica",
+    "company_body": "Poker è pubblicato da Foxugly SRL, una società belga. Costruiamo strumenti semplici per i team che decidono insieme.",
+    "legal_body": "Editore: Foxugly SRL — Belgio. Contatto: info@foxugly.com. Hosting: Amazon Web Services (Irlanda, regione eu-west-1). Le stanze anonime sono temporanee e scadono dopo un periodo di inattività.",
+    "technical_body": "Applicazione in tempo reale: backend Django e Django Channels (WebSocket), frontend Angular e PrimeNG. Multilingue (5 lingue), temi chiaro e scuro."
+  },
+  "privacy": {
+    "title": "Privacy",
+    "intro": "Questa informativa spiega quali dati tratta Poker, perché e come li proteggiamo. Poker è gestito da Foxugly SRL (Belgio).",
+    "updated": "Ultimo aggiornamento: luglio 2026.",
+    "sections": {
+      "data": {
+        "title": "Dati che trattiamo",
+        "body": "Le stanze anonime funzionano senza account: conserviamo solo uno pseudonimo temporaneo e i tuoi voti per la durata della sessione. Se crei un account, memorizziamo il tuo indirizzo e-mail, il nome visualizzato e i tuoi team."
+      },
+      "usage": {
+        "title": "Utilizzo dei dati",
+        "body": "I tuoi dati servono esclusivamente a far funzionare il servizio: autenticazione, gestione dei team, cronologia delle sessioni e invio di e-mail transazionali. Non vendiamo né noleggiamo i tuoi dati e non mostriamo pubblicità."
+      },
+      "retention": {
+        "title": "Conservazione e hosting",
+        "body": "Le stanze anonime sono temporanee e scadono dopo un periodo di inattività. I dati dell'account vengono conservati finché l'account esiste. L'hosting è fornito da Amazon Web Services nell'Unione Europea (Irlanda, regione eu-west-1)."
+      },
+      "rights": {
+        "title": "I tuoi diritti",
+        "body": "In conformità al GDPR, puoi richiedere l'accesso, la rettifica o la cancellazione dei tuoi dati, nonché la chiusura del tuo account. Contattaci per esercitare questi diritti."
+      }
+    },
+    "contact_title": "Contatto",
+    "contact_lead": "Per qualsiasi domanda sulla privacy o per esercitare i tuoi diritti, contattaci a:"
+  },
+  "join": {
+    "title": "Entra in una stanza",
+    "code": "Codice stanza",
+    "cta": "Entra"
+  },
+  "features": {
+    "eyebrow": "Gratis e a pagamento",
+    "title": "Funzionalità",
+    "intro": "Inizia gratis con stanze anonime in tempo reale. Passa a pagamento per team, cronologia e delegation board.",
+    "feature": "Funzionalità",
+    "free": "Gratis",
+    "free_desc": "Stanze anonime, senza account",
+    "paid": "A pagamento",
+    "paid_desc": "Team, in abbonamento",
+    "rows": {
+      "anon_rooms": "Stanze anonime temporanee",
+      "standard_deck": "Mazzo Delegation Poker standard",
+      "realtime": "Voto in tempo reale e rivelazione simultanea",
+      "langs": "5 lingue (FR/NL/EN/IT/ES)",
+      "accounts": "Account e team",
+      "history": "Cronologia delle sessioni",
+      "board": "Delegation Board (AS-IS / TO-BE)",
+      "custom_decks": "Mazzi personalizzati",
+      "custom_back": "Retro carta personalizzato",
+      "prepared_votes": "Voti preparati in anticipo",
+      "export": "Esportazione CSV / PDF",
+      "email_history": "Invio della cronologia via email"
+    }
+  },
+  "auth": {
+    "email": "Indirizzo email",
+    "password": "Password",
+    "new_password": "Nuova password",
+    "display_name": "Nome visualizzato",
+    "logout": "Esci",
+    "back_to_login": "Torna all'accesso",
+    "back_to_password": "Torna alla password",
+    "remember_me": "Ricordami",
+    "or": "o",
+    "login": {
+      "title": "Accedi",
+      "lead": "Accedi al tuo team e alla cronologia.",
+      "cta": "Accedi",
+      "forgot": "Password dimenticata?",
+      "magic": "Inviami un link di accesso via email",
+      "no_account": "Non hai un account?",
+      "not_confirmed": "Conferma prima la tua email.",
+      "resend": "Reinvia il link",
+      "resent": "Se l'account esiste, è stato inviato un nuovo link."
+    },
+    "register": {
+      "title": "Crea un account",
+      "lead": "Crea il tuo account per gestire un team.",
+      "cta": "Crea account",
+      "have_account": "Hai già un account?",
+      "done_title": "Controlla la posta",
+      "done_lead": "Ti abbiamo inviato un link per confermare il tuo indirizzo."
+    },
+    "forgot": {
+      "title": "Password dimenticata",
+      "lead": "Inserisci la tua email per ricevere un link di reimpostazione.",
+      "cta": "Invia il link",
+      "sent": "Se l'indirizzo esiste, è stato inviato un link di reimpostazione."
+    },
+    "reset": {
+      "title": "Reimposta la password",
+      "cta": "Reimposta",
+      "done": "Password reimpostata. Ora puoi accedere."
+    },
+    "confirm": {
+      "pending": "Conferma in corso…",
+      "ok_title": "Email confermata",
+      "ok_lead": "Reindirizzamento…",
+      "error_title": "Link non valido",
+      "error_lead": "Questo link di conferma non è valido o è scaduto."
+    },
+    "magic": {
+      "title": "Link di accesso",
+      "lead": "Inserisci la tua email e ti invieremo un link per accedere.",
+      "cta": "Invia il link",
+      "sent": "Se l'account esiste, è stato inviato un link di accesso.",
+      "verifying": "Accesso in corso…",
+      "error_title": "Link non valido",
+      "error_lead": "Questo link non è valido, è scaduto o è già stato usato.",
+      "request_new": "Richiedi un nuovo link"
+    },
+    "errors": {
+      "invalid_credentials": "Email o password errati.",
+      "password_short": "Almeno 8 caratteri.",
+      "generic": "Qualcosa è andato storto. Riprova.",
+      "reset_invalid": "Link non valido o scaduto.",
+      "captcha": "Completa il captcha."
+    }
+  },
+  "vote_state": {
+    "idle": "In attesa",
+    "open": "Voto aperto",
+    "revealed": "Rivelato",
+    "acted": "Risultato deciso"
+  },
+  "room": {
+    "untitled": "Stanza",
+    "no_subject": "Nessun argomento definito",
+    "set_subject": "Definisci l'argomento del voto",
+    "share": "Condividi link",
+    "open_vote": "Apri il voto",
+    "reveal": "Rivela",
+    "reveal_votes_count": "{{count}} voti",
+    "reveal_anonymous_hint": "I voti sono anonimi",
+    "reset": "Reimposta",
+    "new_round": "Nuovo turno",
+    "acted_result": "Livello scelto",
+    "choose_result": "Scegli il livello",
+    "act": "Conferma",
+    "participants": "Partecipanti",
+    "facilitator_absent": "Il facilitatore è assente.",
+    "claim": "Assumi il ruolo",
+    "give_facilitator": "Rendi facilitatore",
+    "your_hand": "La tua mano",
+    "waiting_facilitator": "In attesa del facilitatore",
+    "scenario": "Scenario",
+    "agenda_empty": "Nessun argomento. Aggiungine uno per iniziare.",
+    "add_subject": "Aggiungi un argomento",
+    "add": "Aggiungi",
+    "send": "Invia",
+    "vote_title": "Titolo del voto",
+    "code_copied": "Codice copiato",
+    "link_copied": "Link copiato",
+    "qr": {
+      "open": "Codice QR di accesso",
+      "copy_hint": "Clicca sul codice QR per copiarlo negli appunti",
+      "copied": "Codice QR copiato"
+    },
+    "fullscreen": "Schermo intero",
+    "exit_fullscreen": "Esci da schermo intero",
+    "timer": {
+      "label": "Timer",
+      "seconds": "Durata (secondi)",
+      "remaining": "Tempo rimanente",
+      "expired": "Tempo scaduto",
+      "sec_suffix": " sec"
+    },
+    "deck": {
+      "label": "Tipo di poker",
+      "locked": "Concludi il round per cambiare tipo.",
+      "type": {
+        "delegation_poker": "Delegation Poker",
+        "poker_planning": "Planning Poker",
+        "fist_of_five": "Fist of Five",
+        "roman_vote": "Voto romano"
+      }
+    },
+    "reveal_mode": {
+      "label": "Rivelazione",
+      "mode_nominative": "Nominativa",
+      "mode_anonymous": "Anonima",
+      "locked": "Impostabile solo prima dell’apertura del voto.",
+      "badge_nominative": "Voto nominativo",
+      "badge_anonymous": "Voto anonimo"
+    },
+    "prepare": "Prepara il voto",
+    "launch": "Avvia il voto",
+    "edit": "Modifica",
+    "queue_add": "Aggiungi alla coda",
+    "reveal_title": "Spoglio"
+  },
+  "billing": {
+    "title": "Abbonamento",
+    "active": "Abbonamento attivo.",
+    "inactive": "Nessun abbonamento attivo.",
+    "subscribe": "Abbonati",
+    "manage": "Gestisci abbonamento",
+    "success": "Grazie! Il tuo abbonamento è attivo.",
+    "canceled": "Pagamento annullato.",
+    "choose": "Scegli un piano per creare e gestire i team.",
+    "teams": "team",
+    "per_month": "mese",
+    "per_year": "anno",
+    "quota": "Team",
+    "quota_reached": "quota raggiunta",
+    "offered_access": "Accesso offerto",
+    "offered_access_hint": "Il tuo account ha un accesso offerto: nessun abbonamento è necessario."
+  },
+  "board": {
+    "title": "Delegation Board",
+    "topic": "Argomento",
+    "as_is": "AS-IS",
+    "to_be": "TO-BE",
+    "place": "Posiziona:",
+    "add_topic": "Aggiungi un argomento",
+    "add": "Aggiungi",
+    "empty": "Nessun argomento. Aggiungine uno e posiziona i post-it.",
+    "export_csv": "Esporta CSV",
+    "export_pdf": "Esporta PDF",
+    "export_failed": "Esportazione non riuscita."
+  },
+  "history": {
+    "title": "Cronologia",
+    "empty": "Nessun risultato per ora.",
+    "results": "risultati",
+    "email": "Invia via email",
+    "email_sent": "Cronologia inviata a {{count}} membro/i."
+  },
+  "staff": {
+    "nav": {
+      "users": "Account"
+    },
+    "users": {
+      "title": "Amministrazione account",
+      "search": "Cerca",
+      "search_placeholder": "Email o nome",
+      "fields": {
+        "email": "Email",
+        "name": "Nome",
+        "bypass": "Accesso offerto",
+        "note": "Motivo",
+        "note_placeholder": "Perché questo accesso è offerto"
+      },
+      "actions": {
+        "saved": "Account aggiornato."
+      },
+      "errors": {
+        "load_failed": "Caricamento degli account non riuscito.",
+        "save_failed": "Aggiornamento dell'account non riuscito."
+      }
+    }
+  },
+  "errors": {
+    "username_required": "Il tuo nome è obbligatorio.",
+    "code_required": "Il codice stanza è obbligatorio.",
+    "create_room": "Impossibile creare la stanza.",
+    "room_not_found": "Stanza non trovata o scaduta.",
+    "room_full": "Questa stanza è piena (massimo 15 persone)."
+  },
+  "common": {
+    "skip_to_content": "Vai al contenuto"
+  },
+  "me": {
+    "title": "Il mio account",
+    "identity": "Identità",
+    "email_confirmed": "Verificata",
+    "email_unconfirmed": "Non verificata",
+    "email_readonly": "L'email identifica l'account; cambiarla richiede una nuova verifica.",
+    "role": "Ruolo",
+    "staff": "Team Foxugly",
+    "display_name": "Nome visualizzato",
+    "display_name_hint": "Il nome che gli altri partecipanti vedono nelle stanze.",
+    "saved": "Profilo salvato.",
+    "account": "Il mio account",
+    "subscription_link": "Abbonamento",
+    "no_name": "Senza nome",
+    "avatar_change": "Cambia avatar",
+    "avatar_remove": "Rimuovi avatar",
+    "avatar_hint": "PNG, JPEG o WebP, max 3 MB.",
+    "avatar_saved": "Avatar salvato.",
+    "avatar_invalid": "Immagine rifiutata."
+  },
+  "subscription": {
+    "title": "Abbonamento",
+    "loading": "Caricamento…",
+    "billing_off": "La fatturazione non è ancora attiva.",
+    "current": "Abbonamento in corso",
+    "none": "Non hai un abbonamento.",
+    "see_plans": "Vedi le formule",
+    "offered": "Accesso offerto",
+    "offered_hint": "Il tuo account ha le funzioni a pagamento senza abbonamento.",
+    "plan": "Formula",
+    "status": "Stato",
+    "quota": "Team usati",
+    "interval_monthly": "mensile",
+    "interval_yearly": "annuale",
+    "status_active": "Attivo",
+    "status_trialing": "Prova",
+    "status_canceled": "Annullato",
+    "status_past_due": "Scaduto",
+    "status_incomplete": "Incompleto",
+    "status_unpaid": "Non pagato",
+    "history": "Storico abbonamenti",
+    "no_history": "Nessun abbonamento passato.",
+    "started": "Inizio",
+    "ended": "Fine",
+    "invoices": "Fatture",
+    "no_invoices": "Nessuna fattura.",
+    "invoice_number": "Numero",
+    "date": "Data",
+    "amount": "Importo",
+    "invoice_paid": "Pagata",
+    "invoice_open": "In attesa",
+    "invoice_draft": "Bozza",
+    "invoice_void": "Annullata",
+    "invoice_uncollectible": "Inesigibile",
+    "pdf": "PDF",
+    "view": "Vedi"
+  },
+  "appUpdate": {
+    "title": "Nuova versione disponibile",
+    "detail": "L'app è stata aggiornata mentre eri qui. Ricarica la pagina per continuare."
+  }
+}

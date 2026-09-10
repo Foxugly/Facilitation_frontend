@@ -1,0 +1,44 @@
+@if (auth.isAuthenticated()) {
+  <div class="user-menu">
+    <button
+      type="button"
+      class="user-menu__trigger"
+      [attr.aria-expanded]="open()"
+      aria-haspopup="menu"
+      (click)="toggle()"
+    >
+      @if (auth.currentUser()?.avatar_url; as avatar) {
+        <img class="user-menu__avatar" [src]="avatar" alt="" />
+      } @else {
+        <i class="pi pi-user"></i>
+      }
+      <span class="user-menu__name">{{
+        auth.currentUser()?.display_name || auth.currentUser()?.email
+      }}</span>
+      <i class="pi pi-angle-down user-menu__caret"></i>
+    </button>
+
+    @if (open()) {
+      <div class="user-menu__panel" role="menu">
+        <a class="user-menu__item" role="menuitem" [routerLink]="['/me']" (click)="close()">
+          <i class="pi pi-user"></i>{{ 'nav.account' | transloco }}
+        </a>
+        <a class="user-menu__item" role="menuitem" [routerLink]="['/subscription']" (click)="close()">
+          <i class="pi pi-credit-card"></i>{{ 'subscription.title' | transloco }}
+        </a>
+        @if (auth.currentUser()?.is_superuser) {
+          <a class="user-menu__item" role="menuitem" [routerLink]="['/staff/users']" (click)="close()">
+            <i class="pi pi-shield"></i>{{ 'staff.nav.users' | transloco }}
+          </a>
+        }
+        <button type="button" role="menuitem" class="user-menu__item user-menu__item--danger" (click)="logout()">
+          <i class="pi pi-sign-out"></i>{{ 'auth.logout' | transloco }}
+        </button>
+      </div>
+    }
+  </div>
+} @else {
+  <a routerLink="/login" class="user-menu__signin">
+    <i class="pi pi-sign-in"></i>{{ 'auth.login.cta' | transloco }}
+  </a>
+}

@@ -1,0 +1,47 @@
+<header class="topbar" #root>
+  <div class="topbar__inner" [class.open]="mobileOpen()">
+    <a routerLink="/home" class="topbar__brand">
+      <span class="topbar__brand-icon"><img src="logo.png" alt="" /></span>
+      <span class="topbar__brand-name">{{ 'app.title' | transloco }}</span>
+    </a>
+
+    <button
+      class="topbar__toggle"
+      type="button"
+      [attr.aria-expanded]="mobileOpen()"
+      aria-label="Menu"
+      (click)="toggleMobile($event)"
+    >
+      <i class="pi" [class.pi-bars]="!mobileOpen()" [class.pi-times]="mobileOpen()"></i>
+    </button>
+
+    <nav class="topbar__nav">
+      <a class="topbar__link" routerLink="/home" routerLinkActive="topbar__link--active" [routerLinkActiveOptions]="{ exact: true }">
+        <i class="pi pi-home"></i>{{ 'nav.home' | transloco }}
+      </a>
+      <a class="topbar__link" routerLink="/features" routerLinkActive="topbar__link--active">
+        <i class="pi pi-sparkles"></i>{{ 'nav.features' | transloco }}
+      </a>
+      <a class="topbar__link" routerLink="/pricing" routerLinkActive="topbar__link--active">
+        <i class="pi pi-tag"></i>{{ 'nav.pricing' | transloco }}
+      </a>
+      <a class="topbar__link topbar__link--support" routerLink="/support" routerLinkActive="topbar__link--active">
+        <i class="pi pi-heart"></i>{{ 'nav.support' | transloco }}
+      </a>
+      <a class="topbar__link" routerLink="/about" routerLinkActive="topbar__link--active">
+        <i class="pi pi-info-circle"></i>{{ 'nav.about' | transloco }}
+      </a>
+      @if (auth.isAuthenticated()) {
+        <a class="topbar__link" routerLink="/teams" routerLinkActive="topbar__link--active">
+          <i class="pi pi-users"></i>{{ 'nav.teams' | transloco }}
+        </a>
+      }
+    </nav>
+
+    <div class="topbar__actions">
+      <app-theme-toggle />
+      <app-language-switcher />
+      <app-user-menu />
+    </div>
+  </div>
+</header>

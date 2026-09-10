@@ -1,0 +1,37 @@
+<div class="lang">
+  <button
+    type="button"
+    class="lang__trigger"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="listbox"
+    [pTooltip]="currentName()"
+    tooltipPosition="bottom"
+    (click)="toggle()"
+  >
+    <span class="lang__code">{{ current().toUpperCase() }}</span>
+  </button>
+
+  @if (open()) {
+    <ul class="lang__panel" role="listbox" [attr.aria-label]="currentName()">
+      @for (l of languages; track l.code; let i = $index) {
+        <li role="none">
+          <button
+            #menuitem
+            type="button"
+            role="option"
+            class="lang__option"
+            [class.lang__option--active]="l.code === current()"
+            [attr.aria-selected]="l.code === current()"
+            (click)="select(l.code)"
+          >
+            <span class="lang__option-code">{{ l.short }}</span>
+            <span class="lang__option-name">{{ l.name }}</span>
+            @if (l.code === current()) {
+              <i class="pi pi-check"></i>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

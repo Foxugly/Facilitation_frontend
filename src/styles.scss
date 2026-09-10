@@ -1,0 +1,23 @@
+@use "styles/tokens";
+@use "styles/layout";
+@use "styles/shell";
+
+@import "primeicons/primeicons.css";
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--surface-2);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Room facilitator timer: the PrimeNG p-inputNumber inner <input> keeps its
+   intrinsic ~20-char width and spills out of the fixed-width control (and past the
+   panel). This lives here, not in room.component.scss, because emulated
+   encapsulation can't style a child component's internals. Scoped to .timer-row so
+   it only affects that control; min-width:0 lets the input shrink to the container
+   and the stepper buttons overlay its right edge (PrimeNG "stacked" layout). */
+.timer-row .p-inputnumber-input {
+  min-width: 0;
+  flex: 1 1 0;
+}

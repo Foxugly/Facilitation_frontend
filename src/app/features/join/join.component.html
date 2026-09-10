@@ -1,0 +1,34 @@
+<section class="page page--narrow">
+  <div class="card form-card">
+    <h1 style="margin-top: 0">{{ 'join.title' | transloco }}</h1>
+    <div class="meta-grid" style="margin-top: var(--s-4)">
+      @if (!fromUrl()) {
+        <div>
+          <label class="meta-label">{{ 'join.code' | transloco }} *</label>
+          <input
+            pInputText
+            class="w-full"
+            [ngModel]="code()"
+            (ngModelChange)="onCode($event)"
+            maxlength="8"
+            style="text-transform: uppercase"
+          />
+          @if (submitted() && !code().trim()) {
+            <p class="meta-hint--error">{{ 'errors.code_required' | transloco }}</p>
+          }
+        </div>
+      }
+      <div>
+        <label class="meta-label">{{ 'field.username' | transloco }} *</label>
+        <input pInputText class="w-full" [ngModel]="username()" (ngModelChange)="username.set($event)" />
+        @if (submitted() && !username().trim()) {
+          <p class="meta-hint--error">{{ 'errors.username_required' | transloco }}</p>
+        }
+      </div>
+      <div class="flex gap-2 justify-end">
+        <p-button [label]="'action.cancel' | transloco" [text]="true" severity="secondary" (onClick)="cancel()" />
+        <p-button [label]="'join.cta' | transloco" icon="pi pi-sign-in" [loading]="joining()" (onClick)="join()" />
+      </div>
+    </div>
+  </div>
+</section>
