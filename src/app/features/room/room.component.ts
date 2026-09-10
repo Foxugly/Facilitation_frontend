@@ -23,8 +23,8 @@ import { RoomSocketService } from '../../core/realtime/room-socket.service';
 import { joinUrl } from '../../core/rooms/join-url';
 import { RoundState, SnapshotCard } from '../../core/realtime/protocol';
 import { DelegationCardComponent } from '../../shared/ui/delegation-card/delegation-card.component';
-import { DelegationPokerFacilitatorPanelComponent } from './activities/delegation-poker/facilitator-panel.component';
-import { DelegationPokerTableComponent } from './activities/delegation-poker/table.component';
+import { NgComponentOutlet } from '@angular/common';
+import { resolveActivity } from './activities/activity-registry';
 import { DelegationDeckComponent } from '../../shared/ui/delegation-deck/delegation-deck.component';
 
 const BADGE_SEVERITY: Record<RoundState, 'secondary' | 'success' | 'warn' | 'info'> = {
@@ -49,7 +49,7 @@ const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
   imports: [
     FormsModule, TranslocoModule, ButtonModule, InputNumberModule, InputTextModule, SelectModule, TagModule, ToggleSwitchModule,
     TooltipModule, DelegationDeckComponent, DelegationCardComponent,
-    DelegationPokerFacilitatorPanelComponent, DelegationPokerTableComponent,
+    NgComponentOutlet,
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
@@ -110,6 +110,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   /** Un fond quelconque casse le contraste du texte pose dessus : l'equipe choisit
    *  son image, pas la couleur d'encre du visiteur. Quand il y en a un, les zones
    *  de texte prennent un voile de la surface courante. */
+  /** L'activite jouee, resolue par le registre depuis le `voteType` du deck.
+   * La salle ne nomme plus aucune activite : ajouter la suivante ne touchera que
+   * `activities/activity-registry.ts`. */
+  readonly activity = computed(() => resolveActivity(this.socket.deckSnapshot()?.voteType));
+
   readonly hasCustomBackground = computed(() => this.backgroundColor() !== null || this.backgroundImage() !== null);
 
 
