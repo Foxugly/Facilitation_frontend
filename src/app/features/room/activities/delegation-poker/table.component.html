@@ -84,41 +84,24 @@
         </span>
 
         @if (state() === 'acted') {
-          <!-- La decision prise, une seule carte compte : celle qui a ete retenue. -->
-          <div class="decided">
-            @if (decidedCard(); as card) {
-              <app-delegation-card [card]="card" [revealed]="true" [cardBack]="cardBackImage()" [cardBackColor]="cardBackColor()" [lang]="lang()" />
-            }
-            <span class="decided-name">{{ resultName() }}</span>
-          </div>
-        } @else if (resultLayout() === 'summary') {
-          <!-- La CSS ne sait pas compter ses enfants : le nombre de lignes lui
-               arrive d'ici, pour qu'elles se partagent la hauteur de la bande. -->
+          <!-- La decision prise, une seule chose compte : le niveau retenu. -->
+          <p class="decided-name">{{ resultName() }}</p>
+        } @else {
+          <!-- Une ligne par valeur jouee, barre proportionnelle et votants.
+               La variante « cartes posees » a disparu avec le tapis : elle
+               n'apportait rien qu'un decor, la ou une barre se lit d'un coup
+               d'oeil et tient quel que soit le nombre de valeurs. Le reglage
+               d'equipe result_layout n'a plus d'effet ici — il sera retire du
+               modele quand le poker cessera d'etre la seule activite. -->
           <div class="tally-list" [style.--tl-rows]="outcomeGroups().length">
             @for (g of outcomeGroups(); track g.value) {
-              <div class="tl-row">
+              <div class="tl-row" [class.tl-row--top]="g.value === outcomeWinner()">
                 <span class="tl-name">{{ g.name }}</span>
                 <div class="tl-bar">
                   <i [style.width.%]="g.count / outcomeMax() * 100"></i>
                   <span>{{ g.voters }}</span>
                 </div>
                 <span class="tl-count">{{ g.count }}</span>
-              </div>
-            }
-          </div>
-        } @else {
-          <!-- Les cartes jouees : la seule forme qui parle sur un deck a
-               pictogrammes, dont les cartes n'ont aucun libelle. -->
-          <div class="outcome-cards">
-            @for (g of outcomeGroups(); track g.value) {
-              <div class="outcome-group">
-                @if (g.card; as card) {
-                  <app-delegation-card [card]="card" [revealed]="true" [cardBack]="cardBackImage()" [cardBackColor]="cardBackColor()" [lang]="lang()" />
-                }
-                <span class="og-count" [class.og-count--top]="g.value === outcomeWinner()">
-                  {{ 'room.reveal_votes_count' | transloco: { count: g.count } }}
-                </span>
-                <span class="og-voters" [title]="g.voters">{{ g.voters }}</span>
               </div>
             }
           </div>
