@@ -44,6 +44,14 @@ test('captures des etats de la salle', async ({ browser }) => {
 test('captures de la salle d equipe', async ({ browser }) => {
   const { page: fac } = await openTeamRoom(browser);
   await fac.waitForTimeout(600);
-  // Panneau complet : timer + mode de revelation + selecteur de deck.
-  await fac.screenshot({ path: `${DIR}/09-equipe-panneau.png`, fullPage: true });
+  // Panneau complet : timer + mode de revelation + selecteur de deck. La salle
+  // porte aussi `.room--custom-bg`, l'equipe e2e imposant un fond (voir
+  // seed_e2e_team) — c'etait un angle mort jusqu'a l'etape 3c.
+  await fac.screenshot({ path: `${DIR}/09-equipe-theme.png`, fullPage: true });
+
+  // Plein ecran : `.room:fullscreen` porte ses propres regles, et un selecteur
+  // descendant y avait ete rompu par l'encapsulation sans que rien ne le voie.
+  await fac.getByRole('button', { name: /Fullscreen/ }).click();
+  await fac.waitForTimeout(600);
+  await fac.screenshot({ path: `${DIR}/10-plein-ecran.png`, fullPage: true });
 });
