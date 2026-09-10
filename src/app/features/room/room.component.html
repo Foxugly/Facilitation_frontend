@@ -19,12 +19,12 @@
 
   @if (socket.deckSnapshot(); as deck) {
     <div class="room-body" [class.has-panel]="showPanel()">
-      <!-- Table + hand -->
-      <app-delegation-poker-table />
+      <!-- L'activite est resolue par le registre, jamais nommee ici. -->
+      <ng-container *ngComponentOutlet="activity().board" />
 
       <!-- Facilitator panel (right) -->
       @if (isFacilitator()) {
-        <app-delegation-poker-facilitator-panel />
+        <ng-container *ngComponentOutlet="activity().panel" />
       } @else if (showPanel()) {
         <!-- Pas facilitateur, et personne ne l'est : le panneau se reduit a l'encart
              qui permet de reprendre le role. Meme condition que la grille (showPanel),
