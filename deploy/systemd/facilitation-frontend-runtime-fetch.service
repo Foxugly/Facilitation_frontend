@@ -1,5 +1,5 @@
 [Unit]
-Description=Delegation Poker frontend — fetch runtime config from AWS SSM into nginx snippet
+Description=Facilitation frontend — fetch runtime config from AWS SSM into nginx snippet
 After=network-online.target nginx.service
 Wants=network-online.target
 

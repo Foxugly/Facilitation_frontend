@@ -1,4 +1,4 @@
-# Delegation Poker frontend — Deployment (facilitation.foxugly.com)
+# Facilitation frontend — Deployment (facilitation.foxugly.com)
 
 Angular SPA served statically by nginx at `facilitation.foxugly.com`; it calls the API at
 `facilitation-api.foxugly.com` cross-origin and opens a WebSocket to `wss://facilitation-api.foxugly.com/ws/`.
@@ -15,7 +15,7 @@ reloads nginx. Runtime config is injected into `index.html` as `window.__FACILIT
 1. **SSM** `/facilitation-frontend/prod/*` (all String): `API_BASE_URL=https://facilitation-api.foxugly.com`,
    `SENTRY_DSN=<frontend DSN>`, `SENTRY_ENV=production`, `SENTRY_RELEASE=`. Grant the instance
    role `foxugly-fleet-ec2` `ssm:GetParametersByPath` on `/facilitation-frontend/prod` (+ `/*`).
-2. **OIDC role** `poker-frontend-deploy`: trust pinned to
+2. **OIDC role** `facilitation-frontend-deploy`: trust pinned to
    `repo:Foxugly/Facilitation_frontend:environment:production`; perms `ssm:SendCommand` on the
    instance + `AWS-RunShellScript`, `ssm:GetCommandInvocation`, and `s3:PutObject` on
    `foxugly-deploy/builds/facilitation-frontend/*`. (The instance role already reads
@@ -34,5 +34,5 @@ in CI, not on the box — no node needed on the box.
 
 Push `main` → CI test (vitest + build) → deploy. Then:
 - `curl -I https://facilitation.foxugly.com/` → 200, `index.html` served.
-- In a browser: create a room, confirm live voting (WS) works against poker-api.
+- In a browser: create a room, confirm live voting (WS) works against facilitation-api.
 - Check the injected `window.__FACILITATION__` (view-source) has the right `apiBaseUrl`.
