@@ -1,58 +1,34 @@
-import { BrowserContext, expect, Page, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { createRoom, expectState, joinRoom, openRound } from './helpers';
 
-// Two isolated participants (separate contexts = separate localStorage identities)
-// run a full Delegation Poker round end to end: create → join → subject → open →
-// vote → live participation → reveal → act. Locale is forced to EN for stable text.
-
-async function englishContext(browser: BrowserContext['browser']): Promise<BrowserContext> {
-  const ctx = await browser!.newContext();
-  await ctx.addInitScript(() => localStorage.setItem('poker.lang', 'en'));
-  return ctx;
-}
+// Deux participants isoles jouent un round complet de Delegation Poker :
+// creation -> entree -> sujet -> ouverture -> vote -> participation live ->
+// revelation -> resultat.
 
 test('two participants run a full vote cycle', async ({ browser }) => {
-  const facCtx = await englishContext(browser);
-  const voterCtx = await englishContext(browser);
-  const fac: Page = await facCtx.newPage();
-  const voter: Page = await voterCtx.newPage();
+  const { ctx: facCtx, page: fac, code } = await createRoom(browser, 'Sam');
+  const { ctx: voterCtx, page: voter } = await joinRoom(browser, code, 'Alex');
 
-  // --- Facilitator creates a room ---
-  await fac.goto('/');
-  await fac.getByRole('textbox').nth(1).fill('Sam'); // 1st = title (optional), 2nd = username
-  await fac.getByRole('button', { name: /Create/ }).click();
-  await fac.waitForURL(/\/room\/[A-Z0-9]{6,8}/);
-  const code = fac.url().split('/room/')[1];
-  expect(code).toMatch(/^[A-Z0-9]{6,8}$/);
-
-  // --- Voter joins via the direct URL (username only) ---
-  await voter.goto(`/join/${code}`);
-  await voter.getByRole('textbox').first().fill('Alex');
-  // Button accessible names carry a leading space from the icon node — match loosely.
-  await voter.getByRole('button', { name: /Join/ }).click();
-  await voter.waitForURL(/\/room\//);
-
-  // Facilitator sees the second participant appear live.
+  // Le facilitateur voit le second participant arriver en direct.
   await expect(fac.getByText('Alex')).toBeVisible();
 
-  // --- Facilitator sets the subject and opens the vote ---
-  await fac.getByRole('textbox').first().fill('Who owns the budget?');
-  await fac.getByRole('button', { name: /Save/ }).click();
-  await fac.getByRole('button', { name: /Open vote/ }).click();
+  await openRound(fac, 'Who owns the budget?');
+  await expectState(voter, 'Vote open');
 
-  // --- Voter casts card 5 (Advise) ---
+  // Le votant joue la carte 5 (Advise).
   await voter.getByRole('button', { name: /Advise/ }).click();
 
-  // Facilitator sees live participation reach 1 voted, then reveals.
+  // La participation remonte au facilitateur, qui revele.
   await expect(fac.getByText(/1 \/ \d/)).toBeVisible();
   await fac.getByRole('button', { name: /Reveal/ }).click();
+  await expectState(fac, 'Revealed');
 
-  // Revealed → the facilitator can now set the result (default = mode).
+  // Revele -> le facilitateur fige le resultat (defaut = mode).
   const setResult = fac.getByRole('button', { name: /Set result/ });
   await expect(setResult).toBeVisible();
   await setResult.click();
 
-  // Acted: the chosen level is displayed.
-  await expect(fac.getByText(/Result set/)).toBeVisible();
+  await expectState(fac, 'Result set');
   await expect(fac.getByText(/Chosen level/)).toBeVisible();
 
   await facCtx.close();

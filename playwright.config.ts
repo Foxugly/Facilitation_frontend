@@ -18,8 +18,14 @@ export default defineConfig({
   webServer: [
     {
       // Django ASGI backend (daphne via runserver) + a seeded standard deck.
+      //
+      // Le chemin du venv est ENTRE GUILLEMETS : sous Windows, cmd traite
+      // `.venv/Scripts/python.exe` en tete de commande comme le programme `.venv`
+      // assorti d'options `/Scripts`, et echoue sur « '.venv' n'est pas reconnu ».
+      // Les guillemets en font un chemin. Le probleme restait invisible tant que
+      // les serveurs etaient demarres a la main (reuseExistingServer: true).
       command:
-        'cd ../../PycharmProjects/Poker_server && .venv/Scripts/python.exe manage.py migrate --noinput && .venv/Scripts/python.exe manage.py seed_delegation_deck && .venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000 --noreload',
+        'cd ../../PycharmProjects/Facilitation_server && set E2E=1 && ".venv/Scripts/python.exe" manage.py migrate --noinput && ".venv/Scripts/python.exe" manage.py seed_delegation_deck && ".venv/Scripts/python.exe" manage.py seed_icon_decks && ".venv/Scripts/python.exe" manage.py seed_e2e_team && ".venv/Scripts/python.exe" manage.py runserver 127.0.0.1:8000 --noreload',
       url: 'http://127.0.0.1:8000/health/',
       reuseExistingServer: true,
       timeout: 60_000,
