@@ -84,7 +84,7 @@ test('la revelation anonyme masque le lien participant -> carte', async ({ brows
   // en anonyme le serveur n'emet pas la cle `votes`, donc aucun siege ne se
   // retourne. C'est l'invariant, et il tient cote SERVEUR, pas a l'affichage.
   await expect(fac.getByText('Votes are anonymous')).toBeVisible();
-  await expect(fac.locator('.felt').getByText('Delegate', { exact: true })).toHaveCount(0);
+  await expect(fac.locator('.roster').getByText('Delegate', { exact: true })).toHaveCount(0);
 
   await facCtx.close();
   await voterCtx.close();
