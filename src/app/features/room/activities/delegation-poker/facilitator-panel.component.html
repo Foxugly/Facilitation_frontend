@@ -1,0 +1,111 @@
+<aside class="fac-panel">
+  <ul class="agenda">
+    @for (item of socket.agenda(); track item.id) {
+      <li class="agenda-item" [class.current]="item.status === 'current'" [class.done]="item.status === 'done'">
+        <button type="button" class="agenda-line" [disabled]="item.status === 'current' || state() !== 'idle'"
+                (click)="item.status !== 'current' && selectAgenda(item.id)">
+          <i class="pi"
+             [class.pi-caret-right]="item.status === 'current'"
+             [class.pi-check-circle]="item.status === 'done'"
+             [class.pi-circle]="item.status === 'pending'"></i>
+          <span class="agenda-text">{{ item.text }}</span>
+          @if (item.status === 'done' && item.result) {
+            <span class="agenda-result">{{ agendaResultName(item.result) }}</span>
+          }
+        </button>
+      </li>
+    } @empty {
+      <li class="agenda-empty">{{ 'room.agenda_empty' | transloco }}</li>
+    }
+  </ul>
+
+  @switch (state()) {
+    <!-- Idle = the two-step round form: compose (step 1) then launch (step 2). -->
+    @case ('open') {
+      <div class="panel-block controls">
+        <p-button [label]="'room.reveal' | transloco" icon="pi pi-eye" severity="warn" [disabled]="!canReveal()" (onClick)="socket.reveal()" styleClass="w-full" />
+      </div>
+    }
+    @case ('revealed') {
+      <div class="panel-block controls">
+        <div class="act-row">
+          <p-select [options]="cardOptions()" optionLabel="label" optionValue="value" [ngModel]="chosenValue()" (ngModelChange)="chosenValue.set($event)" appendTo="body" styleClass="grow" />
+          <p-button icon="pi pi-check" [ariaLabel]="'room.act' | transloco" [disabled]="!chosenValue()" severity="success" (onClick)="act()" />
+        </div>
+        <p-button [label]="'room.reset' | transloco" icon="pi pi-refresh" [text]="true" severity="secondary" (onClick)="socket.reset()" styleClass="w-full" />
+      </div>
+    }
+    @case ('acted') {
+      <div class="panel-block controls">
+        <p-button [label]="'room.new_round' | transloco" icon="pi pi-refresh" (onClick)="socket.reset()" styleClass="w-full" />
+      </div>
+    }
+    @default {
+      @if (showComposeForm()) {
+        <!-- STEP 1 — compose the round: subject + details, applied together. -->
+        <div class="round-form">
+          <div class="panel-block">
+            <input id="subjectDraft" pInputText class="w-full" [placeholder]="'room.add_subject' | transloco"
+                   [ngModel]="subjectDraft()" (ngModelChange)="subjectDraft.set($event)" (keyup.enter)="prepare()" />
+          </div>
+
+          <!-- Always offered: an anonymous room carries the whole standard
+               catalogue, a team room its enabled decks. -->
+          @if (availableDecks().length > 0) {
+            <div class="panel-block deck-settings">
+              <p-select [options]="deckOptions()" optionLabel="label" optionValue="value"
+                        [ngModel]="deckDraft() ?? currentDeckId()" (ngModelChange)="onDeckChange($event)"
+                        appendTo="body" styleClass="w-full" />
+            </div>
+          }
+
+          @if (socket.revealMode().canAnonymise) {
+            <div class="panel-block reveal-settings">
+              <div class="reveal-row">
+                <p-toggleswitch [ngModel]="anonymousDraft()" (ngModelChange)="onRevealModeChange($event)" />
+                <span class="reveal-mode-name">
+                  <i class="pi pi-eye-slash"></i>
+                  {{ (anonymousDraft() ? 'room.reveal_mode.mode_anonymous' : 'room.reveal_mode.mode_nominative') | transloco }}
+                </span>
+              </div>
+            </div>
+          }
+
+          <!-- Timer: team-only feature — an anonymous room never sees it. -->
+          @if (socket.isTeam()) {
+            <div class="panel-block timer-settings">
+              <div class="timer-row">
+                <p-toggleswitch [ngModel]="timerEnabledDraft()" (ngModelChange)="onTimerEnabledChange($event)" />
+                <i class="pi pi-clock timer-icon"></i>
+                <p-inputNumber [ngModel]="timerSecondsDraft()" (ngModelChange)="onTimerSecondsChange($event)"
+                               [min]="10" [max]="60" [step]="5" [showButtons]="true" [suffix]="timerSuffix()"
+                               [disabled]="!timerEnabledDraft()" inputStyleClass="timer-input" />
+              </div>
+            </div>
+          }
+
+          <div class="panel-block controls">
+            <p-button [label]="'room.prepare' | transloco" icon="pi pi-check" [disabled]="!canPrepare()" (onClick)="prepare()" styleClass="w-full" />
+            <p-button [label]="'room.queue_add' | transloco" icon="pi pi-plus" [text]="true" severity="secondary" [disabled]="!canPrepare()" (onClick)="queueSubject()" styleClass="w-full" />
+          </div>
+        </div>
+      } @else {
+        <!-- STEP 2 — the round is announced; launch it. -->
+        <div class="round-ready">
+          <p class="ready-subject">{{ socket.subject() }}</p>
+          <div class="panel-block controls">
+            <p-button [label]="'room.launch' | transloco" icon="pi pi-play" [disabled]="!canOpen()" (onClick)="launch()" styleClass="w-full" />
+            <p-button [label]="'room.edit' | transloco" icon="pi pi-pencil" [text]="true" severity="secondary" (onClick)="enterCompose()" styleClass="w-full" />
+          </div>
+        </div>
+      }
+    }
+  }
+
+  @if (!socket.facilitatorPresent()) {
+    <div class="panel-block guard">
+      <span>{{ 'room.facilitator_absent' | transloco }}</span>
+      <p-button [label]="'room.claim' | transloco" icon="pi pi-flag" size="small" (onClick)="socket.claimFacilitator()" />
+    </div>
+  }
+</aside>

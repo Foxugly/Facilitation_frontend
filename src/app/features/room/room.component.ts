@@ -23,6 +23,7 @@ import { RoomSocketService } from '../../core/realtime/room-socket.service';
 import { joinUrl } from '../../core/rooms/join-url';
 import { RoundState, SnapshotCard } from '../../core/realtime/protocol';
 import { DelegationCardComponent } from '../../shared/ui/delegation-card/delegation-card.component';
+import { DelegationPokerFacilitatorPanelComponent } from './activities/delegation-poker/facilitator-panel.component';
 import { DelegationDeckComponent } from '../../shared/ui/delegation-deck/delegation-deck.component';
 
 const BADGE_SEVERITY: Record<RoundState, 'secondary' | 'success' | 'warn' | 'info'> = {
@@ -92,6 +93,7 @@ interface Seat {
   imports: [
     FormsModule, TranslocoModule, ButtonModule, InputNumberModule, InputTextModule, SelectModule, TagModule, ToggleSwitchModule,
     TooltipModule, DelegationDeckComponent, DelegationCardComponent,
+    DelegationPokerFacilitatorPanelComponent,
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.scss',
@@ -113,26 +115,13 @@ export class RoomComponent implements OnInit, OnDestroy {
   readonly isFullscreen = signal(false);
   /** Data URL du QR de jointure ; non nul = la fenetre est ouverte. */
   readonly qrDataUrl = signal<string | null>(null);
-  readonly subjectDraft = signal('');
-  readonly chosenValue = signal<string | null>(null);
   readonly lang = this.language.active;
 
   // --- Round timer (contract §timer): the countdown is purely cosmetic, the
   // interval only runs while a deadline exists and stops on reveal/destroy.
   readonly remainingSeconds = signal<number | null>(null);
-  readonly timerEnabledDraft = signal(false);
-  readonly timerSecondsDraft = signal(TIMER_DURATIONS[0]);
   private countdownHandle: ReturnType<typeof setInterval> | null = null;
 
-  // Two-step round flow. The panel is a *form*: while idle the facilitator composes
-  // the round (subject + deck + reveal mode + timer) as local drafts, then step 1
-  // ("Préparer") announces it atomically, and step 2 ("Lancer") opens it. Nothing
-  // hits the server per-keystroke, so a setting can't be rejected out of order (that
-  // was the "toggle nominative → error" bug).
-  readonly deckDraft = signal<number | null>(null);
-  readonly anonymousDraft = signal(false);
-  /** Forces the compose step back on for an already-announced round ("Modifier"). */
-  readonly editing = signal(false);
 
   readonly isFacilitator = computed(() => this.socket.myRole() === 'facilitator');
 
@@ -146,8 +135,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   readonly showPanel = computed(() => this.isFacilitator() || !this.socket.facilitatorPresent());
   readonly state = this.socket.roundState;
   readonly badgeSeverity = computed(() => BADGE_SEVERITY[this.state()]);
-  readonly canOpen = computed(() => this.state() === 'idle' && this.socket.subject().trim().length > 0);
-  readonly canReveal = computed(() => this.state() === 'open' && this.socket.participation().voted >= 1);
   readonly votable = computed(() => this.state() === 'open');
 
   // Team appearance (P2.6): felt recolours the table, card-back colours the face-down cards.
@@ -184,35 +171,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     return back?.style === 'image' ? back.image : null;
   });
 
-  // Multi-deck rooms: the room freezes every poker type the team enabled and the
-  // facilitator switches between rounds. The server refuses a switch while a round
-  // is in flight (cast votes reference the current deck's values); the control
-  // mirrors that rather than letting the user hit an error.
-  readonly availableDecks = computed(() => this.socket.availableDecks());
-  readonly currentDeckId = computed(() => this.socket.deckSnapshot()?.deckId ?? null);
-  readonly canSwitchDeck = computed(() => this.state() === 'idle' || this.state() === 'acted');
-  readonly deckOptions = computed(() =>
-    this.availableDecks().map((d) => ({
-      value: d.deckId,
-      label: this.transloco.translate(`room.deck.type.${d.voteType}`),
-    })),
-  );
 
-  // Reveal mode: composed in the form (a local draft), applied atomically at prepare.
-  // Voters are told the mode before they play (it's announced when the round is
-  // prepared), so it never flips under cast votes.
-  readonly canSetRevealMode = computed(() => this.state() === 'idle');
-  /** While a vote is open the whole facilitator panel is frozen: settings mustn't
-   * change under people who are voting. */
-  readonly panelFrozen = computed(() => this.state() === 'open');
 
-  // Two-step panel: idle shows the compose form until a round is announced, then the
-  // launch step. A fresh room (no subject yet) always starts on the compose form.
-  readonly showComposeForm = computed(
-    () => this.state() === 'idle' && (this.editing() || this.socket.subject().trim().length === 0),
-  );
-  readonly showPrepared = computed(() => this.state() === 'idle' && !this.showComposeForm());
-  readonly canPrepare = computed(() => this.subjectDraft().trim().length > 0);
   /** The hand only appears once a round has been prepared (subject announced) —
    * before that there is nothing to vote on and the cards would just be noise.
    * Elle disparait a la revelation : les cartes cessent d'etre jouables, et le
@@ -262,23 +222,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   readonly decidedCard = computed(() => this.cardByValue(this.socket.result() ?? ''));
 
   readonly cardValues = computed(() => this.socket.deckSnapshot()?.cards.map((c) => c.value) ?? []);
-  /** Act/globalise on the level NAME, not the number. Options + the acted result
-   * resolve the card's translated name (from the snapshot) in the current language. */
-  readonly cardOptions = computed(() =>
-    (this.socket.deckSnapshot()?.cards ?? []).map((c) => ({ value: c.value, label: this.cardName(c) })),
-  );
   readonly resultName = computed(() => {
     const v = this.socket.result();
     return v ? this.cardName(this.cardByValue(v)) || v : '';
   });
 
-  /** Localized unit shown inside the timer input (e.g. " sec"). Depends on the
-   * language revision so it re-resolves on a switch *and* once the catalogue
-   * lands — lang() alone leaves the raw key frozen on a cold load. */
-  readonly timerSuffix = computed(() => {
-    this.language.revision();
-    return this.transloco.translate('room.timer.sec_suffix');
-  });
 
   cardName(card: SnapshotCard | null): string {
     if (!card) return '';
@@ -435,12 +383,6 @@ export class RoomComponent implements OnInit, OnDestroy {
       const err = this.socket.lastError();
       if (err) this.messages.add({ severity: 'warn', summary: err.code, detail: err.message });
     });
-    // Propose the mode of revealed votes as the default acted value (design §4).
-    effect(() => {
-      if (this.state() === 'revealed' && this.chosenValue() === null) {
-        this.chosenValue.set(this.modeValue());
-      }
-    });
     // Countdown display: (re)start the 1s ticker only while a deadline exists.
     // Purely cosmetic — it never triggers a reveal, the server does (reason
     // "timeout" or "facilitator", both just followed via vote.revealed).
@@ -454,13 +396,6 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.remainingSeconds.set(null);
       }
     });
-    // Keep the facilitator's draft controls in sync with the server-authoritative
-    // timer setting (also reflects another facilitator's change, or normalisation).
-    effect(() => {
-      const t = this.socket.timer();
-      this.timerEnabledDraft.set(t.enabled);
-      this.timerSecondsDraft.set(t.seconds);
-    });
     this.destroyRef.onDestroy(() => this.stopCountdown());
   }
 
@@ -471,70 +406,15 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  // The compose controls only touch local drafts now; nothing is sent until prepare().
-  onRevealModeChange(anonymous: boolean): void {
-    this.anonymousDraft.set(anonymous);
-  }
 
-  onDeckChange(deckId: number): void {
-    this.deckDraft.set(deckId);
-  }
 
-  onTimerEnabledChange(enabled: boolean): void {
-    this.timerEnabledDraft.set(enabled);
-  }
 
-  onTimerSecondsChange(seconds: number | null): void {
-    if (seconds == null || Number.isNaN(seconds)) return;
-    this.timerSecondsDraft.set(seconds);
-  }
 
-  /** The detail drafts, as a prepareRound payload fragment. Team-only options
-   * (timer, anonymous reveal) are simply not sent for an anonymous room. */
-  private roundDetails() {
-    const isTeam = this.socket.isTeam();
-    return {
-      deckId: (this.deckDraft() ?? this.currentDeckId()) ?? undefined,
-      anonymous: this.socket.revealMode().canAnonymise ? this.anonymousDraft() : undefined,
-      timerEnabled: isTeam ? this.timerEnabledDraft() : undefined,
-      timerSeconds: isTeam ? this.timerSecondsDraft() : undefined,
-    };
-  }
 
-  /** Step 1: announce the composed round (subject + details) — stays idle. */
-  prepare(): void {
-    const text = this.subjectDraft().trim();
-    if (!text) return;
-    this.socket.prepareRound({ subjectText: text, ...this.roundDetails() });
-    this.editing.set(false);
-  }
 
-  /** Pick a queued agenda subject and announce it with the current details. */
-  selectAgenda(subjectId: number): void {
-    this.socket.prepareRound({ subjectId, ...this.roundDetails() });
-    this.editing.set(false);
-  }
 
-  /** Step 2: open the announced round for voting. */
-  launch(): void {
-    this.socket.openVote();
-  }
 
-  /** Re-open the compose step for an announced round, pre-filled from what's live. */
-  enterCompose(): void {
-    this.subjectDraft.set(this.socket.subject());
-    this.deckDraft.set(this.currentDeckId());
-    this.anonymousDraft.set(this.socket.revealMode().anonymous);
-    this.editing.set(true);
-  }
 
-  /** Queue the typed subject onto the agenda without opening it (multi-subject prep). */
-  queueSubject(): void {
-    const text = this.subjectDraft().trim();
-    if (!text) return;
-    this.socket.addSubject(text);
-    this.subjectDraft.set('');
-  }
 
   async ngOnInit(): Promise<void> {
     document.addEventListener('fullscreenchange', this.onFsChange);
@@ -587,15 +467,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.socket.disconnect();
   }
 
-  /** Resolve an agenda item's retained value to its translated level name (not the number). */
-  agendaResultName(value: string): string {
-    return this.cardName(this.cardByValue(value)) || value;
-  }
 
-  act(): void {
-    const value = this.chosenValue();
-    if (value) this.socket.actResult(value);
-  }
 
   copyCode(): void {
     navigator.clipboard?.writeText(this.code());
@@ -645,15 +517,4 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  private modeValue(): string | null {
-    let best: string | null = null;
-    let bestCount = -1;
-    for (const { cardValue, count } of this.socket.voteTally()) {
-      if (count > bestCount) {
-        best = cardValue;
-        bestCount = count;
-      }
-    }
-    return best;
-  }
 }
