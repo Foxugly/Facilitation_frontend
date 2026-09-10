@@ -58,3 +58,6 @@ Thumbs.db
 # Config locale de l'outillage (deja ignoree sur QuizOnline et
 # trainingmanager_frontend) — rien a partager entre postes.
 .claude/
+
+# Captures du harnais visuel e2e (comparaison avant/apres refactoring).
+shots/
