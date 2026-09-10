@@ -79,7 +79,8 @@ test('aucune valeur de vote ne fuite avant la revelation (secret §6.a)', async 
   // participant garde sa propre main affichee, ou tous les libelles du deck sont
   // presents en permanence. Chercher « Delegate » n'importe ou reviendrait donc a
   // constater qu'une carte est jouable, pas qu'un vote a fuite.
-  const felt = fac.locator('.felt');
+  // La liste des participants a remplace le tapis ovale (design/plateau-en-liste).
+  const felt = fac.locator('.roster');
   await expect(felt.getByText('Delegate', { exact: true })).toHaveCount(0);
   await expect(felt.getByText('Tell', { exact: true })).toHaveCount(0);
 

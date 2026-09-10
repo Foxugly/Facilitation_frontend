@@ -1,6 +1,5 @@
 @if (socket.deckSnapshot(); as deck) {
-  <div class="stage" [style.--felt-aspect]="feltAspect()"
-       [style.--seat-frac]="seatCardFraction()" [style.--deck-n]="deckCardCount()">
+  <div class="stage">
     <div class="subject-view">
       <p-tag [severity]="badgeSeverity()" [value]="'vote_state.' + state() | transloco" />
       <h2>{{ socket.subject() || ('room.no_subject' | transloco) }}</h2>
@@ -17,55 +16,46 @@
       </span>
     </div>
 
-    <div class="table-wrap">
-      <!-- Plus aucun plafond de largeur en pixels : la table se dimensionne sur
-           la place disponible (voir --felt-w dans la feuille de styles). Le ratio
-           et la part des cartes partent en variables CSS, la feuille en ayant
-           besoin pour deduire une taille de carte identique a la table et dans
-           la main. -->
-      <div class="felt"
-           [style.aspect-ratio]="feltAspect()" [style.--felt-aspect]="feltAspect()"
-           [style.--seat-frac]="seatCardFraction()">
-        @for (seat of seats(); track seat.participantId) {
-          <!-- Card near the table -->
-          <div class="seat-card" [style.left.%]="seat.cardX" [style.top.%]="seat.cardY">
-            @if (seat.show && seat.card) {
-              <!-- Face-down until revealed, and only flips in nominative mode:
-                   an anonymous round sends no participant -> card link at all. -->
-              <app-delegation-card [card]="seat.card" [revealed]="seat.revealed" [cardBack]="cardBackImage()" [cardBackColor]="cardBackColor()" [lang]="lang()" />
-            } @else {
-              <div class="empty-slot"></div>
+    <!-- Une ligne par participant : nom a gauche, etat et vote a droite.
+         Remplace le tapis ovale et ses sieges en arc — un decor de casino qui
+         n'a rien a dire d'un atelier, illisible au-dela d'une dizaine de
+         personnes, et etranger au reste de l'application. Cette forme tient
+         sans limite de participants et prefigure les activites a venir (dot
+         voting, ranking), qui listeront elles aussi des items. -->
+    <ul class="roster">
+      @for (seat of seats(); track seat.participantId) {
+        <li class="roster-row" [class.has-voted]="seat.show">
+          <div class="avatar" [style.background]="avatarColor(seat.participantId)">{{ initials(seat.username) }}</div>
+          <span class="roster-name">
+            @if (seat.role === 'facilitator') { <i class="pi pi-star-fill"></i> }
+            {{ seat.username }}
+            @if (isFacilitator() && seat.role !== 'facilitator') {
+              <button class="roster-transfer" type="button" [title]="'room.give_facilitator' | transloco" (click)="transfer(seat.participantId)">
+                <i class="pi pi-star"></i>
+              </button>
             }
-          </div>
-          <!-- Le joueur, pose depuis SA carte : la CSS l'ecarte juste ce qu'il faut
-               pour la degager, dans la direction que porte le siege. -->
-          <div class="seat-person" [style.left.%]="seat.cardX" [style.top.%]="seat.cardY"
-               [style.--seat-ux]="seat.personUx" [style.--seat-uy]="seat.personUy">
-            <div class="avatar" [style.background]="avatarColor(seat.participantId)">{{ initials(seat.username) }}</div>
-            <span class="seat-name">
-              @if (seat.role === 'facilitator') { <i class="pi pi-star-fill"></i> }
-              {{ seat.username }}
-              @if (isFacilitator() && seat.role !== 'facilitator') {
-                <button class="seat-transfer" type="button" [title]="'room.give_facilitator' | transloco" (click)="transfer(seat.participantId)">
-                  <i class="pi pi-star"></i>
-                </button>
-              }
-            </span>
-          </div>
-        }
+          </span>
+          <span class="roster-vote">
+            @if (seat.revealed && seat.card) {
+              <!-- Revele et nominatif : le NOM du niveau, pas une carte miniature.
+                   Le composant carte se dimensionne en unites de conteneur et
+                   devient illisible sous ~120px de large. -->
+              <span class="roster-value">{{ cardName(seat.card) }}</span>
+            } @else if (seat.show) {
+              <span class="roster-done"><i class="pi pi-check"></i></span>
+            } @else if (state() === 'open') {
+              <span class="roster-waiting">…</span>
+            }
+          </span>
+        </li>
+      }
+    </ul>
 
-        <!-- Le centre du tapis ne porte plus que l'avancement du vote : le
-             depouillement et le resultat sont descendus dans la bande de la main,
-             ou ils ne se battent ni avec les cartes des sieges ni avec le vert. -->
-        <div class="table-center">
-          @if (state() === 'open') {
-            <span class="count">{{ socket.participation().voted }} / {{ socket.participation().total }}</span>
-          } @else if (state() === 'idle' && !isFacilitator()) {
-            <span class="center-hint">{{ 'room.waiting_facilitator' | transloco }}</span>
-          }
-        </div>
-      </div>
-    </div>
+    @if (state() === 'open') {
+      <p class="roster-progress">{{ socket.participation().voted }} / {{ socket.participation().total }}</p>
+    } @else if (state() === 'idle' && !isFacilitator()) {
+      <p class="roster-progress">{{ 'room.waiting_facilitator' | transloco }}</p>
+    }
 
     <!-- No hand until a round is prepared: nothing to vote on yet. -->
     @if (handVisible()) {
