@@ -83,6 +83,17 @@ export class DelegationPokerTableComponent {
 
   readonly votable = computed(() => this.state() === 'open');
 
+  /** Ma reponse a l'item courant du round (design N-items, §5) — remplace
+   * l'ancien `socket.myVote()`, qui ne portait qu'une valeur pour tout le
+   * round. Le poker n'en joue jamais qu'un, mais on lit deja au singulier. */
+  readonly myResponse = computed<string | null>(() => {
+    const item = this.socket.currentItem();
+    return item ? (this.socket.myResponses()[String(item.id)]?.card ?? null) : null;
+  });
+
+  /** L'ecart de l'item courant, une fois revele — remplace `socket.spread()`. */
+  readonly spread = computed(() => this.socket.currentItemResult()?.spread ?? { min: null, max: null });
+
 
   // --- Round timer (contract §timer): the countdown is purely cosmetic, the
   // interval only runs while a deadline exists and stops on reveal/destroy.
@@ -94,7 +105,8 @@ export class DelegationPokerTableComponent {
   readonly seats = computed<Seat[]>(() => {
     const revealed = this.state() === 'revealed' || this.state() === 'acted';
     const anonymous = this.socket.revealMode().anonymous;
-    const byParticipant = new Map(this.socket.nominativeVotes().map((v) => [v.participantId, v.cardValue]));
+    const votes = this.socket.currentItemResult()?.votes ?? [];
+    const byParticipant = new Map(votes.map((v) => [v.participantId, v.cardValue]));
     return this.socket.participants().map((p) => {
       const value = byParticipant.get(p.participantId);
       const voted = this.socket.participation().votedIds.includes(p.participantId);
@@ -141,9 +153,9 @@ export class DelegationPokerTableComponent {
    * les deux mises en page. */
   readonly outcomeGroups = computed(() => {
     const noms = new Map(this.socket.participants().map((p) => [p.participantId, p.username]));
-    const votants = this.socket.nominativeVotes();
-    return this.socket
-      .voteTally()
+    const result = this.socket.currentItemResult();
+    const votants = result?.votes ?? [];
+    return (result?.tally ?? [])
       .map((t) => ({
         value: t.cardValue,
         card: this.cardByValue(t.cardValue),

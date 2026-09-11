@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 import { getRuntimeConfig } from '../runtime-config';
 import {
@@ -6,18 +6,20 @@ import {
   AvailableDeck,
   DeckSnapshot,
   Envelope,
+  ItemResult,
+  MyResponses,
   Participation,
   ParticipantView,
   PROTOCOL_VERSION,
+  RevealedPayload,
   Role,
   RoomError,
   ResultLayout,
+  RoundItem,
   RoundState,
   StateSync,
   TimerSettings,
-  NominativeVote,
   RevealMode,
-  VoteTally,
 } from './protocol';
 
 /**
@@ -45,15 +47,27 @@ export class RoomSocketService {
   readonly availableDecks = signal<AvailableDeck[]>([]);
   readonly participants = signal<ParticipantView[]>([]);
   readonly participation = signal<Participation>({ voted: 0, total: 0, votedIds: [] });
-  readonly myVote = signal<string | null>(null);
-  /** Per-value vote count once a round is revealed. */
-  readonly voteTally = signal<VoteTally[]>([]);
-  /** Who voted what — populated only for a nominative round. An anonymous round
-   * leaves this empty because the server never sent the link, not because the UI
-   * hides it. */
-  readonly nominativeVotes = signal<NominativeVote[]>([]);
+  /** Les items du round courant (design N-items, §5). Tenu a jour par
+   * `state.sync` (a la connexion) ET par `agenda.updated` (a chaque round
+   * compose/repris) : ce dernier est le SEUL evenement qui rediffuse l'item
+   * neuf aux participants deja connectes, les alias herites (`round.prepare`,
+   * `subject.add`...) ne portant que le texte du sujet. */
+  readonly items = signal<RoundItem[]>([]);
+  /** Un round ne porte qu'un item aujourd'hui : "l'item courant" est le premier. */
+  readonly currentItem = computed<RoundItem | null>(() => this.items()[0] ?? null);
+  /** Mes reponses au round courant, indexees par id d'item (string, cote JSON).
+   * Remplace l'ancien `myVote`, qui ne portait qu'une valeur pour tout le round :
+   * un composant lit desormais `myResponses()[currentItem()?.id]?.card`. */
+  readonly myResponses = signal<MyResponses>({});
+  /** Le depouillement, un bloc par item, une fois le round revele. */
+  readonly itemResults = signal<ItemResult[]>([]);
+  /** Le bloc de depouillement de l'item courant. */
+  readonly currentItemResult = computed<ItemResult | null>(() => {
+    const item = this.currentItem();
+    if (!item) return null;
+    return this.itemResults().find((r) => r.itemId === item.id) ?? null;
+  });
   readonly revealMode = signal<RevealMode>({ anonymous: false, canAnonymise: false });
-  readonly spread = signal<{ min: number | null; max: number | null }>({ min: null, max: null });
   readonly result = signal<string | null>(null);
   /** La forme du depouillement, figee sur la salle. Les cartes jouees par defaut :
    * c'est la seule lisible sur un deck a pictogrammes, ou les cartes sont muettes. */
@@ -118,10 +132,14 @@ export class RoomSocketService {
   addSubject(text: string) { this.send('subject.add', { text }); }
   selectSubject(subjectId: number) { this.send('subject.select', { subjectId }); }
   openVote() { this.send('vote.open', {}); }
+  /** Emet `response.cast` pour l'item courant (contrat §8.2.b) — le poker ne
+   * joue jamais qu'un item par round, donc une seule carte a la fois. */
   castVote(cardValue: string) {
+    const item = this.currentItem();
+    if (!item) return;
     // The caster may see its own choice immediately (not a secret from itself, §6.a).
-    this.myVote.set(cardValue);
-    this.send('vote.cast', { cardValue });
+    this.myResponses.update((r) => ({ ...r, [String(item.id)]: { card: cardValue } }));
+    this.send('response.cast', { itemId: item.id, payload: { card: cardValue } });
   }
   reveal() { this.send('vote.reveal', {}); }
   actResult(chosenValue: string) { this.send('result.act', { chosenValue }); }
@@ -179,34 +197,35 @@ export class RoomSocketService {
       case 'deck.changed':
         return this.deckSnapshot.set((msg.payload as { deckSnapshot: DeckSnapshot }).deckSnapshot);
       case 'participation.update': return this.participation.set(msg.payload as Participation);
-      case 'agenda.updated':
-        this.agenda.set((msg.payload as { agenda: AgendaItem[] }).agenda);
+      case 'agenda.updated': {
+        const agenda = (msg.payload as { agenda: AgendaItem[] }).agenda;
+        this.agenda.set(agenda);
+        // SEULE source qui rediffuse l'item courant aux participants deja
+        // connectes : les alias herites (round.prepare, subject.add...) ne
+        // portent que le texte du sujet (subject.updated), jamais l'id d'item
+        // que `response.cast` doit pourtant citer. `agenda.updated` accompagne
+        // systematiquement tout changement de round, donc de current_id.
+        const current = agenda.find((a) => a.status === 'current');
+        if (current) this.items.set(current.items ?? []);
         return;
+      }
       case 'subject.updated':
         this.subject.set((msg.payload as { text: string }).text);
         return;
       case 'vote.opened': {
         const p = msg.payload as { deadline: string | null };
         this.roundState.set('open');
-        this.voteTally.set([]);
+        this.itemResults.set([]);
         this.result.set(null);
-        this.myVote.set(null);
+        this.myResponses.set({});
         this.deadline.set(p?.deadline ?? null);
         return;
       }
       case 'vote.revealed': {
-        const p = msg.payload as {
-          tally: VoteTally[];
-          votes?: NominativeVote[];
-          anonymous: boolean;
-          spread: { min: number | null; max: number | null };
-          reason?: 'timeout' | 'facilitator';
-        };
+        const p = msg.payload as RevealedPayload;
         this.roundState.set('revealed');
-        this.voteTally.set(p.tally);
-        this.nominativeVotes.set(p.votes ?? []);
+        this.itemResults.set(p.itemResults ?? []);
         this.revealMode.update((r) => ({ ...r, anonymous: p.anonymous }));
-        this.spread.set(p.spread);
         // The countdown is cosmetic only: whatever the reason, the round is over.
         this.deadline.set(null);
         return;
@@ -223,9 +242,9 @@ export class RoomSocketService {
       case 'vote.wasReset': {
         const next = (msg.payload as { nextState: RoundState }).nextState;
         this.roundState.set(next);
-        this.voteTally.set([]);
+        this.itemResults.set([]);
         this.result.set(null);
-        this.myVote.set(null);
+        this.myResponses.set({});
         this.deadline.set(null);
         return;
       }
@@ -263,14 +282,17 @@ export class RoomSocketService {
     // session enregistree a l'arrivee et peut etre perime (prise de role, passation).
     if (s.myRole) this.myRole.set(s.myRole);
     if (s.myParticipantId) this.myParticipantId.set(s.myParticipantId);
-    this.myVote.set(s.myVote);
+    this.items.set(s.items ?? []);
+    this.myResponses.set(s.myResponses ?? {});
     this.result.set(s.result);
     this.resultLayout.set(s.resultLayout ?? 'cards');
     this.facilitatorPresent.set(s.facilitatorPresent);
     this.agenda.set(s.agenda ?? []);
-    this.voteTally.set(s.tally ?? []);
-    this.nominativeVotes.set(s.votes ?? []);
-    this.spread.set(s.spread ?? { min: null, max: null });
+    // Le serveur fusionne desormais `itemResults` dans state.sync pour un round
+    // revele/acte (meme mecanique que les cles plates depreciees). Repli sur []
+    // pour un round idle/open, qui n'en porte pas : sans lui, le depouillement
+    // d'un round PRECEDENT survivrait a l'ecran d'un arrivant sur un round neuf.
+    this.itemResults.set(s.itemResults ?? []);
     this.revealMode.set(s.reveal ?? { anonymous: false, canAnonymise: false });
     this.deadline.set(s.deadline ?? null);
     this.timer.set(s.timer ?? { enabled: false, seconds: 10 });

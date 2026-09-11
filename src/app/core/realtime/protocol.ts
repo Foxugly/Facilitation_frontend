@@ -94,12 +94,60 @@ export interface RevealMode {
   canAnonymise: boolean;
 }
 
+/** Un item du round (design N-items, §5). Le poker d'aujourd'hui n'en joue
+ * jamais qu'un seul par round, mais la forme est deja celle qui portera les
+ * futures activites — ne pas la confondre avec `ItemResult`, leur depouillement. */
+export interface RoundItem {
+  id: number;
+  text: string;
+  sequence: number;
+}
+
+/** Le payload d'une reponse a un item : sa forme depend du schema que declare
+ * l'activite au registre. Le poker n'en connait qu'une, `{ card }`. */
+export interface CardResponsePayload {
+  card: string;
+}
+
+/** Mes reponses au round courant, indexees par id d'item (cle string cote
+ * JSON, `state.sync.myResponses`). Remplace `StateSync.myVote`, qui ne portait
+ * la reponse que pour un seul item implicite. */
+export type MyResponses = Record<string, CardResponsePayload>;
+
+/** Le depouillement d'UN item — un bloc par item dans `vote.revealed.itemResults`.
+ * `votes` est absent des blocs d'un round anonyme : invariant serveur (le lien
+ * participant -> carte n'est jamais envoye), jamais un masquage cote client. */
+export interface ItemResult {
+  itemId: number;
+  tally: VoteTally[];
+  spread: { min: number | null; max: number | null };
+  votes?: NominativeVote[];
+}
+
+/** Payload de `vote.revealed` (contrat §8.2.b). `itemResults` porte tout ; les
+ * cles plates ci-dessous sont l'ancien alias, recopiees du premier item par le
+ * serveur le temps que ce front bascule — a ne plus lire. */
+export interface RevealedPayload {
+  itemResults: ItemResult[];
+  anonymous: boolean;
+  reason?: 'timeout' | 'facilitator';
+  /** @deprecated Remplace par `itemResults[].tally`. */
+  tally: VoteTally[];
+  /** @deprecated Remplace par `itemResults[].votes`. */
+  votes?: NominativeVote[];
+  /** @deprecated Remplace par `itemResults[].spread`. */
+  spread: { min: number | null; max: number | null };
+}
+
 /** One line of the facilitator's scenario (agenda): a subject with its round status. */
 export interface AgendaItem {
   id: number;
   text: string;
   status: 'current' | 'done' | 'pending';
   result: string | null;
+  /** Les items de CE round (design N-items, §5) — un round sans round associe
+   * n'apparait pas dans l'agenda, donc toujours au moins un item ici. */
+  items: RoundItem[];
 }
 
 /** Facilitator-controlled round timer (contract §timer): purely advisory to the UI —
@@ -137,14 +185,31 @@ export interface StateSync {
    * les cartes jouees, ou des lignes chiffrees. Fige sur la salle a sa creation depuis
    * le reglage de l'equipe ; absent des vieux serveurs, d'ou le defaut cote client. */
   resultLayout?: ResultLayout;
+  /** @deprecated Remplace par `myResponses` — ne portait la reponse que pour
+   * un seul item implicite (contrat §8.2.b). */
   myVote: string | null;
+  /** Mes reponses au round courant, indexees par id d'item. */
+  myResponses: MyResponses;
+  /** Les items du round courant (design N-items, §5). A NE PAS CONFONDRE avec
+   * `itemResults` (leur depouillement, forme differente). */
+  items: RoundItem[];
+  /** Le depouillement, un bloc par item — present si le round courant est
+   * revele ou acte (repris depuis `vote.revealed`, meme mecanique que les
+   * cles plates depreciees ci-dessous), absent sur un round idle/open : rien
+   * n'a encore ete depouille. */
+  itemResults?: ItemResult[];
   result: string | null;
   facilitatorPresent: boolean;
   agenda: AgendaItem[];
+  /** @deprecated Remplace par `itemResults[0].tally` — encore fusionne ici pour
+   * un arrivant sur un round revele, le temps que `state.sync` porte lui aussi
+   * `itemResults` (contrat §8.2.b). */
   tally?: VoteTally[];
+  /** @deprecated Voir `tally`. */
   votes?: NominativeVote[];
   /** Present sur un round revele ou acte, comme dans `vote.revealed` — sans quoi
-   * l'ecart disparaissait de l'ecran au moindre rechargement. */
+   * l'ecart disparaissait de l'ecran au moindre rechargement.
+   * @deprecated Voir `tally`. */
   spread?: { min: number | null; max: number | null };
   reveal: RevealMode;
   deadline: string | null;

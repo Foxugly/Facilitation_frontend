@@ -145,7 +145,7 @@ export class DelegationPokerFacilitatorPanelComponent {
   private modeValue(): string | null {
     let best: string | null = null;
     let bestCount = -1;
-    for (const { cardValue, count } of this.socket.voteTally()) {
+    for (const { cardValue, count } of this.socket.currentItemResult()?.tally ?? []) {
       if (count > bestCount) {
         best = cardValue;
         bestCount = count;
