@@ -53,24 +53,28 @@ describe('RoomSocketService reducer', () => {
     expect(svc.resultLayout()).toBe('summary');
   });
 
-  it("state.sync ne restaure pas (encore) le depouillement d'un round revele", () => {
-    // Ecart connu (contrat §8.2.b) : `itemResults` n'est fusionne dans state.sync par
-    // AUCUN serveur aujourd'hui — seules les cles plates depreciees (tally/spread/votes)
-    // le sont, et ce front ne les lit plus. Un arrivant (ou un rechargement) sur un round
-    // deja revele voit donc un depouillement vide tant qu'un `vote.revealed` n'a pas ete
-    // recu PENDANT cette connexion. Ce test documente le comportement actuel plutot que
-    // de pretendre qu'il restaure quoi que ce soit — a corriger cote serveur.
+  it("state.sync restaure le depouillement d'un round revele, et le laisse vide sur un round ouvert", () => {
+    // Corrige cote serveur (build_state_sync fusionne desormais itemResults pour
+    // REVEALED/ACTED, meme mecanique que les cles plates depreciees) : un arrivant
+    // (ou un rechargement) sur un round deja revele voit maintenant le MEME
+    // depouillement que ceux qui etaient la — sans les cartes du tapis restant
+    // face cachee alors que le decompte, lui, s'afficherait.
     const svc = new RoomSocketService();
-    feed(svc, 'state.sync', {
-      ...SYNC,
-      roundState: 'revealed',
+    const revealedBlock = {
+      itemId: 1,
       tally: [{ cardValue: '4', count: 1 }],
-      votes: [{ participantId: 'p1', cardValue: '4' }],
       spread: { min: 4, max: 4 },
-    });
+      votes: [{ participantId: 'p1', cardValue: '4' }],
+    };
+    feed(svc, 'state.sync', { ...SYNC, roundState: 'revealed', itemResults: [revealedBlock] });
     expect(svc.roundState()).toBe('revealed');
+    expect(svc.itemResults()).toEqual([revealedBlock]);
+    expect(svc.currentItemResult()?.spread).toEqual({ min: 4, max: 4 });
+
+    // Repli : SYNC (roundState 'open') n'en porte pas — le depouillement d'un
+    // round PRECEDENT ne doit pas survivre a l'ecran d'un round neuf.
+    feed(svc, 'state.sync', SYNC);
     expect(svc.itemResults()).toEqual([]);
-    expect(svc.currentItemResult()).toBeNull();
   });
 
   it('takes its own role from state.sync, not from the stored session', () => {

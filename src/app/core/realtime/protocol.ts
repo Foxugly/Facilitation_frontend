@@ -191,10 +191,13 @@ export interface StateSync {
   /** Mes reponses au round courant, indexees par id d'item. */
   myResponses: MyResponses;
   /** Les items du round courant (design N-items, §5). A NE PAS CONFONDRE avec
-   * `itemResults` (leur depouillement, forme differente) : celui-ci ne transite
-   * que par `vote.revealed` aujourd'hui, `state.sync` ne le fusionne pas encore
-   * pour un arrivant sur un round deja revele. */
+   * `itemResults` (leur depouillement, forme differente). */
   items: RoundItem[];
+  /** Le depouillement, un bloc par item — present si le round courant est
+   * revele ou acte (repris depuis `vote.revealed`, meme mecanique que les
+   * cles plates depreciees ci-dessous), absent sur un round idle/open : rien
+   * n'a encore ete depouille. */
+  itemResults?: ItemResult[];
   result: string | null;
   facilitatorPresent: boolean;
   agenda: AgendaItem[];

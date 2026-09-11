@@ -288,13 +288,11 @@ export class RoomSocketService {
     this.resultLayout.set(s.resultLayout ?? 'cards');
     this.facilitatorPresent.set(s.facilitatorPresent);
     this.agenda.set(s.agenda ?? []);
-    // `itemResults` n'est pas encore fusionne dans state.sync par le serveur —
-    // seules les cles plates depreciees (tally/spread/votes) le sont, pour un
-    // arrivant sur un round deja revele (contrat §8.2.b). Ne pas s'y substituer
-    // en les lisant ici : elles disparaissent avec l'alias. Le depouillement
-    // reste donc vide tant qu'un `vote.revealed` n'a pas ete recu pendant CETTE
-    // connexion — cas non couvert par ce front, a corriger cote serveur.
-    this.itemResults.set([]);
+    // Le serveur fusionne desormais `itemResults` dans state.sync pour un round
+    // revele/acte (meme mecanique que les cles plates depreciees). Repli sur []
+    // pour un round idle/open, qui n'en porte pas : sans lui, le depouillement
+    // d'un round PRECEDENT survivrait a l'ecran d'un arrivant sur un round neuf.
+    this.itemResults.set(s.itemResults ?? []);
     this.revealMode.set(s.reveal ?? { anonymous: false, canAnonymise: false });
     this.deadline.set(s.deadline ?? null);
     this.timer.set(s.timer ?? { enabled: false, seconds: 10 });
