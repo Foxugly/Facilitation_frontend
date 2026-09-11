@@ -69,7 +69,7 @@
         <div class="choices">
           @for (card of deck.cards; track card.value) {
             <button type="button" class="choice"
-                    [class.chosen]="socket.myVote() === card.value"
+                    [class.chosen]="myResponse() === card.value"
                     [disabled]="!votable()"
                     (click)="socket.castVote(card.value)">
               <span class="choice-value">{{ card.value }}</span>
@@ -87,8 +87,8 @@
           {{ (state() === 'acted' ? 'room.acted_result' : 'room.reveal_title') | transloco }}
           <!-- L'ecart decrit la dispersion des votes : il eclaire un depouillement,
                pas une decision deja prise. -->
-          @if (state() === 'revealed' && socket.spread().min !== null && socket.spread().max !== null) {
-            <span class="outcome-spread">{{ socket.spread().min }} – {{ socket.spread().max }}</span>
+          @if (state() === 'revealed' && spread().min !== null && spread().max !== null) {
+            <span class="outcome-spread">{{ spread().min }} – {{ spread().max }}</span>
           }
         </span>
 
