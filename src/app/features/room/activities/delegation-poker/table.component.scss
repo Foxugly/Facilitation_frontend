@@ -725,3 +725,47 @@
   font-weight: 700;
   color: var(--ink);
 }
+
+
+// --- Les choix de vote -----------------------------------------------------
+// Remplacent l'eventail de cartes. La valeur reste lisible (elle sert de repere
+// rapide), mais c'est le NOM qui porte le sens : c'est lui qu'on choisit.
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  justify-content: center;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 96px;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--ink);
+
+  &:hover:not(:disabled) { border-color: #10b981; }
+  &:disabled { opacity: 0.55; cursor: default; }
+}
+
+// Le choix courant : un fond franc, pas seulement une bordure — il doit se
+// reperer sans avoir a comparer les bordures une a une.
+.choice.chosen {
+  background: color-mix(in srgb, #10b981 16%, var(--surface));
+  border-color: #10b981;
+}
+
+.choice-value {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.choice-name {
+  font-weight: 600;
+}
