@@ -9,7 +9,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 import { LanguageService } from '../../../../core/i18n/language.service';
 import { RoomSocketService } from '../../../../core/realtime/room-socket.service';
-import { SnapshotCard } from '../../../../core/realtime/protocol';
+import { AgendaItem, SnapshotCard } from '../../../../core/realtime/protocol';
 import { resolveActivity } from '../activity-registry';
 
 const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
@@ -236,5 +236,52 @@ export class DelegationPokerFacilitatorPanelComponent {
   act(): void {
     const value = this.chosenValue();
     if (value) this.socket.actResult(value);
+  }
+
+  // --- Scenario : reordonnancement et elagage (tache 2) -----------------------
+  isFirst(index: number): boolean {
+    return index === 0;
+  }
+
+  isLast(index: number): boolean {
+    return index === this.socket.agenda().length - 1;
+  }
+
+  /** La regle complete du serveur, reproduite telle quelle (services.py::remove_round) :
+   * on ne retire qu'un round PREPARE (`state === 'idle'`), JAMAIS DECIDE
+   * (`everDecided === false`), et qui n'est pas l'entree courante (couvert par
+   * `status === 'pending'`, qui exclut `current` comme `done`). `status` seul
+   * confondait un round jamais ouvert avec un round ouvert puis abandonne
+   * (`state` corrige ce cas) ET avec un round acte puis reinitialise par
+   * `vote.reset` -- celui-ci redevient `status: 'pending'` / `state: 'idle'`
+   * tout en portant toujours un `Result` en base (`everDecided` couvre ce
+   * second cas). Liste blanche sur les TROIS cles (aucune negation) :
+   * extensible sans remaniement si un nouveau statut/etat apparait. */
+  isRemovable(item: AgendaItem): boolean {
+    return item.status === 'pending' && item.state === 'idle' && item.everDecided === false;
+  }
+
+  /** `round.reorder` exige la liste COMPLETE, dans l'ordre voulu : monter ou
+   * descendre une entree se traduit donc par un recalcul local de la file
+   * entiere, envoyee telle que l'utilisateur vient de la voir (pas l'etat
+   * precedent). */
+  private moveRound(index: number, delta: number): void {
+    const roundIds = this.socket.agenda().map((a) => a.id);
+    const target = index + delta;
+    if (target < 0 || target >= roundIds.length) return;
+    [roundIds[index], roundIds[target]] = [roundIds[target], roundIds[index]];
+    this.socket.reorderRounds(roundIds);
+  }
+
+  moveUp(index: number): void {
+    this.moveRound(index, -1);
+  }
+
+  moveDown(index: number): void {
+    this.moveRound(index, 1);
+  }
+
+  removeRound(roundId: number): void {
+    this.socket.removeRound(roundId);
   }
 }

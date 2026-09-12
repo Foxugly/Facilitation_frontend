@@ -1,6 +1,6 @@
 <aside class="fac-panel">
   <ul class="agenda">
-    @for (item of socket.agenda(); track item.id) {
+    @for (item of socket.agenda(); track item.id; let idx = $index) {
       <li class="agenda-item" [class.current]="item.status === 'current'" [class.done]="item.status === 'done'">
         <button type="button" class="agenda-line" [disabled]="item.status === 'current' || state() !== 'idle'"
                 (click)="item.status !== 'current' && selectAgenda(item.id)">
@@ -13,6 +13,24 @@
             <span class="agenda-result">{{ agendaResultName(item.result) }}</span>
           }
         </button>
+        <!-- Monter / descendre / retirer : pas de glisser-deposer (design 5d,
+             repli explicitement accepte — le DnD des bibliotheques en place
+             repose sur l'API HTML5, peu fiable au tactile). Chaque geste n'est
+             propose que si le serveur l'accepterait (voir les gardes au .ts). -->
+        <div class="agenda-actions">
+          @if (!isFirst(idx)) {
+            <p-button icon="pi pi-arrow-up" [text]="true" size="small" severity="secondary"
+                      [ariaLabel]="'room.agenda_move_up' | transloco" (onClick)="moveUp(idx)" />
+          }
+          @if (!isLast(idx)) {
+            <p-button icon="pi pi-arrow-down" [text]="true" size="small" severity="secondary"
+                      [ariaLabel]="'room.agenda_move_down' | transloco" (onClick)="moveDown(idx)" />
+          }
+          @if (isRemovable(item)) {
+            <p-button icon="pi pi-trash" [text]="true" size="small" severity="danger"
+                      [ariaLabel]="'room.agenda_remove' | transloco" (onClick)="removeRound(item.id)" />
+          }
+        </div>
       </li>
     } @empty {
       <li class="agenda-empty">{{ 'room.agenda_empty' | transloco }}</li>

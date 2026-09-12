@@ -32,7 +32,7 @@ const SYNC: StateSync = {
   items: [{ id: 1, text: 'Budget?', sequence: 1 }],
   result: null,
   facilitatorPresent: true,
-  agenda: [{ id: 1, text: 'Budget?', status: 'current', result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
+  agenda: [{ id: 1, text: 'Budget?', status: 'current', state: 'open', everDecided: false, result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
   deadline: null,
   timer: { enabled: false, seconds: 10 },
 };
@@ -173,8 +173,8 @@ describe('RoomSocketService reducer', () => {
     const svc = new RoomSocketService();
     feed(svc, 'agenda.updated', {
       agenda: [
-        { id: 1, text: 'Q1', status: 'done', result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
-        { id: 2, text: 'Q2', status: 'current', result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
+        { id: 1, text: 'Q1', status: 'done', state: 'acted', everDecided: true, result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
+        { id: 2, text: 'Q2', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
       ],
     });
     expect(svc.agenda().length).toBe(2);
@@ -282,6 +282,20 @@ describe('RoomSocketService reducer', () => {
     const sent = captureSent(svc);
     svc.selectRound(42);
     expect(sent).toEqual([{ type: 'round.select', payload: { roundId: 42 } }]);
+  });
+
+  it('reorderRounds emet round.reorder avec la liste complete des ids, dans l ordre donne', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.reorderRounds([3, 1, 2]);
+    expect(sent).toEqual([{ type: 'round.reorder', payload: { roundIds: [3, 1, 2] } }]);
+  });
+
+  it('removeRound emet round.remove avec le bon id de round', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.removeRound(7);
+    expect(sent).toEqual([{ type: 'round.remove', payload: { roundId: 7 } }]);
   });
 
   it('tracks facilitator presence', () => {
