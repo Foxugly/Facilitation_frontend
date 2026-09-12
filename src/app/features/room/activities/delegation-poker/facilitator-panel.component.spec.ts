@@ -73,7 +73,7 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
     socket.subject.set('Deja prepare');
     socket.deckSnapshot.set(deckSnapshot(3));
     socket.agenda.set([
-      { id: 5, text: 'Deja prepare', status: 'current', state: 'idle', result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
+      { id: 5, text: 'Deja prepare', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
     ] satisfies AgendaItem[]);
 
     component.enterCompose(); // deckDraft <- currentDeckId() = 3
@@ -96,7 +96,7 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
     socket.subject.set('Deja prepare');
     socket.deckSnapshot.set(deckSnapshot(3));
     socket.agenda.set([
-      { id: 5, text: 'Deja prepare', status: 'current', state: 'idle', result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
+      { id: 5, text: 'Deja prepare', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
     ] satisfies AgendaItem[]);
 
     component.enterCompose(); // deckDraft <- currentDeckId() = 3, jamais touche ensuite
@@ -117,9 +117,9 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
 // elagage (tache 2).
 function threeRoundAgenda(): AgendaItem[] {
   return [
-    { id: 1, text: 'A', status: 'pending', state: 'idle', result: null, items: [{ id: 11, text: 'A', sequence: 1 }] },
-    { id: 2, text: 'B', status: 'current', state: 'idle', result: null, items: [{ id: 12, text: 'B', sequence: 2 }] },
-    { id: 3, text: 'C', status: 'done', state: 'acted', result: '8', items: [{ id: 13, text: 'C', sequence: 3 }] },
+    { id: 1, text: 'A', status: 'pending', state: 'idle', everDecided: false, result: null, items: [{ id: 11, text: 'A', sequence: 1 }] },
+    { id: 2, text: 'B', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 12, text: 'B', sequence: 2 }] },
+    { id: 3, text: 'C', status: 'done', state: 'acted', everDecided: true, result: '8', items: [{ id: 13, text: 'C', sequence: 3 }] },
   ];
 }
 
@@ -127,7 +127,15 @@ function threeRoundAgenda(): AgendaItem[] {
 // distingue pas de A ci-dessus -- c'est exactement le round que la tache 4
 // complement visait, (cf. `services.py::remove_round`, garde "round en vol").
 function abandonedOpenRound(): AgendaItem {
-  return { id: 4, text: 'D', status: 'pending', state: 'open', result: null, items: [{ id: 14, text: 'D', sequence: 4 }] };
+  return { id: 4, text: 'D', status: 'pending', state: 'open', everDecided: false, result: null, items: [{ id: 14, text: 'D', sequence: 4 }] };
+}
+
+// E (pending, idle, mais DEJA DECIDE) : acte puis `vote.reset` -- la
+// reinitialisation vide les reponses et remet le round a idle SANS reecrire
+// l'historique (2e complement tache 4). `status` et `state` seuls le
+// confondent avec A : seul `everDecided` porte la trace de la decision passee.
+function actedThenResetRound(): AgendaItem {
+  return { id: 5, text: 'E', status: 'pending', state: 'idle', everDecided: true, result: null, items: [{ id: 15, text: 'E', sequence: 5 }] };
 }
 
 describe('DelegationPokerFacilitatorPanelComponent.moveUp()/moveDown()', () => {
@@ -203,6 +211,20 @@ describe('DelegationPokerFacilitatorPanelComponent — gestes non proposes (gard
 
     expect(abandoned.status).toBe('pending'); // meme statut que A, a dessein
     expect(component.isRemovable(abandoned)).toBe(false);
+  });
+
+  // Le test de la reserve signalee dans le premier complement : un round acte
+  // puis reinitialise redevient status/state identiques a A (jamais joue),
+  // seul `everDecided` porte la difference -- et c'est justement ce que le
+  // serveur garde (`results.exists()`, independant de l'etat courant).
+  it("isRemovable : une entree idle/pending mais DEJA DECIDE (everDecided) n est PAS retirable", () => {
+    const { component, socket } = setup();
+    const resetAfterActing = actedThenResetRound();
+    socket.agenda.set([resetAfterActing]);
+
+    expect(resetAfterActing.status).toBe('pending'); // meme statut/etat que A
+    expect(resetAfterActing.state).toBe('idle');
+    expect(component.isRemovable(resetAfterActing)).toBe(false);
   });
 
   it('isFirst/isLast bornent monter/descendre aux deux extremites de la file', () => {

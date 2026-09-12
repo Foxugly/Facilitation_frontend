@@ -247,15 +247,18 @@ export class DelegationPokerFacilitatorPanelComponent {
     return index === this.socket.agenda().length - 1;
   }
 
-  /** Le serveur ne retire qu'un round PREPARE (`state === 'idle'`) qui n'est pas
-   * l'entree courante (services.py::remove_round) — `status === 'pending'` seul
-   * ne suffisait pas : un round ouvert puis abandonne sans resultat (design 5d,
-   * tache 4 complement) porte aussi `status: 'pending'` alors que son `state`
-   * reste 'open'/'revealed', et le serveur le refuse (garde "round en vol").
-   * Liste blanche sur les DEUX cles (pas de negation) : extensible sans
-   * remaniement si un troisieme statut ou etat apparait un jour. */
+  /** La regle complete du serveur, reproduite telle quelle (services.py::remove_round) :
+   * on ne retire qu'un round PREPARE (`state === 'idle'`), JAMAIS DECIDE
+   * (`everDecided === false`), et qui n'est pas l'entree courante (couvert par
+   * `status === 'pending'`, qui exclut `current` comme `done`). `status` seul
+   * confondait un round jamais ouvert avec un round ouvert puis abandonne
+   * (`state` corrige ce cas) ET avec un round acte puis reinitialise par
+   * `vote.reset` -- celui-ci redevient `status: 'pending'` / `state: 'idle'`
+   * tout en portant toujours un `Result` en base (`everDecided` couvre ce
+   * second cas). Liste blanche sur les TROIS cles (aucune negation) :
+   * extensible sans remaniement si un nouveau statut/etat apparait. */
   isRemovable(item: AgendaItem): boolean {
-    return item.status === 'pending' && item.state === 'idle';
+    return item.status === 'pending' && item.state === 'idle' && item.everDecided === false;
   }
 
   /** `round.reorder` exige la liste COMPLETE, dans l'ordre voulu : monter ou

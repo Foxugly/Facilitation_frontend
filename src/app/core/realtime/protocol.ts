@@ -153,6 +153,15 @@ export interface AgendaItem {
    * abandonne sans resultat (`open`/`revealed`) — les deux sont `status:
    * 'pending'`, mais seul le premier est retirable (`services.py::remove_round`). */
   state: RoundState;
+  /** Vrai si ce round a deja porte une decision, UNE FOIS, a n'importe quel
+   * moment -- independamment de son etat courant (tache 5d, 2e complement).
+   * `vote.reset` vide les reponses et remet le round a `idle` mais NE REECRIT
+   * PAS l'historique : un round acte puis reinitialise redevient `status:
+   * 'pending'` / `state: 'idle'`, un round prepare ordinaire en apparence,
+   * alors que le serveur refuse toujours son retrait (`results.exists()`,
+   * `services.py::remove_round`). Sans cette cle, rien dans l'agenda ne
+   * distinguait ce cas d'un round jamais joue. */
+  everDecided: boolean;
   /** Les items de CE round (design N-items, §5) — un round sans round associe
    * n'apparait pas dans l'agenda, donc toujours au moins un item ici. */
   items: RoundItem[];
