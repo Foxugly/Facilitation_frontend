@@ -15,6 +15,7 @@ import {
   Role,
   RoomError,
   ResultLayout,
+  RoundConfigurePayload,
   RoundItem,
   RoundState,
   StateSync,
@@ -74,6 +75,13 @@ export class RoomSocketService {
   readonly resultLayout = signal<ResultLayout>('cards');
   readonly facilitatorPresent = signal(true);
   readonly agenda = signal<AgendaItem[]>([]);
+  /** L'id du round courant, tire de l'agenda : chaque entree y est deja un id
+   * de round (`realtime/services.py::build_agenda`), celle marquee 'current'
+   * designe le round en cours. Necessaire pour cibler `round.configure` sur
+   * CE round precis plutot que sur la room. */
+  readonly currentRoundId = computed<number | null>(
+    () => this.agenda().find((a) => a.status === 'current')?.id ?? null,
+  );
   readonly myRole = signal<Role>('voter');
   /** Notre identifiant public, pour se reconnaitre dans les diffusions. Vide tant
    * que le premier `state.sync` n'est pas arrive. */
@@ -167,6 +175,10 @@ export class RoomSocketService {
    * (rounds then clamps) so the UI need not re-validate the grid it already offers. */
   setTimer(enabled: boolean, seconds: number) { this.send('timer.set', { enabled, seconds }); }
   selectDeck(deckId: number) { this.send('deck.select', { deckId }); }
+  /** Fige le deck et/ou la config d'un round DEJA PREPARE (`round.configure`,
+   * contrat SS8.3) — a la difference de `prepareRound`, ne touche qu'a ce
+   * round precis, jamais au deck actif de la room. */
+  configureRound(payload: RoundConfigurePayload) { this.send('round.configure', payload); }
   setRevealMode(anonymous: boolean) { this.send('reveal.setMode', { anonymous }); }
   /** Step 1 of the two-step flow: compose + announce the next round (subject + deck +
    * reveal mode + timer) atomically, leaving it idle. Opening is a separate step. */
@@ -213,6 +225,12 @@ export class RoomSocketService {
       }
       case 'deck.changed':
         return this.deckSnapshot.set((msg.payload as { deckSnapshot: DeckSnapshot }).deckSnapshot);
+      case 'round.configured':
+        // `deck.changed` (rediffuse a part, seulement si le deck a reellement
+        // change) est deja le message qui met a jour `deckSnapshot` : ne pas
+        // le dupliquer ici. `config` n'a aucun lecteur cote front aujourd'hui
+        // — le poker declare un config_schema vide (`realtime/activities.py`).
+        return;
       case 'participation.update': return this.participation.set(msg.payload as Participation);
       case 'agenda.updated': {
         const agenda = (msg.payload as { agenda: AgendaItem[] }).agenda;

@@ -168,6 +168,29 @@ export interface AvailableDeck {
   cardBack: { image: string | null };
 }
 
+/** Payload de l'intention `round.configure` (contrat SS8.3, design 5c) : fige
+ * le deck et/ou la config d'un round DEJA PREPARE, avant son ouverture. Les
+ * deux cles sont facultatives — changer de deck sans configurer, et
+ * configurer sans changer de deck, sont deux usages valides. Remplace
+ * `round.prepare` pour ce cas precis : ce dernier recompose le round (sujet,
+ * agenda...) et applique aussi le deck au niveau de la ROOM, donc a tous les
+ * rounds a venir qui n'en choisiraient pas un explicitement. */
+export interface RoundConfigurePayload {
+  roundId: number;
+  deckId?: number;
+  config?: Record<string, unknown>;
+}
+
+/** Le fait rediffuse en reponse a `round.configure` (contrat SS8.3), a tous.
+ * `deck.changed` est AUSSI diffuse par le serveur, mais seulement si le deck a
+ * reellement change — c'est lui qui met a jour `deckSnapshot` cote client ;
+ * ne pas dupliquer cette logique ici. */
+export interface RoundConfiguredPayload {
+  roundId: number;
+  deckSnapshot: DeckSnapshot;
+  config: Record<string, unknown>;
+}
+
 export interface StateSync {
   room: { code: string; title: string; isTeam?: boolean };
   protocolVersion: number;
