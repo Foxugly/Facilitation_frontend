@@ -284,6 +284,20 @@ describe('RoomSocketService reducer', () => {
     expect(sent).toEqual([{ type: 'round.select', payload: { roundId: 42 } }]);
   });
 
+  it('reorderRounds emet round.reorder avec la liste complete des ids, dans l ordre donne', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.reorderRounds([3, 1, 2]);
+    expect(sent).toEqual([{ type: 'round.reorder', payload: { roundIds: [3, 1, 2] } }]);
+  });
+
+  it('removeRound emet round.remove avec le bon id de round', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.removeRound(7);
+    expect(sent).toEqual([{ type: 'round.remove', payload: { roundId: 7 } }]);
+  });
+
   it('tracks facilitator presence', () => {
     const svc = new RoomSocketService();
     feed(svc, 'facilitator.presence', { present: false });

@@ -156,6 +156,15 @@ export class RoomSocketService {
    * l'ancien `subject.select` : meme valeur (l'id d'agenda designe deja un
    * round), seuls le type de message et la cle de payload changent. */
   selectRound(roundId: number) { this.send('round.select', { roundId }); }
+  /** Refixe l'ordre du scenario ENTIER (`round.reorder`, tache 2) — facilitateur
+   * seul. Le serveur exige la liste complete des rounds de la salle, chacun une
+   * seule fois : un reordonnancement local (monter/descendre) doit donc toujours
+   * envoyer la file au complet, pas un deplacement partiel. */
+  reorderRounds(roundIds: number[]) { this.send('round.reorder', { roundIds }); }
+  /** Retire un round du scenario (`round.remove`, tache 2) — facilitateur seul.
+   * Le serveur ne retire qu'un round prepare qui n'est pas a l'ecran : ni acte
+   * (il porte un Result), ni en vol, ni courant. */
+  removeRound(roundId: number) { this.send('round.remove', { roundId }); }
   openVote() { this.send('vote.open', {}); }
   /** Emet `response.cast` pour l'item courant (contrat §8.2.b) — le poker ne
    * joue jamais qu'un item par round, donc une seule carte a la fois. */

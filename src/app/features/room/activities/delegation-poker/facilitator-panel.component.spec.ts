@@ -111,3 +111,86 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
     expect(sent.some((s) => s.type === 'round.configure')).toBe(false);
   });
 });
+
+// A (pending), B (current), C (done, acte) : couvre les trois statuts d'agenda
+// d'un seul tenant pour les tests de reordonnancement / elagage (tache 2).
+function threeRoundAgenda(): AgendaItem[] {
+  return [
+    { id: 1, text: 'A', status: 'pending', result: null, items: [{ id: 11, text: 'A', sequence: 1 }] },
+    { id: 2, text: 'B', status: 'current', result: null, items: [{ id: 12, text: 'B', sequence: 2 }] },
+    { id: 3, text: 'C', status: 'done', result: '8', items: [{ id: 13, text: 'C', sequence: 3 }] },
+  ];
+}
+
+describe('DelegationPokerFacilitatorPanelComponent.moveUp()/moveDown()', () => {
+  it('moveUp(1) envoie round.reorder avec B et A echanges, C inchange', () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda());
+
+    component.moveUp(1);
+
+    // Mutation a guetter : envoyer l etat PRECEDENT (ids tels quels) plutot
+    // que l ordre fraichement echange romprait ce test.
+    expect(sent).toEqual([{ type: 'round.reorder', payload: { roundIds: [2, 1, 3] } }]);
+  });
+
+  it('moveDown(0) envoie le meme echange, vu depuis l autre extremite', () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda());
+
+    component.moveDown(0);
+
+    expect(sent).toEqual([{ type: 'round.reorder', payload: { roundIds: [2, 1, 3] } }]);
+  });
+
+  it("moveUp sur la PREMIERE entree n emet rien (rien a echanger au-dela du bord)", () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda());
+
+    component.moveUp(0);
+
+    expect(sent).toEqual([]);
+  });
+
+  it("moveDown sur la DERNIERE entree n emet rien", () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda());
+
+    component.moveDown(2);
+
+    expect(sent).toEqual([]);
+  });
+});
+
+describe('DelegationPokerFacilitatorPanelComponent.removeRound()', () => {
+  it('emet round.remove avec le roundId de l entree visee', () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda());
+
+    component.removeRound(1);
+
+    expect(sent).toEqual([{ type: 'round.remove', payload: { roundId: 1 } }]);
+  });
+});
+
+describe('DelegationPokerFacilitatorPanelComponent — gestes non proposes (gardes §4)', () => {
+  it('isRemovable : seule l entree pending est retirable, pas current ni done', () => {
+    const { component, socket } = setup();
+    const [a, b, c] = threeRoundAgenda();
+    socket.agenda.set([a, b, c]);
+
+    expect(component.isRemovable(a)).toBe(true);
+    expect(component.isRemovable(b)).toBe(false);
+    expect(component.isRemovable(c)).toBe(false);
+  });
+
+  it('isFirst/isLast bornent monter/descendre aux deux extremites de la file', () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda());
+
+    expect(component.isFirst(0)).toBe(true);
+    expect(component.isFirst(1)).toBe(false);
+    expect(component.isLast(2)).toBe(true);
+    expect(component.isLast(1)).toBe(false);
+  });
+});

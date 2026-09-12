@@ -117,8 +117,15 @@
   font-style: italic;
   padding: var(--s-2) 0;
 }
+.agenda-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
 .agenda-line {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
   display: flex;
   align-items: center;
   gap: var(--s-2);
@@ -166,6 +173,12 @@
 }
 .agenda-item.done .agenda-text {
   color: var(--muted);
+}
+.agenda-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 .agenda-result {
   flex-shrink: 0;
