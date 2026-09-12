@@ -247,11 +247,15 @@ export class DelegationPokerFacilitatorPanelComponent {
     return index === this.socket.agenda().length - 1;
   }
 
-  /** Le serveur ne retire qu'un round encore 'pending' (services.py::remove_round) :
-   * ni courant, ni acte (un Result existe). Mieux vaut ne pas proposer le geste
-   * que le laisser refuser. */
+  /** Le serveur ne retire qu'un round PREPARE (`state === 'idle'`) qui n'est pas
+   * l'entree courante (services.py::remove_round) — `status === 'pending'` seul
+   * ne suffisait pas : un round ouvert puis abandonne sans resultat (design 5d,
+   * tache 4 complement) porte aussi `status: 'pending'` alors que son `state`
+   * reste 'open'/'revealed', et le serveur le refuse (garde "round en vol").
+   * Liste blanche sur les DEUX cles (pas de negation) : extensible sans
+   * remaniement si un troisieme statut ou etat apparait un jour. */
   isRemovable(item: AgendaItem): boolean {
-    return item.status === 'pending';
+    return item.status === 'pending' && item.state === 'idle';
   }
 
   /** `round.reorder` exige la liste COMPLETE, dans l'ordre voulu : monter ou

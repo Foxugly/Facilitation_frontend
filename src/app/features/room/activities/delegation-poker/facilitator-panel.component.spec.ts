@@ -73,7 +73,7 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
     socket.subject.set('Deja prepare');
     socket.deckSnapshot.set(deckSnapshot(3));
     socket.agenda.set([
-      { id: 5, text: 'Deja prepare', status: 'current', result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
+      { id: 5, text: 'Deja prepare', status: 'current', state: 'idle', result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
     ] satisfies AgendaItem[]);
 
     component.enterCompose(); // deckDraft <- currentDeckId() = 3
@@ -96,7 +96,7 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
     socket.subject.set('Deja prepare');
     socket.deckSnapshot.set(deckSnapshot(3));
     socket.agenda.set([
-      { id: 5, text: 'Deja prepare', status: 'current', result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
+      { id: 5, text: 'Deja prepare', status: 'current', state: 'idle', result: null, items: [{ id: 10, text: 'Deja prepare', sequence: 1 }] },
     ] satisfies AgendaItem[]);
 
     component.enterCompose(); // deckDraft <- currentDeckId() = 3, jamais touche ensuite
@@ -112,14 +112,22 @@ describe('DelegationPokerFacilitatorPanelComponent.prepare()', () => {
   });
 });
 
-// A (pending), B (current), C (done, acte) : couvre les trois statuts d'agenda
-// d'un seul tenant pour les tests de reordonnancement / elagage (tache 2).
+// A (pending, idle -- jamais ouvert), B (current), C (done, acte) : couvre les
+// trois statuts d'agenda d'un seul tenant pour les tests de reordonnancement /
+// elagage (tache 2).
 function threeRoundAgenda(): AgendaItem[] {
   return [
-    { id: 1, text: 'A', status: 'pending', result: null, items: [{ id: 11, text: 'A', sequence: 1 }] },
-    { id: 2, text: 'B', status: 'current', result: null, items: [{ id: 12, text: 'B', sequence: 2 }] },
-    { id: 3, text: 'C', status: 'done', result: '8', items: [{ id: 13, text: 'C', sequence: 3 }] },
+    { id: 1, text: 'A', status: 'pending', state: 'idle', result: null, items: [{ id: 11, text: 'A', sequence: 1 }] },
+    { id: 2, text: 'B', status: 'current', state: 'idle', result: null, items: [{ id: 12, text: 'B', sequence: 2 }] },
+    { id: 3, text: 'C', status: 'done', state: 'acted', result: '8', items: [{ id: 13, text: 'C', sequence: 3 }] },
   ];
+}
+
+// D (pending, mais ouvert puis abandonne SANS resultat) : `status` seul ne le
+// distingue pas de A ci-dessus -- c'est exactement le round que la tache 4
+// complement visait, (cf. `services.py::remove_round`, garde "round en vol").
+function abandonedOpenRound(): AgendaItem {
+  return { id: 4, text: 'D', status: 'pending', state: 'open', result: null, items: [{ id: 14, text: 'D', sequence: 4 }] };
 }
 
 describe('DelegationPokerFacilitatorPanelComponent.moveUp()/moveDown()', () => {
@@ -182,6 +190,19 @@ describe('DelegationPokerFacilitatorPanelComponent — gestes non proposes (gard
     expect(component.isRemovable(a)).toBe(true);
     expect(component.isRemovable(b)).toBe(false);
     expect(component.isRemovable(c)).toBe(false);
+  });
+
+  // Le test qui manquait avant l'ajout de `state` cote serveur : un round
+  // ouvert puis abandonne sans resultat est `status: 'pending'` (comme A,
+  // jamais ouvert), mais son `state` reste 'open' -- le serveur le refuse
+  // ("round en vol"), donc le bouton de retrait ne doit pas apparaitre.
+  it("isRemovable : une entree pending mais ouverte en vol (state 'open') n est PAS retirable", () => {
+    const { component, socket } = setup();
+    const abandoned = abandonedOpenRound();
+    socket.agenda.set([abandoned]);
+
+    expect(abandoned.status).toBe('pending'); // meme statut que A, a dessein
+    expect(component.isRemovable(abandoned)).toBe(false);
   });
 
   it('isFirst/isLast bornent monter/descendre aux deux extremites de la file', () => {

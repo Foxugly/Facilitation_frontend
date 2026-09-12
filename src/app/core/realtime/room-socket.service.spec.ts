@@ -32,7 +32,7 @@ const SYNC: StateSync = {
   items: [{ id: 1, text: 'Budget?', sequence: 1 }],
   result: null,
   facilitatorPresent: true,
-  agenda: [{ id: 1, text: 'Budget?', status: 'current', result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
+  agenda: [{ id: 1, text: 'Budget?', status: 'current', state: 'open', result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
   deadline: null,
   timer: { enabled: false, seconds: 10 },
 };
@@ -173,8 +173,8 @@ describe('RoomSocketService reducer', () => {
     const svc = new RoomSocketService();
     feed(svc, 'agenda.updated', {
       agenda: [
-        { id: 1, text: 'Q1', status: 'done', result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
-        { id: 2, text: 'Q2', status: 'current', result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
+        { id: 1, text: 'Q1', status: 'done', state: 'acted', result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
+        { id: 2, text: 'Q2', status: 'current', state: 'idle', result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
       ],
     });
     expect(svc.agenda().length).toBe(2);

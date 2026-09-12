@@ -146,6 +146,13 @@ export interface AgendaItem {
   text: string;
   status: 'current' | 'done' | 'pending';
   result: string | null;
+  /** L'etat REEL du round (tache 5d, tache 4 complement) — coexiste avec `status`
+   * a dessein : `status` repond a « ou en est-on dans la seance ? » (courant /
+   * acte / en attente), `state` a « ce round a-t-il deja vecu ? ». Necessaire
+   * pour distinguer un round jamais ouvert (`idle`) d'un round ouvert puis
+   * abandonne sans resultat (`open`/`revealed`) — les deux sont `status:
+   * 'pending'`, mais seul le premier est retirable (`services.py::remove_round`). */
+  state: RoundState;
   /** Les items de CE round (design N-items, §5) — un round sans round associe
    * n'apparait pas dans l'agenda, donc toujours au moins un item ici. */
   items: RoundItem[];
