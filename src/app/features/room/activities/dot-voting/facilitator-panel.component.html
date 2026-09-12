@@ -1,0 +1,151 @@
+<aside class="fac-panel">
+  @switch (state()) {
+    @case ('open') {
+      <!-- Reserve au facilitateur (contrat §8.7) : ce qu'il reste a placer par
+           participant, l'information dont il a besoin puisque les jetons ne
+           sont pas obligatoires (design §4, "a fini" ne se deduit plus du seul
+           nombre de reponses). -->
+      <div class="panel-block">
+        <span class="section-label">{{ 'room.dot_voting.pending_label' | transloco }}</span>
+        @if (pendingRows().length > 0) {
+          <ul class="pending-list">
+            @for (row of pendingRows(); track row.participantId) {
+              <li class="pending-row" [class.pending-row--done]="row.remaining === 0">
+                <span class="pending-name">{{ row.name }}</span>
+                <span class="pending-remaining">{{ row.remaining }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="pending-empty">{{ 'room.dot_voting.pending_unknown' | transloco }}</p>
+        }
+      </div>
+      <div class="panel-block controls">
+        <p-button [label]="'room.reveal' | transloco" icon="pi pi-eye" severity="warn" [disabled]="!canReveal()" (onClick)="reveal()" styleClass="w-full" />
+      </div>
+    }
+    @case ('revealed') {
+      <div class="panel-block controls">
+        <!-- Pas de valeur a choisir ici : le classement est deja fige a la
+             revelation (contrat §8.6, design §6) -- conclure ne fait
+             qu'acter la fin du round. -->
+        <p-button [label]="'room.dot_voting.conclude' | transloco" icon="pi pi-check" severity="success" (onClick)="conclude()" styleClass="w-full" />
+        <p-button [label]="'room.reset' | transloco" icon="pi pi-refresh" [text]="true" severity="secondary" (onClick)="reset()" styleClass="w-full" />
+      </div>
+    }
+    @case ('acted') {
+      <div class="panel-block controls">
+        <p-button [label]="'room.new_round' | transloco" icon="pi pi-refresh" (onClick)="reset()" styleClass="w-full" />
+      </div>
+    }
+    @default {
+      @if (showCompose()) {
+        <!-- Round pas encore cree : un seul item suffit pour demarrer, les
+             suivants s'ajoutent a l'etape 2 (round deja courant). -->
+        <div class="round-form">
+          <div class="panel-block">
+            <input pInputText class="w-full" [placeholder]="'room.dot_voting.item_placeholder' | transloco"
+                   [ngModel]="firstItemDraft()" (ngModelChange)="firstItemDraft.set($event)" (keyup.enter)="prepare()" />
+          </div>
+
+          @if (offersAnonymous() && socket.revealMode().canAnonymise) {
+            <div class="panel-block reveal-settings">
+              <div class="reveal-row">
+                <p-toggleswitch [ngModel]="anonymousDraft()" (ngModelChange)="onRevealModeChange($event)" />
+                <span class="reveal-mode-name">
+                  <i class="pi pi-eye-slash"></i>
+                  {{ (anonymousDraft() ? 'room.reveal_mode.mode_anonymous' : 'room.reveal_mode.mode_nominative') | transloco }}
+                </span>
+              </div>
+            </div>
+          }
+
+          @if (offersTimer() && socket.isTeam()) {
+            <div class="panel-block timer-settings">
+              <div class="timer-row">
+                <p-toggleswitch [ngModel]="timerEnabledDraft()" (ngModelChange)="onTimerEnabledChange($event)" />
+                <i class="pi pi-clock timer-icon"></i>
+                <p-inputNumber [ngModel]="timerSecondsDraft()" (ngModelChange)="onTimerSecondsChange($event)"
+                               [min]="10" [max]="60" [step]="5" [showButtons]="true"
+                               [disabled]="!timerEnabledDraft()" inputStyleClass="timer-input" />
+              </div>
+            </div>
+          }
+
+          <div class="panel-block controls">
+            <p-button [label]="'room.prepare' | transloco" icon="pi pi-check" [disabled]="!canPrepare()" (onClick)="prepare()" styleClass="w-full" />
+          </div>
+        </div>
+      } @else if (showReady()) {
+        <!-- Round deja courant : ses items restent modifiables tant qu'il est
+             `idle` -- chaque geste part immediatement (item.add/remove/reorder),
+             rien a batcher (a la difference de l'etape 1 du poker). -->
+        <div class="round-ready">
+          <span class="section-label">{{ 'room.dot_voting.items_label' | transloco }}</span>
+          <ul class="item-list">
+            @for (item of items(); track item.id; let idx = $index) {
+              <li class="item-row">
+                <span class="item-text">{{ item.text }}</span>
+                <!-- Monter / descendre / retirer : pas de glisser-depose (design
+                     dot-voting, decision reprise du scenario 5d). Chaque geste
+                     n'est propose que si le serveur l'accepterait. -->
+                <div class="item-actions">
+                  @if (!isFirst(idx)) {
+                    <p-button icon="pi pi-arrow-up" [text]="true" size="small" severity="secondary"
+                              [ariaLabel]="'room.agenda_move_up' | transloco" (onClick)="moveUp(idx)" />
+                  }
+                  @if (!isLast(idx)) {
+                    <p-button icon="pi pi-arrow-down" [text]="true" size="small" severity="secondary"
+                              [ariaLabel]="'room.agenda_move_down' | transloco" (onClick)="moveDown(idx)" />
+                  }
+                  @if (canRemoveItem()) {
+                    <p-button icon="pi pi-trash" [text]="true" size="small" severity="danger"
+                              [ariaLabel]="'room.dot_voting.remove_item' | transloco" (onClick)="removeItem(item.id)" />
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+
+          <div class="panel-block add-item">
+            <input pInputText class="w-full" [placeholder]="'room.dot_voting.item_placeholder' | transloco"
+                   [ngModel]="newItemDraft()" (ngModelChange)="newItemDraft.set($event)" (keyup.enter)="addItem()" />
+            <p-button icon="pi pi-plus" [ariaLabel]="'room.dot_voting.add_item' | transloco" (onClick)="addItem()" />
+          </div>
+
+          <!-- Premier usage reel de Round.config (design dot-voting §5) : le
+               facilitateur decide, round par round, si les totaux sont
+               visibles pendant le vote -- defaut : secret. Trois etats
+               (round de correction 1, point 3) : un reglage INCONNU (apres
+               un rechargement, avant que le serveur ne l'ait confirme) ne
+               doit jamais se lire comme "off" -- il invite a le reposer. -->
+          <div class="panel-block totals-settings">
+            <div class="totals-row">
+              <p-toggleswitch [ngModel]="liveTotalsState() === 'on'" (ngModelChange)="toggleLiveTotals($event)" />
+              <span class="totals-name">{{ 'room.dot_voting.totals_visible_label' | transloco }}</span>
+            </div>
+            @if (liveTotalsState() === 'unknown') {
+              <p class="totals-hint totals-hint--unknown">
+                <i class="pi pi-exclamation-triangle"></i>
+                {{ 'room.dot_voting.totals_visibility_unknown' | transloco }}
+              </p>
+            } @else {
+              <p class="totals-hint">{{ 'room.dot_voting.totals_visible_hint' | transloco }}</p>
+            }
+          </div>
+
+          <div class="panel-block controls">
+            <p-button [label]="'room.launch' | transloco" icon="pi pi-play" (onClick)="launch()" styleClass="w-full" />
+          </div>
+        </div>
+      }
+    }
+  }
+
+  @if (!socket.facilitatorPresent()) {
+    <div class="panel-block guard">
+      <span>{{ 'room.facilitator_absent' | transloco }}</span>
+      <p-button [label]="'room.claim' | transloco" icon="pi pi-flag" size="small" (onClick)="socket.claimFacilitator()" />
+    </div>
+  }
+</aside>

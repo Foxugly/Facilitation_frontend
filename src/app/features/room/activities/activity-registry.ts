@@ -4,6 +4,8 @@ import { RoundState } from '../../../core/realtime/protocol';
 
 import { DelegationPokerFacilitatorPanelComponent } from './delegation-poker/facilitator-panel.component';
 import { DelegationPokerTableComponent } from './delegation-poker/table.component';
+import { DotVotingFacilitatorPanelComponent } from './dot-voting/facilitator-panel.component';
+import { DotVotingTableComponent } from './dot-voting/table.component';
 
 /**
  * Registre des activites d'une salle.
@@ -90,6 +92,24 @@ export const ACTIVITY_REGISTRY: Readonly<Record<string, ActivityDefinition>> = {
     consumes: 'items',
     produces: 'results',
     teamOptions: ['timer', 'anonymous', 'deck'],
+  },
+  // Premiere activite neuve du registre (design dot-voting, contrat §8.6/§8.7) :
+  // n items, 2n jetons par participant, classement fige a la revelation. Cycle
+  // idle -> open -> revealed -> acted IDENTIQUE au poker (design §8 : pas de
+  // CLOSED avant une activite qui ne revele rien). `produces: 'results'` --
+  // c'est la premiere activite qui SAIT classer (`rank_value` cote registre
+  // serveur), donc `canRank` s'allumera de lui-meme au chainage (agenda), sans
+  // rien a coder ici.
+  dot_voting: {
+    board: DotVotingTableComponent,
+    panel: DotVotingFacilitatorPanelComponent,
+    states: ['idle', 'open', 'revealed', 'acted'],
+    consumes: 'items',
+    produces: 'results',
+    // Pas de 'deck' : ce panneau ne propose pas son propre selecteur de deck
+    // (limite connue, voir task-6-report.md) -- basculer VERS dot_voting se
+    // fait depuis le panneau poker, qui en a un.
+    teamOptions: ['timer', 'anonymous'],
   },
 };
 

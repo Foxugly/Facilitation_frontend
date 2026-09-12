@@ -1,0 +1,281 @@
+/* Styles encapsules par composant (Angular) : ce fichier reprend deliberement
+   le vocabulaire de classes de delegation-poker/table.component.scss (.stage,
+   .subject-view, .hand, .hand-label, .outcome, .reveal-badge, .roster-progress)
+   pour un rendu visuellement coherent — mais chaque activite porte sa PROPRE
+   copie, les styles ne traversant pas les composants dynamiques
+   (voir room.component.scss, meme remarque sur .fac-panel). Cout observe,
+   non corrige ici : voir task-6-report.md. */
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.subject-view {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--ink);
+  }
+}
+
+.reveal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.reveal-badge.anonymous {
+  color: var(--accent);
+}
+
+.roster-progress {
+  margin: var(--s-3) 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* --- La main : un item par ligne, +/- pour poser/retirer une gommette -------- */
+
+.hand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  width: 100%;
+  padding-top: var(--s-3);
+}
+
+.hand-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hand-label::before,
+.hand-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Plus de jeton a poser : ce n'est pas une erreur, mais ca merite d'etre vu. */
+.hand-label--empty {
+  color: var(--muted);
+}
+
+.dot-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.dot-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.dot-item-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: var(--s-3);
+}
+
+.dot-item-text {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dot-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* Cibles tactiles genereuses (design "mobile d'abord cote participant") : 44px
+   est le plancher communement admis pour un pouce, pas un pointeur de souris. */
+.dot-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.dot-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.dot-btn--plus {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  color: var(--accent);
+}
+
+.dot-count {
+  min-width: 1.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dot-total {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot-total--hidden {
+  font-style: italic;
+}
+
+/* --- Classement : la meme bande, une fois les votes reveles ------------------ */
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  width: 100%;
+  padding-top: var(--s-3);
+}
+
+.outcome-label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.outcome-label::before,
+.outcome-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.outcome-hint {
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.ranking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  width: 100%;
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.ranking-row--top {
+  border-color: color-mix(in srgb, #10b981 55%, var(--border));
+}
+
+.ranking-rank {
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 2em;
+}
+
+.ranking-text {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ranking-points {
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ranking-responses {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ranking-voters {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .dot-item,
+  .ranking-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .ranking-rank {
+    grid-row: 1;
+  }
+
+  .ranking-responses {
+    grid-column: 1 / -1;
+  }
+}

@@ -81,10 +81,14 @@ export interface VoteTally {
 }
 
 /** Who voted what. Emitted ONLY for a nominative round — an anonymous one omits
- * the key entirely rather than expecting the client to hide it. */
+ * the key entirely rather than expecting the client to hide it. La forme depend
+ * de l'activite (contrat §8.6) : `cardValue` pour le poker, `points` pour Dot
+ * Voting — les deux optionnels plutot qu'une union stricte, un bloc ne portant
+ * jamais les deux a la fois. */
 export interface NominativeVote {
   participantId: string;
-  cardValue: string;
+  cardValue?: string;
+  points?: number;
 }
 
 /** Reveal mode of the current round, announced to every participant (not just the
@@ -104,25 +108,78 @@ export interface RoundItem {
 }
 
 /** Le payload d'une reponse a un item : sa forme depend du schema que declare
- * l'activite au registre. Le poker n'en connait qu'une, `{ card }`. */
+ * l'activite au registre. Le poker n'en connait qu'une, `{ card }` ; Dot Voting
+ * `{ points }` (design dot voting §2 -- le nombre de jetons unitaires poses sur
+ * CET item). Les deux champs coexistent en option plutot qu'une union stricte :
+ * un composant qui lit `.card` sur une reponse Dot Voting doit voir `undefined`,
+ * jamais une erreur de type -- un bloc reel ne porte jamais les deux a la fois. */
 export interface CardResponsePayload {
   card: string;
 }
 
+export interface PointsResponsePayload {
+  points: number;
+}
+
+export type ResponsePayload = Partial<CardResponsePayload> & Partial<PointsResponsePayload>;
+
 /** Mes reponses au round courant, indexees par id d'item (cle string cote
  * JSON, `state.sync.myResponses`). Remplace `StateSync.myVote`, qui ne portait
  * la reponse que pour un seul item implicite. */
-export type MyResponses = Record<string, CardResponsePayload>;
+export type MyResponses = Record<string, ResponsePayload>;
 
 /** Le depouillement d'UN item — un bloc par item dans `vote.revealed.itemResults`.
  * `votes` est absent des blocs d'un round anonyme : invariant serveur (le lien
- * participant -> carte n'est jamais envoye), jamais un masquage cote client. */
+ * participant -> carte n'est jamais envoye), jamais un masquage cote client.
+ *
+ * Depuis 6a (contrat §8.6), ce bloc porte ce que declare l'ACTIVITE : le poker
+ * garde `tally`/`spread` (inchange, cle par cle) ; Dot Voting rend `totalPoints`/
+ * `responseCount`/`rank` a la place -- d'ou les deux groupes de champs en
+ * option plutot qu'une union stricte (le registre fusionne l'agregat de
+ * l'activite avec `itemId`/`anonymous`, jamais les deux formes a la fois). */
 export interface ItemResult {
   itemId: number;
-  tally: VoteTally[];
-  spread: { min: number | null; max: number | null };
+  anonymous: boolean;
+  tally?: VoteTally[];
+  spread?: { min: number | null; max: number | null };
+  /** Dot Voting (contrat §8.6/§8.7) : somme des jetons de CET item, tous
+   * participants confondus. */
+  totalPoints?: number;
+  /** Dot Voting : nombre de participants ayant pose AU MOINS un jeton sur cet
+   * item -- distinct de `totalPoints`, un participant pouvant en poser plusieurs. */
+  responseCount?: number;
+  /** Dot Voting SEULEMENT, et seulement une fois REVELE (§8.6) : position dans
+   * le classement fige a la revelation, 1 = le plus de jetons. Absent pendant
+   * le vote (`response.totals`/`liveTotals` ne portent jamais ce champ -- le
+   * classement n'existe qu'a partir de la revelation, design §6). */
+  rank?: number;
   votes?: NominativeVote[];
 }
+
+/** Un total EN DIRECT, pendant le vote (contrat §8.7) -- UNIQUEMENT `itemId` +
+ * l'agregat, jamais `anonymous` ni `rank` : ce n'est pas encore un depouillement
+ * fige, seulement ce que `response.totals`/`state.sync.liveTotals` diffusent
+ * PENDANT que le round est `open`, et seulement si sa config l'autorise
+ * (`Round.config.liveTotals`, defaut : secret). */
+export interface LiveItemTotal {
+  itemId: number;
+  totalPoints: number;
+  responseCount: number;
+}
+
+/** Forme commune a `response.totals` (evenement) et `state.sync.liveTotals`
+ * (memes conditions, §8.7 -- state.sync ne rejoue aucun evenement, un
+ * rechargement en cours de round doit donc retrouver ce que l'evenement lui
+ * aurait deja appris). */
+export interface LiveTotalsPayload {
+  itemResults: LiveItemTotal[];
+}
+
+/** `response.pending` (evenement, contrat §8.7) : ce qu'il reste a placer, PAR
+ * PARTICIPANT (cle = `Participant.public_id`), reserve au facilitateur seul.
+ * `state.sync.pendingBudgets` porte la MEME forme, sans l'enveloppe
+ * `{ remaining }` -- normalise par `RoomSocketService`, voir son onMessage. */
+export type PendingBudgets = Record<string, number>;
 
 /** Payload de `vote.revealed` (contrat §8.2.b). `itemResults` porte tout ; les
  * cles plates ci-dessous sont l'ancien alias : le serveur ne les emet plus du
@@ -333,6 +390,29 @@ export interface StateSync {
    * un masquage cote client. Meme forme que le `candidates` de
    * `round.candidates`, sans le `roundId` (implicitement le round courant). */
   chainingCandidates?: ChainCandidate[];
+  /** Totaux en direct du round courant (contrat §8.7) — a TOUT destinataire,
+   * seulement si le round est `open` ET que sa config l'autorise (defaut :
+   * secret). Absent sinon (jamais un tableau vide traite comme "aucun total"
+   * -- absent veut dire "rien a diffuser", pas "tout est a zero"). */
+  liveTotals?: LiveTotalsPayload;
+  /** Ce qu'il reste a placer par participant (contrat §8.7) — reserve au
+   * facilitateur : NON CALCULE DU TOUT (absent, pas juste omis) pour tout
+   * autre destinataire, ou pour une activite sans notion de budget (le poker).
+   * Forme brute `{participantPublicId: number}`, SANS l'enveloppe
+   * `{ remaining }` que porte l'evenement `response.pending` -- les deux
+   * chemins ne sont pas serialises pareil cote serveur (§8.7). */
+  pendingBudgets?: PendingBudgets;
+  /** La config du round courant (`Round.config`) -- NON CONFIRMEE au contrat
+   * au moment ou ce champ est ecrit ici (round de correction 1, point 3) :
+   * jusqu'ici seul `round.configured` l'exposait, en reponse a une ECRITURE,
+   * jamais en lecture au (re)connect, d'ou un reglage affiche a tort comme
+   * "off" apres un rechargement alors que le serveur le gardait "on". Le nom
+   * de cle suppose ici (`config`) reprend celui de `RoundConfiguredPayload`
+   * -- A VERIFIER contre le contrat une fois la correction serveur mergee.
+   * Absent (pas `{}`) tant que le serveur ne l'envoie pas encore : `roundConfig`
+   * (RoomSocketService) reste alors dans son etat "inconnu", qui n'affirme
+   * rien (voir sa doc). */
+  config?: Record<string, unknown>;
 }
 
 export interface Participation {
