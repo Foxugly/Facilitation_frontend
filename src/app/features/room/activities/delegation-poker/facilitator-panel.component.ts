@@ -216,7 +216,7 @@ export class DelegationPokerFacilitatorPanelComponent {
   queueSubject(): void {
     const text = this.subjectDraft().trim();
     if (!text) return;
-    this.socket.addSubject(text);
+    this.socket.addRound(text);
     this.subjectDraft.set('');
   }
 

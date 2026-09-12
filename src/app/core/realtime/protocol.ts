@@ -125,18 +125,19 @@ export interface ItemResult {
 }
 
 /** Payload de `vote.revealed` (contrat §8.2.b). `itemResults` porte tout ; les
- * cles plates ci-dessous sont l'ancien alias, recopiees du premier item par le
- * serveur le temps que ce front bascule — a ne plus lire. */
+ * cles plates ci-dessous sont l'ancien alias : le serveur ne les emet plus du
+ * tout depuis la bascule de ce front sur `itemResults` — optionnelles pour ne
+ * pas mentir sur ce qu'un payload reel porte encore. A ne plus lire. */
 export interface RevealedPayload {
   itemResults: ItemResult[];
   anonymous: boolean;
   reason?: 'timeout' | 'facilitator';
   /** @deprecated Remplace par `itemResults[].tally`. */
-  tally: VoteTally[];
+  tally?: VoteTally[];
   /** @deprecated Remplace par `itemResults[].votes`. */
   votes?: NominativeVote[];
   /** @deprecated Remplace par `itemResults[].spread`. */
-  spread: { min: number | null; max: number | null };
+  spread?: { min: number | null; max: number | null };
 }
 
 /** One line of the facilitator's scenario (agenda): a subject with its round status. */
@@ -186,8 +187,9 @@ export interface StateSync {
    * le reglage de l'equipe ; absent des vieux serveurs, d'ou le defaut cote client. */
   resultLayout?: ResultLayout;
   /** @deprecated Remplace par `myResponses` — ne portait la reponse que pour
-   * un seul item implicite (contrat §8.2.b). */
-  myVote: string | null;
+   * un seul item implicite (contrat §8.2.b). Le serveur ne l'emet plus du
+   * tout ; optionnel pour ne pas mentir sur un payload reel. */
+  myVote?: string | null;
   /** Mes reponses au round courant, indexees par id d'item. */
   myResponses: MyResponses;
   /** Les items du round courant (design N-items, §5). A NE PAS CONFONDRE avec
