@@ -111,6 +111,74 @@
         <!-- STEP 2 — the round is announced; launch it. -->
         <div class="round-ready">
           <p class="ready-subject">{{ socket.subject() }}</p>
+
+          <!-- Chainage (design 5e, contrat §8.5) : reprendre les items ou les
+               resultats d'un round anterieur. roundId n'existe qu'ICI (round
+               deja compose) -- pas a l'etape 1. -->
+          @if (chainCandidates(); as candidates) {
+            <!-- Selection manuelle : des cases a cocher + une validation, pas
+                 de glisser-depose (decision de conception, tactile). -->
+            <div class="panel-block chain-manual">
+              <span class="chain-title">{{ 'room.chain.manual_title' | transloco }}</span>
+              <ul class="chain-candidates">
+                @for (c of candidates; track c.sourceItemId) {
+                  <li class="chain-candidate">
+                    <p-checkbox [binary]="true" [inputId]="'chain-cand-' + c.sourceItemId"
+                                [ngModel]="isChainCandidateChecked(c.sourceItemId)"
+                                (ngModelChange)="toggleChainCandidate(c.sourceItemId, $event)" />
+                    <label [for]="'chain-cand-' + c.sourceItemId">
+                      {{ c.text }}
+                      @if (chainAuthorName(c.authorId); as author) {
+                        <span class="chain-candidate-author">— {{ author }}</span>
+                      }
+                    </label>
+                  </li>
+                } @empty {
+                  <li class="chain-candidate-empty">{{ 'room.chain.no_candidates' | transloco }}</li>
+                }
+              </ul>
+              <p-button [label]="'room.chain.resolve' | transloco" icon="pi pi-check" (onClick)="resolveChain()" styleClass="w-full" />
+            </div>
+          } @else if (chainOffered()) {
+            <div class="panel-block chain-form">
+              <button type="button" class="chain-toggle" (click)="chainEnabled.set(!chainEnabled())">
+                <i class="pi" [class.pi-chevron-right]="!chainEnabled()" [class.pi-chevron-down]="chainEnabled()"></i>
+                {{ 'room.chain.toggle' | transloco }}
+              </button>
+              @if (chainEnabled()) {
+                <p-select [options]="chainSourceOptions()" optionLabel="label" optionValue="value"
+                          [placeholder]="'room.chain.pick_source' | transloco"
+                          [ngModel]="chainSourceDraft()" (ngModelChange)="onChainSourceChange($event)"
+                          appendTo="body" styleClass="w-full" />
+
+                <div class="chain-rule-row">
+                  <p-select [options]="chainTakeOptions()" optionLabel="label" optionValue="value"
+                            [ngModel]="effectiveChainTake()" (ngModelChange)="onChainTakeChange($event)"
+                            appendTo="body" styleClass="grow" />
+                  <p-select [options]="chainModeOptions()" optionLabel="label" optionValue="value"
+                            [ngModel]="chainModeDraft()" (ngModelChange)="onChainModeChange($event)"
+                            appendTo="body" styleClass="grow" />
+                </div>
+
+                @if (offersChainTop()) {
+                  <p-inputNumber [ngModel]="chainTopDraft()" (ngModelChange)="onChainTopChange($event)"
+                                 [min]="1" [placeholder]="'room.chain.top_placeholder' | transloco"
+                                 [showButtons]="true" styleClass="w-full" />
+                }
+
+                <!-- Avertissement explicite (design §7) : rouvrir la source ne
+                     met a jour AUCUNE copie deja faite -- le serveur ne
+                     propage rien, la copie est figee des la resolution. -->
+                <p class="chain-warning">
+                  <i class="pi pi-exclamation-triangle"></i>
+                  {{ 'room.chain.reopen_warning' | transloco }}
+                </p>
+
+                <p-button [label]="'room.chain.bind' | transloco" icon="pi pi-link" [disabled]="!canBindChain()" (onClick)="bindChain()" styleClass="w-full" />
+              }
+            </div>
+          }
+
           <div class="panel-block controls">
             <p-button [label]="'room.launch' | transloco" icon="pi pi-play" [disabled]="!canOpen()" (onClick)="launch()" styleClass="w-full" />
             <p-button [label]="'room.edit' | transloco" icon="pi pi-pencil" [text]="true" severity="secondary" (onClick)="enterCompose()" styleClass="w-full" />

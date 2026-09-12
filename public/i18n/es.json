@@ -376,7 +376,25 @@
     "launch": "Iniciar la votación",
     "edit": "Editar",
     "queue_add": "Añadir a la cola",
-    "reveal_title": "Recuento"
+    "reveal_title": "Recuento",
+    "chain": {
+      "toggle": "Retomar una ronda anterior",
+      "pick_source": "Elegir la ronda de origen",
+      "take": {
+        "items": "Los items",
+        "results": "Los resultados"
+      },
+      "mode": {
+        "auto": "Automático",
+        "manual": "Manual"
+      },
+      "top_placeholder": "Conservar los N primeros",
+      "reopen_warning": "Reabrir la ronda de origen no actualiza las copias ya realizadas.",
+      "bind": "Encadenar",
+      "manual_title": "Seleccione lo que se retoma",
+      "no_candidates": "No hay candidatos que retomar.",
+      "resolve": "Confirmar selección"
+    }
   },
   "billing": {
     "title": "Suscripción",

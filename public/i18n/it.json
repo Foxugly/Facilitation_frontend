@@ -376,7 +376,25 @@
     "launch": "Avvia il voto",
     "edit": "Modifica",
     "queue_add": "Aggiungi alla coda",
-    "reveal_title": "Spoglio"
+    "reveal_title": "Spoglio",
+    "chain": {
+      "toggle": "Riprendi da un round precedente",
+      "pick_source": "Scegli il round sorgente",
+      "take": {
+        "items": "Gli item",
+        "results": "I risultati"
+      },
+      "mode": {
+        "auto": "Automatica",
+        "manual": "Manuale"
+      },
+      "top_placeholder": "Mantieni i primi N",
+      "reopen_warning": "Riaprire il round sorgente non aggiorna le copie già fatte.",
+      "bind": "Collega",
+      "manual_title": "Seleziona cosa riprendere",
+      "no_candidates": "Nessun candidato da riprendere.",
+      "resolve": "Conferma selezione"
+    }
   },
   "billing": {
     "title": "Abbonamento",

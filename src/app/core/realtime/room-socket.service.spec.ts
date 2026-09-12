@@ -32,7 +32,7 @@ const SYNC: StateSync = {
   items: [{ id: 1, text: 'Budget?', sequence: 1 }],
   result: null,
   facilitatorPresent: true,
-  agenda: [{ id: 1, text: 'Budget?', status: 'current', state: 'open', everDecided: false, result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
+  agenda: [{ id: 1, text: 'Budget?', status: 'current', state: 'open', everDecided: false, canRank: false, result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
   deadline: null,
   timer: { enabled: false, seconds: 10 },
 };
@@ -173,8 +173,8 @@ describe('RoomSocketService reducer', () => {
     const svc = new RoomSocketService();
     feed(svc, 'agenda.updated', {
       agenda: [
-        { id: 1, text: 'Q1', status: 'done', state: 'acted', everDecided: true, result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
-        { id: 2, text: 'Q2', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
+        { id: 1, text: 'Q1', status: 'done', state: 'acted', everDecided: true, canRank: false, result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
+        { id: 2, text: 'Q2', status: 'current', state: 'idle', everDecided: false, canRank: false, result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
       ],
     });
     expect(svc.agenda().length).toBe(2);
@@ -302,5 +302,97 @@ describe('RoomSocketService reducer', () => {
     const svc = new RoomSocketService();
     feed(svc, 'facilitator.presence', { present: false });
     expect(svc.facilitatorPresent()).toBe(false);
+  });
+});
+
+describe('RoomSocketService chaining (contrat §8.5, design §7)', () => {
+  it('bindRound emet round.bind avec la regle complete (top TOUJOURS present, null si sans objet)', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.bindRound(5, 2, { take: 'items', mode: 'manual', top: null });
+    expect(sent).toEqual([
+      { type: 'round.bind', payload: { roundId: 5, sourceRoundId: 2, rule: { take: 'items', mode: 'manual', top: null } } },
+    ]);
+  });
+
+  it('resolveChaining omet sourceItemIds quand non fourni (mode auto : le serveur reprend tous les candidats)', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.resolveChaining(5);
+    expect(sent).toEqual([{ type: 'round.resolve', payload: { roundId: 5 } }]);
+  });
+
+  it('resolveChaining porte sourceItemIds quand fourni (mode manuel)', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.resolveChaining(5, [10, 11]);
+    expect(sent).toEqual([{ type: 'round.resolve', payload: { roundId: 5, sourceItemIds: [10, 11] } }]);
+  });
+
+  it('round.candidates alimente currentChainingCandidates quand il vise le round courant', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // agenda[0].id = 1, status 'current'
+    feed(svc, 'round.candidates', { roundId: 1, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
+    expect(svc.currentChainingCandidates()).toEqual([{ sourceItemId: 9, text: 'Un', authorId: null }]);
+  });
+
+  it("round.candidates pour un AUTRE round que le courant reste invisible (sourceItemId n'est pas un itemId du round affiche)", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // round courant = 1
+    feed(svc, 'round.candidates', { roundId: 99, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
+    expect(svc.currentChainingCandidates()).toBeNull();
+  });
+
+  it('round.bound invalide les candidats deja recus pour CE round (nouvelle regle : ancienne liste perimee)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC);
+    feed(svc, 'round.candidates', { roundId: 1, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
+    feed(svc, 'round.bound', { roundId: 1, sourceRoundId: 2, rule: { take: 'items', mode: 'manual', top: null } });
+    expect(svc.currentChainingCandidates()).toBeNull();
+  });
+
+  it('round.bound sur un AUTRE round ne touche pas les candidats du round courant', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC);
+    feed(svc, 'round.candidates', { roundId: 1, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
+    feed(svc, 'round.bound', { roundId: 42, sourceRoundId: 2, rule: { take: 'items', mode: 'manual', top: null } });
+    expect(svc.currentChainingCandidates()).toEqual([{ sourceItemId: 9, text: 'Un', authorId: null }]);
+  });
+
+  it('round.resolved cloture la selection en cours pour CE round', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC);
+    feed(svc, 'round.candidates', { roundId: 1, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
+    feed(svc, 'round.resolved', { roundId: 1, items: [] });
+    expect(svc.currentChainingCandidates()).toBeNull();
+  });
+
+  it('state.sync porte chainingCandidates pour le round courant (contrat §5.1, reserve au facilitateur)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', { ...SYNC, chainingCandidates: [{ sourceItemId: 3, text: 'Post-it', authorId: 7 }] });
+    expect(svc.currentChainingCandidates()).toEqual([{ sourceItemId: 3, text: 'Post-it', authorId: 7 }]);
+  });
+
+  it('state.sync sans chainingCandidates efface une selection deja affichee', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', { ...SYNC, chainingCandidates: [{ sourceItemId: 3, text: 'Post-it', authorId: 7 }] });
+    feed(svc, 'state.sync', SYNC);
+    expect(svc.currentChainingCandidates()).toBeNull();
+  });
+
+  it("currentChainingCandidates ignore des candidats perimes des qu'un AUTRE round devient courant, meme sans round.bound/round.resolved explicite", () => {
+    // L'ordre d'arrivee est contre-intuitif (round.candidates precede round.selected
+    // sur la connexion du facilitateur, contrat §8.5.a) : cette garde ne doit rien
+    // supposer sur l'ordre, seulement comparer deux valeurs deja posees.
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // round courant = 1
+    feed(svc, 'round.candidates', { roundId: 1, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
+    feed(svc, 'agenda.updated', {
+      agenda: [
+        { id: 1, text: 'Budget?', status: 'done', state: 'acted', everDecided: true, canRank: false, result: '5', items: [] },
+        { id: 2, text: 'Suivant', status: 'current', state: 'idle', everDecided: false, canRank: false, result: null, items: [{ id: 20, text: 'Suivant', sequence: 1 }] },
+      ],
+    });
+    expect(svc.currentChainingCandidates()).toBeNull();
   });
 });

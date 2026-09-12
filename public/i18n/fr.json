@@ -376,7 +376,25 @@
     "launch": "Lancer le vote",
     "edit": "Modifier",
     "queue_add": "Ajouter à la file",
-    "reveal_title": "Dépouillement"
+    "reveal_title": "Dépouillement",
+    "chain": {
+      "toggle": "Reprendre un round précédent",
+      "pick_source": "Choisir le round source",
+      "take": {
+        "items": "Les items",
+        "results": "Les résultats"
+      },
+      "mode": {
+        "auto": "Automatique",
+        "manual": "Manuelle"
+      },
+      "top_placeholder": "Garder les N premiers",
+      "reopen_warning": "Rouvrir le round source ne met pas à jour les copies déjà faites.",
+      "bind": "Lier",
+      "manual_title": "Sélectionnez ce qui passe",
+      "no_candidates": "Aucun candidat à reprendre.",
+      "resolve": "Valider la sélection"
+    }
   },
   "billing": {
     "title": "Abonnement",

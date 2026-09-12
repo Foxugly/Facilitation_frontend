@@ -59,7 +59,7 @@ export interface ActivityDefinition {
    * alimenter une autre activite. Un brainstorming produirait des items sans
    * consommer de resultat.
    */
-  consumes: 'subjects' | 'results' | 'none';
+  consumes: 'items' | 'results' | 'none';
   produces: 'results' | 'items' | 'none';
 
   /**
@@ -83,9 +83,11 @@ export const ACTIVITY_REGISTRY: Readonly<Record<string, ActivityDefinition>> = {
     panel: DelegationPokerFacilitatorPanelComponent,
     // Cycle historique, sans CLOSED : les votes se revelent directement.
     states: ['idle', 'open', 'revealed', 'acted'],
-    // Consomme des sujets saisis (ou pris dans l'agenda), produit un niveau
+    // Consomme des items saisis (ou pris dans l'agenda), produit un niveau
     // retenu — donc chainable vers une activite qui consommerait des resultats.
-    consumes: 'subjects',
+    // Vocabulaire aligne sur le registre serveur (`realtime/activities.py`,
+    // `ActivitySpec.consumes`), qui n'emploie plus le mot banni "subject".
+    consumes: 'items',
     produces: 'results',
     teamOptions: ['timer', 'anonymous', 'deck'],
   },

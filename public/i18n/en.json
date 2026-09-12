@@ -376,7 +376,25 @@
     "launch": "Launch the vote",
     "edit": "Edit",
     "queue_add": "Add to queue",
-    "reveal_title": "Tally"
+    "reveal_title": "Tally",
+    "chain": {
+      "toggle": "Chain from a previous round",
+      "pick_source": "Pick the source round",
+      "take": {
+        "items": "The items",
+        "results": "The results"
+      },
+      "mode": {
+        "auto": "Automatic",
+        "manual": "Manual"
+      },
+      "top_placeholder": "Keep the top N",
+      "reopen_warning": "Reopening the source round does not refresh copies already made.",
+      "bind": "Chain",
+      "manual_title": "Select what carries over",
+      "no_candidates": "No candidates to chain.",
+      "resolve": "Confirm selection"
+    }
   },
   "billing": {
     "title": "Subscription",

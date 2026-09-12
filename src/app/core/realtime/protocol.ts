@@ -162,6 +162,16 @@ export interface AgendaItem {
    * `services.py::remove_round`). Sans cette cle, rien dans l'agenda ne
    * distinguait ce cas d'un round jamais joue. */
   everDecided: boolean;
+  /** Quatrieme question, independante des trois precedentes (round de
+   * correction 1, contrat) : si CE round sert un jour de source a un
+   * chainage `top N` (§8.5), le serveur honorera-t-il un `top` non nul, ou
+   * refusera-t-il systematiquement (`bind_round`) ? Vient du registre
+   * serveur (`ActivitySpec.rank_value`) — un consensus par item n'est pas un
+   * ordre ENTRE items, donc aucune activite actuelle ne classe, et `canRank`
+   * vaut `false` partout aujourd'hui. A LIRE ICI plutot qu'a deviner : le
+   * champ « top N » ne doit s'afficher QUE si la source choisie le declare,
+   * pour ne jamais offrir un geste que le serveur refuse toujours. */
+  canRank: boolean;
   /** Les items de CE round (design N-items, §5) — un round sans round associe
    * n'apparait pas dans l'agenda, donc toujours au moins un item ici. */
   items: RoundItem[];
@@ -205,6 +215,67 @@ export interface RoundConfiguredPayload {
   roundId: number;
   deckSnapshot: DeckSnapshot;
   config: Record<string, unknown>;
+}
+
+/** La regle d'une liaison de chainage (contrat §8.5, design §7) : ce que reprend
+ * un round de son round source. Les TROIS cles sont toujours presentes cote
+ * serveur (`_validate_chaining_rule` exige EXACTEMENT {take, mode, top}) — `top`
+ * vaut `null` quand il ne s'applique pas, jamais absent. */
+export interface ChainRule {
+  take: 'items' | 'results';
+  mode: 'auto' | 'manual';
+  top: number | null;
+}
+
+/** Un candidat de chainage presente au facilitateur en mode manuel
+ * (`round.candidates`, contrat §8.5.a). `sourceItemId` designe un item DE LA
+ * SOURCE — a ne jamais confondre avec `itemId`, qui designe un item du round
+ * qu'on regarde (piege deja rencontre cote serveur, task-2-report.md).
+ * `authorId` est l'UUID PUBLIC du participant (`Participant.public_id`,
+ * round de correction 1) — meme convention que `ParticipantView.participantId`
+ * (§5), jamais la PK interne : comparable tel quel a la liste des
+ * participants. `null` sans auteur (pose par le facilitateur, ou auteur
+ * ayant quitte la salle). */
+export interface ChainCandidate {
+  sourceItemId: number;
+  text: string;
+  authorId: string | null;
+}
+
+/** Un item copie par chainage (`round.resolved`, contrat §8.5). `originItemId`
+ * remonte a la RACINE de la chaine entiere ; `sourceItemId` designe son parent
+ * DIRECT dans CETTE resolution. Les deux coexistent : sur une chaine de plus
+ * d'un maillon, aucun des deux ne remplace l'autre. `authorId` : voir
+ * `ChainCandidate.authorId` ci-dessus, meme convention (UUID public). */
+export interface ChainedItem {
+  itemId: number;
+  text: string;
+  sequence: number;
+  originItemId: number | null;
+  sourceItemId: number | null;
+  authorId: string | null;
+}
+
+/** Le fait rediffuse en reponse a `round.bind` (contrat §8.5), a tous — la
+ * liaison ne change ni les items ni l'etat d'aucun round, aucun autre fait
+ * n'est donc necessaire. */
+export interface RoundBoundPayload {
+  roundId: number;
+  sourceRoundId: number;
+  rule: ChainRule;
+}
+
+/** Le fait envoye AU SEUL facilitateur (`round.candidates`, contrat §8.5.a)
+ * quand un round lie en mode manuel, pas encore resolu, devient courant. */
+export interface RoundCandidatesPayload {
+  roundId: number;
+  candidates: ChainCandidate[];
+}
+
+/** Le fait rediffuse en reponse a `round.resolve` (contrat §8.5), a tous. */
+export interface RoundResolvedPayload {
+  roundId: number;
+  items: ChainedItem[];
 }
 
 export interface StateSync {
@@ -255,6 +326,13 @@ export interface StateSync {
   reveal: RevealMode;
   deadline: string | null;
   timer: TimerSettings;
+  /** Les candidats du round courant, si lie en mode manuel et pas encore resolu
+   * (contrat §8.5.a, §5.1) — UNIQUEMENT presente si le destinataire de ce
+   * snapshot est le facilitateur. Absente (pas vide) pour tout autre
+   * destinataire ou toute autre situation : la garde precede le calcul, jamais
+   * un masquage cote client. Meme forme que le `candidates` de
+   * `round.candidates`, sans le `roundId` (implicitement le round courant). */
+  chainingCandidates?: ChainCandidate[];
 }
 
 export interface Participation {

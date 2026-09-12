@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -9,7 +10,7 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 import { LanguageService } from '../../../../core/i18n/language.service';
 import { RoomSocketService } from '../../../../core/realtime/room-socket.service';
-import { AgendaItem, SnapshotCard } from '../../../../core/realtime/protocol';
+import { AgendaItem, ChainRule, SnapshotCard } from '../../../../core/realtime/protocol';
 import { resolveActivity } from '../activity-registry';
 
 const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
@@ -34,7 +35,7 @@ const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
   selector: 'app-delegation-poker-facilitator-panel',
   standalone: true,
   imports: [
-    FormsModule, TranslocoModule, ButtonModule, InputNumberModule, InputTextModule,
+    FormsModule, TranslocoModule, ButtonModule, CheckboxModule, InputNumberModule, InputTextModule,
     SelectModule, ToggleSwitchModule,
   ],
   templateUrl: './facilitator-panel.component.html',
@@ -95,6 +96,165 @@ export class DelegationPokerFacilitatorPanelComponent {
   );
   readonly showPrepared = computed(() => this.state() === 'idle' && !this.showComposeForm());
   readonly canPrepare = computed(() => this.subjectDraft().trim().length > 0);
+
+  // --- Chainage (design §7, contrat §8.5) -------------------------------------
+  // Declare une liaison depuis le round DEJA courant (etape 2, "round-ready") :
+  // round.bind exige un roundId, qui n'existe qu'une fois le round compose.
+  readonly chainEnabled = signal(false);
+  readonly chainSourceDraft = signal<number | null>(null);
+  readonly chainTakeDraft = signal<'items' | 'results'>('items');
+  readonly chainModeDraft = signal<'auto' | 'manual'>('auto');
+  readonly chainTopDraft = signal<number | null>(null);
+  /** Coche localement, avant validation (`resolveChain`). Remise a zero par
+   * `bindChain` (une nouvelle liaison rend toute coche anterieure hors-sujet)
+   * et par `resolveChain` (la selection vient d'etre consommee) — deux points
+   * d'application explicites plutot qu'un effet reactif sur la liste de
+   * candidats, qui aurait exige un cycle de detection de changements pour
+   * rien (aucun rendu n'en depend avant que le facilitateur ne coche a
+   * nouveau). */
+  readonly chainChecked = signal<ReadonlySet<number>>(new Set());
+
+  /** Round proposables comme source : n'importe quelle AUTRE entree du
+   * scenario (round.bind refuse `roundId === sourceRoundId`) — un round jamais
+   * ouvert porte deja au moins un item (son sujet), un round encore ouvert est
+   * une source valide (design §7 : "copier depuis un round encore ouvert est
+   * autorise"). Rien d'autre a filtrer ici : le serveur reste seul juge de la
+   * compatibilite reelle (registre consumes/produces), que ce composant ne
+   * connait pas round par round. */
+  readonly chainSourceOptions = computed(() =>
+    this.socket.agenda()
+      .filter((a) => a.id !== this.socket.currentRoundId())
+      .map((a) => ({ value: a.id, label: a.text || `#${a.id}`, everDecided: a.everDecided, canRank: a.canRank })),
+  );
+  /** Cette activite consomme-t-elle quelque chose ? Une activite future
+   * `consumes: 'none'` n'a rien ou poser une copie — le geste ne doit alors
+   * meme pas etre propose (regle tenue tout du long de ce programme). */
+  readonly chainOffered = computed(
+    () => this.activity().consumes !== 'none' && this.chainSourceOptions().length > 0,
+  );
+  /** La source choisie a-t-elle deja produit un resultat au moins une fois ?
+   * Approximation cote client (le detail du registre par round n'est pas
+   * expose au front) : `take: "results"` n'est offert que si oui, pour ne pas
+   * proposer un geste que le serveur refuserait presque a coup sur. */
+  readonly chainSourceEverDecided = computed(
+    () => this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.everDecided ?? false,
+  );
+  /** La source choisie sait-elle classer (`AgendaItem.canRank`, round de
+   * correction 1) ? Vient du registre serveur (`ActivitySpec.rank_value`) —
+   * AUCUNE activite actuelle n'en declare (un consensus par item n'est pas un
+   * ordre ENTRE items), donc ce champ vaut toujours `false` aujourd'hui. Lu
+   * depuis l'agenda plutot que code en dur : le jour ou une activite classera,
+   * le champ « top N » s'affichera de lui-meme, sans readaptation du front. */
+  readonly chainSourceCanRank = computed(
+    () => this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.canRank ?? false,
+  );
+  readonly canBindChain = computed(() => this.chainSourceDraft() !== null);
+  /** `results` n'apparait dans la liste que si la source l'autorise (voir
+   * `chainSourceEverDecided`) — le geste ne doit pas etre offert sinon. */
+  readonly chainTakeOptions = computed(() => {
+    const values: ('items' | 'results')[] = this.chainSourceEverDecided() ? ['items', 'results'] : ['items'];
+    return values.map((value) => ({ value, label: this.transloco.translate(`room.chain.take.${value}`) }));
+  });
+  /** La valeur EFFECTIVEMENT applicable de `take` — jamais "results" si la
+   * source choisie ne l'autorise pas (voir `chainSourceEverDecided`), meme si
+   * le brouillon le porte encore (ex. la source vient de changer). Purement
+   * derive : aucun effet correcteur necessaire, ni pour l'affichage (le
+   * select y est lie), ni pour `bindChain`, qui s'y refere aussi — le geste
+   * impossible n'est donc jamais ni montre ni envoye. */
+  readonly effectiveChainTake = computed<'items' | 'results'>(() =>
+    this.chainTakeDraft() === 'results' && this.chainSourceEverDecided() ? 'results' : 'items',
+  );
+  /** Le champ « top N » n'a de sens QUE si `take: results` ET que la source
+   * sait classer (`chainSourceCanRank`) — le serveur refuse systematiquement
+   * un `top` pose sans classement disponible (`bind_round`). Purement derive,
+   * comme `effectiveChainTake` : affichage et `bindChain` s'y referent tous
+   * les deux, le geste impossible n'est donc jamais ni montre ni envoye. */
+  readonly offersChainTop = computed(() => this.effectiveChainTake() === 'results' && this.chainSourceCanRank());
+  readonly effectiveChainTop = computed<number | null>(() => (this.offersChainTop() ? this.chainTopDraft() : null));
+  readonly chainModeOptions = computed(() =>
+    (['auto', 'manual'] as const).map((value) => ({ value, label: this.transloco.translate(`room.chain.mode.${value}`) })),
+  );
+  /** Les candidats du round courant, s'il est lie en mode manuel et pas encore
+   * resolu (contrat §8.5.a) — pilote l'affichage de l'ecran de selection,
+   * qu'un rechargement retrouve aussi bien qu'une declaration fraiche. */
+  readonly chainCandidates = computed(() => this.socket.currentChainingCandidates());
+
+  /** Bascule un candidat coche/decoche (etape manuelle, pas de glisser-depose —
+   * decision de conception, tactile). */
+  toggleChainCandidate(sourceItemId: number, checked: boolean): void {
+    this.chainChecked.update((set) => {
+      const next = new Set(set);
+      if (checked) next.add(sourceItemId);
+      else next.delete(sourceItemId);
+      return next;
+    });
+  }
+
+  isChainCandidateChecked(sourceItemId: number): boolean {
+    return this.chainChecked().has(sourceItemId);
+  }
+
+  onChainSourceChange(sourceRoundId: number): void {
+    this.chainSourceDraft.set(sourceRoundId);
+  }
+
+  onChainTakeChange(take: 'items' | 'results'): void {
+    this.chainTakeDraft.set(take);
+    if (take !== 'results') this.chainTopDraft.set(null);
+  }
+
+  onChainModeChange(mode: 'auto' | 'manual'): void {
+    this.chainModeDraft.set(mode);
+  }
+
+  onChainTopChange(top: number | null): void {
+    this.chainTopDraft.set(top == null || Number.isNaN(top) ? null : top);
+  }
+
+  /** Declare la liaison (`round.bind`), puis force sa resolution : le round
+   * cible est ICI TOUJOURS DEJA courant (etape 2), donc `round.bind` seul ne
+   * declenche rien (la resolution auto ne se joue qu'au moment ou un round
+   * DEVIENT courant, cote serveur). Redemander sa selection (`selectRound`)
+   * reproduit exactement ce declenchement — sans effet destructeur, le round
+   * etant deja idle — et c'est le meme mecanisme que celui documente cote
+   * serveur pour un facilitateur qui rechargerait sur un round manuel non
+   * resolu (state-sync-candidates-report.md). */
+  bindChain(): void {
+    const roundId = this.socket.currentRoundId();
+    const sourceRoundId = this.chainSourceDraft();
+    if (roundId === null || sourceRoundId === null) return;
+    const rule: ChainRule = {
+      take: this.effectiveChainTake(),
+      mode: this.chainModeDraft(),
+      top: this.effectiveChainTop(),
+    };
+    this.socket.bindRound(roundId, sourceRoundId, rule);
+    this.socket.selectRound(roundId);
+    // Une nouvelle liaison rend toute coche anterieure hors-sujet (elle visait
+    // une liste de candidats perimee, ou aucune liste du tout).
+    this.chainChecked.set(new Set());
+  }
+
+  /** Valide la selection cochee (`round.resolve`) — sourceItemIds desigent des
+   * items DE LA SOURCE (contrat §8.5), jamais les ids du round courant. */
+  resolveChain(): void {
+    const roundId = this.socket.currentRoundId();
+    if (roundId === null) return;
+    this.socket.resolveChaining(roundId, [...this.chainChecked()]);
+    this.chainChecked.set(new Set());
+  }
+
+  /** Le nom d'affichage de l'auteur d'un candidat, s'il est resolvable. Meme
+   * UUID public que `ParticipantView.participantId` (round de correction 1) :
+   * comparable tel quel a la liste des participants deja connue du front,
+   * sans jointure hasardeuse entre deux espaces d'identifiants. `null` sans
+   * auteur, OU si l'auteur a quitte la salle depuis (son `Participant` n'est
+   * plus dans la liste courante) -- les deux cas sont indiscernables ici, et
+   * ce n'est pas grave : dans les deux cas il n'y a rien a afficher. */
+  chainAuthorName(authorId: string | null): string | null {
+    if (!authorId) return null;
+    return this.socket.participants().find((p) => p.participantId === authorId)?.username ?? null;
+  }
 
   /** On acte sur le NOM du niveau, pas sur le nombre. */
   readonly cardOptions = computed(() =>
