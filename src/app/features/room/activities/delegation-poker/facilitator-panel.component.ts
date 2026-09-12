@@ -184,11 +184,24 @@ export class DelegationPokerFacilitatorPanelComponent {
     };
   }
 
-  /** Etape 1 : annonce le round compose (sujet + details) — reste idle. */
+  /** Etape 1 : annonce le round compose (sujet + details) — reste idle.
+   *
+   * Editer un round DEJA prepare (`editing()`) ne fait plus passer le deck
+   * par `round.prepare` : cette intention applique aussi le deck au niveau de
+   * la ROOM (`select_deck`), donc a tous les rounds a venir qui n'en
+   * choisiraient pas un explicitement — c'est le bug que `round.configure`
+   * corrige (design 5c) en figeant le deck sur CE round precis, sans toucher
+   * au sujet ni au reste. Composer un round tout neuf n'a pas encore de
+   * roundId a cibler : le deck y reste porte par `round.prepare`, comme avant. */
   prepare(): void {
     const text = this.subjectDraft().trim();
     if (!text) return;
-    this.socket.prepareRound({ subjectText: text, ...this.roundDetails() });
+    const editingRoundId = this.editing() ? this.socket.currentRoundId() : null;
+    const { deckId, ...details } = this.roundDetails();
+    this.socket.prepareRound({ subjectText: text, ...details, ...(editingRoundId == null ? { deckId } : {}) });
+    if (editingRoundId != null && deckId != null && deckId !== this.currentDeckId()) {
+      this.socket.configureRound({ roundId: editingRoundId, deckId });
+    }
     this.editing.set(false);
   }
 
