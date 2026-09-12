@@ -9,6 +9,16 @@ function feed(svc: RoomSocketService, type: string, payload: unknown) {
   (svc as unknown as { onMessage: (m: unknown) => void }).onMessage({ v: 1, type, payload });
 }
 
+// Capture les intentions emises sans passer par un vrai WebSocket : `send` est
+// privee, mais reste une propriete d'instance ordinaire une fois compilee.
+function captureSent(svc: RoomSocketService): { type: string; payload: unknown }[] {
+  const sent: { type: string; payload: unknown }[] = [];
+  (svc as unknown as { send: (type: string, payload: unknown) => void }).send = (type, payload) => {
+    sent.push({ type, payload });
+  };
+  return sent;
+}
+
 const SYNC: StateSync = {
   room: { code: 'ABC234', title: 'Retro' },
   protocolVersion: 1,
@@ -18,7 +28,6 @@ const SYNC: StateSync = {
   reveal: { anonymous: false, canAnonymise: false },
   deckSnapshot: { voteType: 'delegation_poker', resolutionStrategy: 'v1', deckId: 1, cardBack: { style: 'image', image: null, color: '#143d2f' }, felt: { style: 'color', image: null, color: '#10b981' }, cards: [] },
   participants: [{ participantId: 'p1', username: 'Sam', role: 'facilitator', hasVoted: false }],
-  myVote: 'consult',
   myResponses: { '1': { card: 'consult' } },
   items: [{ id: 1, text: 'Budget?', sequence: 1 }],
   result: null,
@@ -242,6 +251,37 @@ describe('RoomSocketService reducer', () => {
     expect(svc.roundState()).toBe('idle');
     expect(svc.itemResults().length).toBe(0);
     expect(svc.myResponses()).toEqual({});
+  });
+
+  it("setItemText ajoute un item quand le round courant n'en porte encore aucun", () => {
+    // Salle neuve, ou round remis a zero : aucun state.sync/agenda.updated n'a
+    // encore livre d'item, currentItem() est donc null.
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.setItemText('Budget ownership?');
+    expect(sent).toEqual([{ type: 'item.add', payload: { text: 'Budget ownership?' } }]);
+  });
+
+  it("setItemText reecrit l'item courant quand le round en porte deja un", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // items: [{ id: 1, ... }]
+    const sent = captureSent(svc);
+    svc.setItemText('Texte revise');
+    expect(sent).toEqual([{ type: 'item.update', payload: { itemId: 1, text: 'Texte revise' } }]);
+  });
+
+  it('addRound empile un round de plus dans la file', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.addRound('Un autre sujet');
+    expect(sent).toEqual([{ type: 'round.add', payload: { text: 'Un autre sujet' } }]);
+  });
+
+  it("selectRound fait passer un round de la file en courant, meme id que l'agenda", () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.selectRound(42);
+    expect(sent).toEqual([{ type: 'round.select', payload: { roundId: 42 } }]);
   });
 
   it('tracks facilitator presence', () => {

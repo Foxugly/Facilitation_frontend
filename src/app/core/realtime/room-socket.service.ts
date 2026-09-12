@@ -51,7 +51,7 @@ export class RoomSocketService {
    * `state.sync` (a la connexion) ET par `agenda.updated` (a chaque round
    * compose/repris) : ce dernier est le SEUL evenement qui rediffuse l'item
    * neuf aux participants deja connectes, les alias herites (`round.prepare`,
-   * `subject.add`...) ne portant que le texte du sujet. */
+   * `round.add`...) ne portant que le texte du sujet. */
   readonly items = signal<RoundItem[]>([]);
   /** Un round ne porte qu'un item aujourd'hui : "l'item courant" est le premier. */
   readonly currentItem = computed<RoundItem | null>(() => this.items()[0] ?? null);
@@ -128,9 +128,26 @@ export class RoomSocketService {
   }
 
   // --- intentions (contract §4) ---
-  setSubject(text: string) { this.send('subject.set', { text }); }
-  addSubject(text: string) { this.send('subject.add', { text }); }
-  selectSubject(subjectId: number) { this.send('subject.select', { subjectId }); }
+  /** Reecrit le texte de l'item courant (`item.update`). Un round tout juste
+   * compose (salle neuve, ou round remis a zero) n'a encore aucun item : dans
+   * ce cas on le CREE (`item.add`) au lieu d'ecrire sur un id qui n'existe pas.
+   * Remplace l'ancien `subject.set`, qui faisait ce choix cote serveur. */
+  setItemText(text: string) {
+    const item = this.currentItem();
+    if (item) {
+      this.send('item.update', { itemId: item.id, text });
+    } else {
+      this.send('item.add', { text });
+    }
+  }
+  /** Empile un round de plus dans la file (`round.add`), sans l'annoncer comme
+   * courant. Remplace l'ancien `subject.add` — semantique differente de
+   * `item.add`, qui ajoute un item au round courant plutot que d'en ouvrir un. */
+  addRound(text: string) { this.send('round.add', { text }); }
+  /** Fait passer un round de la file en courant (`round.select`). Remplace
+   * l'ancien `subject.select` : meme valeur (l'id d'agenda designe deja un
+   * round), seuls le type de message et la cle de payload changent. */
+  selectRound(roundId: number) { this.send('round.select', { roundId }); }
   openVote() { this.send('vote.open', {}); }
   /** Emet `response.cast` pour l'item courant (contrat §8.2.b) — le poker ne
    * joue jamais qu'un item par round, donc une seule carte a la fois. */
@@ -201,7 +218,7 @@ export class RoomSocketService {
         const agenda = (msg.payload as { agenda: AgendaItem[] }).agenda;
         this.agenda.set(agenda);
         // SEULE source qui rediffuse l'item courant aux participants deja
-        // connectes : les alias herites (round.prepare, subject.add...) ne
+        // connectes : les alias herites (round.prepare, round.add...) ne
         // portent que le texte du sujet (subject.updated), jamais l'id d'item
         // que `response.cast` doit pourtant citer. `agenda.updated` accompagne
         // systematiquement tout changement de round, donc de current_id.
