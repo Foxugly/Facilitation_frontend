@@ -361,7 +361,8 @@
         "delegation_poker": "Delegation Poker",
         "poker_planning": "Planning Poker",
         "fist_of_five": "Fist of Five",
-        "roman_vote": "Voto romano"
+        "roman_vote": "Voto romano",
+        "dot_voting": "Votación con pegatinas"
       }
     },
     "reveal_mode": {
@@ -394,6 +395,26 @@
       "manual_title": "Seleccione lo que se retoma",
       "no_candidates": "No hay candidatos que retomar.",
       "resolve": "Confirmar selección"
+    },
+    "dot_voting": {
+      "title": "Votación con pegatinas",
+      "item_placeholder": "Texto del ítem",
+      "no_items": "Todavía no hay ítems.",
+      "remaining": "{{count}} adhesivo(s) restante(s)",
+      "add_dot": "Colocar un adhesivo",
+      "remove_dot": "Quitar un adhesivo",
+      "totals_hidden": "Totales ocultos",
+      "points_label": "{{count}} pts",
+      "responses_label": "{{count}} respuestas",
+      "ranking_title": "Clasificación",
+      "items_label": "Ítems de la ronda",
+      "remove_item": "Quitar ítem",
+      "add_item": "Añadir ítem",
+      "pending_label": "Restante por participante",
+      "pending_unknown": "Aún no hay datos.",
+      "totals_visible_label": "Totales visibles durante la votación",
+      "totals_visible_hint": "Desactivado por defecto: solo se muestran totales agregados, nunca quién colocó qué.",
+      "conclude": "Concluir"
     }
   },
   "billing": {

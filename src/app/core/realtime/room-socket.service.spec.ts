@@ -396,3 +396,152 @@ describe('RoomSocketService chaining (contrat §8.5, design §7)', () => {
     expect(svc.currentChainingCandidates()).toBeNull();
   });
 });
+
+describe('RoomSocketService Dot Voting (contrat §8.6/§8.7, design dot-voting)', () => {
+  it("castResponse emet response.cast pour l'item DONNE (pas forcement le premier), et voit sa propre reponse immediatement", () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.castResponse(42, { points: 2 });
+    expect(sent).toEqual([{ type: 'response.cast', payload: { itemId: 42, payload: { points: 2 } } }]);
+    expect(svc.myResponses()['42']).toEqual({ points: 2 });
+  });
+
+  it("castVote continue de cibler l'item COURANT (generalisation castResponse, poker inchange)", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // items[0].id = 1
+    const sent = captureSent(svc);
+    svc.castVote('advise');
+    expect(sent).toEqual([{ type: 'response.cast', payload: { itemId: 1, payload: { card: 'advise' } } }]);
+  });
+
+  it('addItem/updateItem/removeItem/reorderItems emettent les intentions item.* attendues', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.addItem('Un item');
+    svc.updateItem(3, 'Texte revise');
+    svc.removeItem(3);
+    svc.reorderItems([3, 1, 2]);
+    expect(sent).toEqual([
+      { type: 'item.add', payload: { text: 'Un item' } },
+      { type: 'item.update', payload: { itemId: 3, text: 'Texte revise' } },
+      { type: 'item.remove', payload: { itemId: 3 } },
+      { type: 'item.reorder', payload: { itemIds: [3, 1, 2] } },
+    ]);
+  });
+
+  it('item.reordered met a jour items() quand il vise le round courant (seul item.* a ne pas passer par agenda.updated)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // agenda[0].id = 1 (round courant)
+    feed(svc, 'item.reordered', {
+      roundId: 1,
+      items: [
+        { id: 2, text: 'B', sequence: 1 },
+        { id: 1, text: 'Budget?', sequence: 2 },
+      ],
+    });
+    expect(svc.items()).toEqual([
+      { id: 2, text: 'B', sequence: 1 },
+      { id: 1, text: 'Budget?', sequence: 2 },
+    ]);
+  });
+
+  it("item.reordered pour un AUTRE round que le courant n'ecrase pas items()", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC); // round courant = 1
+    feed(svc, 'item.reordered', { roundId: 99, items: [{ id: 5, text: 'Ailleurs', sequence: 1 }] });
+    expect(svc.items()).toEqual(SYNC.items);
+  });
+
+  it('actResult omet la CLE chosenValue quand aucune valeur (Dot Voting, contrat §8.6 : conclure sans carte)', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.actResult();
+    expect(sent).toEqual([{ type: 'result.act', payload: {} }]);
+    // toEqual seul ne suffit pas a distinguer {} de {chosenValue: undefined}
+    // (les deux passent l'egalite structurelle de vitest/Jest) : verifier la
+    // CLE elle-meme, pas seulement sa valeur.
+    expect('chosenValue' in (sent[0].payload as object)).toBe(false);
+  });
+
+  it('actResult porte chosenValue quand fourni (poker, inchange)', () => {
+    const svc = new RoomSocketService();
+    const sent = captureSent(svc);
+    svc.actResult('advise');
+    expect(sent).toEqual([{ type: 'result.act', payload: { chosenValue: 'advise' } }]);
+  });
+
+  it("response.totals alimente liveTotals -- toujours un agregat, jamais un lien participant -> jetons", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'response.totals', { itemResults: [{ itemId: 1, totalPoints: 5, responseCount: 2 }] });
+    expect(svc.liveTotals()).toEqual([{ itemId: 1, totalPoints: 5, responseCount: 2 }]);
+  });
+
+  it('response.pending alimente pendingBudgets (reserve au facilitateur, filtre cote serveur)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'response.pending', { remaining: { 'p-1': 2, 'p-2': 4 } });
+    expect(svc.pendingBudgets()).toEqual({ 'p-1': 2, 'p-2': 4 });
+  });
+
+  it("vote.opened vide liveTotals/pendingBudgets d'un round precedent", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'response.totals', { itemResults: [{ itemId: 1, totalPoints: 5, responseCount: 2 }] });
+    feed(svc, 'response.pending', { remaining: { 'p-1': 2 } });
+    feed(svc, 'vote.opened', { deadline: null });
+    expect(svc.liveTotals()).toEqual([]);
+    expect(svc.pendingBudgets()).toBeNull();
+  });
+
+  it('vote.revealed vide liveTotals/pendingBudgets : plus personne ne peut poser de jeton', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'response.totals', { itemResults: [{ itemId: 1, totalPoints: 5, responseCount: 2 }] });
+    feed(svc, 'response.pending', { remaining: { 'p-1': 2 } });
+    feed(svc, 'vote.revealed', { itemResults: [{ itemId: 1, totalPoints: 5, responseCount: 2, rank: 1, anonymous: false }], anonymous: false });
+    expect(svc.liveTotals()).toEqual([]);
+    expect(svc.pendingBudgets()).toBeNull();
+  });
+
+  it('round.configured alimente roundConfig (premier lecteur reel, Dot Voting liveTotals)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'round.configured', { roundId: 1, deckSnapshot: SYNC.deckSnapshot, config: { liveTotals: true } });
+    expect(svc.roundConfig()).toEqual({ liveTotals: true });
+  });
+
+  it('vote.opened NE reinitialise PAS roundConfig : le reglage pose en idle reste valable pendant le vote', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'round.configured', { roundId: 1, deckSnapshot: SYNC.deckSnapshot, config: { liveTotals: true } });
+    feed(svc, 'vote.opened', { deadline: null });
+    expect(svc.roundConfig()).toEqual({ liveTotals: true });
+  });
+
+  it('vote.wasReset reinitialise roundConfig (round different possible, contrat ne distingue pas)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'round.configured', { roundId: 1, deckSnapshot: SYNC.deckSnapshot, config: { liveTotals: true } });
+    feed(svc, 'vote.wasReset', { nextState: 'idle' });
+    expect(svc.roundConfig()).toEqual({});
+  });
+
+  it('state.sync porte liveTotals/pendingBudgets aux memes conditions que les evenements (contrat §8.7)', () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', {
+      ...SYNC,
+      liveTotals: { itemResults: [{ itemId: 1, totalPoints: 3, responseCount: 1 }] },
+      pendingBudgets: { 'p-1': 5 },
+    });
+    expect(svc.liveTotals()).toEqual([{ itemId: 1, totalPoints: 3, responseCount: 1 }]);
+    expect(svc.pendingBudgets()).toEqual({ 'p-1': 5 });
+  });
+
+  it("state.sync sans liveTotals/pendingBudgets laisse liveTotals vide et pendingBudgets null (absent, pas 'a zero')", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'state.sync', SYNC);
+    expect(svc.liveTotals()).toEqual([]);
+    expect(svc.pendingBudgets()).toBeNull();
+  });
+
+  it("state.sync remet roundConfig a {} : le contrat ne porte pas Round.config a la connexion", () => {
+    const svc = new RoomSocketService();
+    feed(svc, 'round.configured', { roundId: 1, deckSnapshot: SYNC.deckSnapshot, config: { liveTotals: true } });
+    feed(svc, 'state.sync', SYNC);
+    expect(svc.roundConfig()).toEqual({});
+  });
+});

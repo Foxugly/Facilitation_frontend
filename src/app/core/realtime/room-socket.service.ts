@@ -9,17 +9,22 @@ import {
   DeckSnapshot,
   Envelope,
   ItemResult,
+  LiveItemTotal,
+  LiveTotalsPayload,
   MyResponses,
   Participation,
   ParticipantView,
+  PendingBudgets,
   PROTOCOL_VERSION,
   RevealedPayload,
+  ResponsePayload,
   Role,
   RoomError,
   ResultLayout,
   RoundBoundPayload,
   RoundCandidatesPayload,
   RoundConfigurePayload,
+  RoundConfiguredPayload,
   RoundItem,
   RoundResolvedPayload,
   RoundState,
@@ -114,6 +119,24 @@ export class RoomSocketService {
    * decides when it actually causes a reveal. */
   readonly deadline = signal<string | null>(null);
   readonly timer = signal<TimerSettings>({ enabled: false, seconds: 10 });
+  /** Totaux en direct par item (contrat §8.7, design dot voting §5) — vide tant
+   * que le round n'est pas `open` ou que sa config ne l'autorise pas (defaut :
+   * secret). Toujours un AGREGAT, jamais un lien participant -> jetons. */
+  readonly liveTotals = signal<LiveItemTotal[]>([]);
+  /** Ce qu'il reste a placer par participant (contrat §8.7, design §4) —
+   * `null` pour tout non-facilitateur, ou pour une activite sans notion de
+   * budget (le poker) : le serveur ne calcule alors rien du tout, cote client
+   * on ne peut donc pas non plus faire semblant de savoir. */
+  readonly pendingBudgets = signal<PendingBudgets | null>(null);
+  /** La config du round courant, telle que `round.configure` l'a POSEE cette
+   * connexion-ci (`round.configured`, contrat §8.3) — VUE DE MEILLEUR EFFORT,
+   * pas une verite serveur : `state.sync` ne porte pas `Round.config` (aucun
+   * lecteur avant 6a), donc un rechargement pendant la composition (round
+   * `idle`, avant ouverture) perd cet affichage jusqu'a un nouveau reglage. Le
+   * serveur reste seul a faire autorite sur la valeur REELLEMENT appliquee ;
+   * ce signal ne sert qu'a refleter un choix que CE facilitateur vient de
+   * faire, jamais a valider un geste. */
+  readonly roundConfig = signal<Record<string, unknown>>({});
 
   connect(code: string, token: string, role: Role): void {
     this.code = code.toUpperCase();
@@ -171,6 +194,19 @@ export class RoomSocketService {
       this.send('item.add', { text });
     }
   }
+  /** Ajoute un item de plus au round courant (`item.add`, contrat §8.1.a) --
+   * generalise `setItemText`, qui ne composait qu'un item implicite (le sujet
+   * unique du poker). Une activite a N items (Dot Voting) doit pouvoir en
+   * ajouter plusieurs, un par un -- pas de composition en lot cote serveur. */
+  addItem(text: string) { this.send('item.add', { text }); }
+  /** Reecrit le texte d'un item existant, explicitement (`item.update`). */
+  updateItem(itemId: number, text: string) { this.send('item.update', { itemId, text }); }
+  /** Retire un item du round courant (`item.remove`) -- le serveur refuse s'il
+   * porte deja un `Result` (ne reecrit pas l'historique, contrat §8.1.a). */
+  removeItem(itemId: number) { this.send('item.remove', { itemId }); }
+  /** Refixe la sequence des items du round courant (`item.reorder`) -- exige la
+   * liste COMPLETE, comme `reorderRounds` (meme convention, contrat §8.1.a). */
+  reorderItems(itemIds: number[]) { this.send('item.reorder', { itemIds }); }
   /** Empile un round de plus dans la file (`round.add`), sans l'annoncer comme
    * courant. Remplace l'ancien `subject.add` — semantique differente de
    * `item.add`, qui ajoute un item au round courant plutot que d'en ouvrir un. */
@@ -189,17 +225,32 @@ export class RoomSocketService {
    * (il porte un Result), ni en vol, ni courant. */
   removeRound(roundId: number) { this.send('round.remove', { roundId }); }
   openVote() { this.send('vote.open', {}); }
+  /** Emet `response.cast` pour UN item explicite (contrat §8.2.a) -- generalise
+   * `castVote`, qui ne visait que `currentItem()` (le poker n'a jamais qu'un
+   * item par round). Une activite a N items (Dot Voting) doit pouvoir cibler
+   * chacun independamment. `payload` REMPLACE la reponse existante pour cet
+   * item, il ne la complete pas (meme semantique que `cast_response` cote
+   * serveur, `update_or_create`). */
+  castResponse(itemId: number, payload: ResponsePayload) {
+    // The caster may see its own answer immediately (not a secret from itself, §6.a).
+    this.myResponses.update((r) => ({ ...r, [String(itemId)]: payload }));
+    this.send('response.cast', { itemId, payload });
+  }
   /** Emet `response.cast` pour l'item courant (contrat §8.2.b) — le poker ne
    * joue jamais qu'un item par round, donc une seule carte a la fois. */
   castVote(cardValue: string) {
     const item = this.currentItem();
     if (!item) return;
-    // The caster may see its own choice immediately (not a secret from itself, §6.a).
-    this.myResponses.update((r) => ({ ...r, [String(item.id)]: { card: cardValue } }));
-    this.send('response.cast', { itemId: item.id, payload: { card: cardValue } });
+    this.castResponse(item.id, { card: cardValue });
   }
   reveal() { this.send('vote.reveal', {}); }
-  actResult(chosenValue: string) { this.send('result.act', { chosenValue }); }
+  /** `result.act` (contrat §8.6) a deux regimes selon l'activite : le poker
+   * retient TOUJOURS une carte (`chosenValue` obligatoire) ; une activite qui
+   * fige son resultat a la revelation (Dot Voting) conclut le round SANS
+   * valeur -- le serveur refuse une valeur porteuse dans ce cas. `chosenValue`
+   * est donc optionnel ici, omis du payload plutot qu'envoye `null` (le
+   * consumer traite deja l'absence comme None). */
+  actResult(chosenValue?: string) { this.send('result.act', chosenValue !== undefined ? { chosenValue } : {}); }
   reset() { this.send('vote.reset', {}); }
   claimFacilitator() { this.send('facilitator.claim', {}); }
   transferFacilitator(targetParticipantId: string) { this.send('facilitator.transfer', { targetParticipantId }); }
@@ -280,9 +331,18 @@ export class RoomSocketService {
       case 'round.configured':
         // `deck.changed` (rediffuse a part, seulement si le deck a reellement
         // change) est deja le message qui met a jour `deckSnapshot` : ne pas
-        // le dupliquer ici. `config` n'a aucun lecteur cote front aujourd'hui
-        // — le poker declare un config_schema vide (`realtime/activities.py`).
+        // le dupliquer ici. `config` n'avait aucun lecteur avant 6a -- Dot
+        // Voting est le premier a en avoir un (`liveTotals`, contrat §8.3/§8.7).
+        this.roundConfig.set((msg.payload as RoundConfiguredPayload).config ?? {});
         return;
+      case 'item.reordered': {
+        // SEUL des quatre `item.*` a NE PAS declencher `agenda.updated` (contrat
+        // §8.1.a) : sans ce cas, un reordonnancement resterait invisible cote
+        // client tant qu'aucun autre fait ne rafraichit l'agenda.
+        const p = msg.payload as { roundId: number | null; items: RoundItem[] };
+        if (p.roundId !== null && p.roundId === this.currentRoundId()) this.items.set(p.items);
+        return;
+      }
       case 'round.bound': {
         // La liaison ne change ni les items ni l'etat d'aucun round (contrat
         // §8.5) : rien a appliquer ici, sauf invalider une liste de candidats
@@ -325,8 +385,25 @@ export class RoomSocketService {
         this.result.set(null);
         this.myResponses.set({});
         this.deadline.set(p?.deadline ?? null);
+        // Round neuf (ou reouvert) : aucun total ni reste-a-placer n'a encore
+        // ete diffuse -- vide plutot qu'un residu du round precedent. `roundConfig`
+        // N'EST PAS reinitialise ici : la config posee pendant la composition
+        // (idle) reste valable pendant tout le vote, c'est justement quand elle
+        // sert (liveTotals).
+        this.liveTotals.set([]);
+        this.pendingBudgets.set(null);
         return;
       }
+      case 'response.totals':
+        // A tous, mais seulement si la config du round l'autorise (contrat
+        // §8.7) -- jamais un lien participant -> jetons, toujours un agregat.
+        this.liveTotals.set((msg.payload as LiveTotalsPayload).itemResults ?? []);
+        return;
+      case 'response.pending':
+        // Reserve au facilitateur (filtre a l'emission cote serveur, contrat
+        // §8.7) : tout autre destinataire ne recoit meme pas cet octet.
+        this.pendingBudgets.set((msg.payload as { remaining: PendingBudgets }).remaining ?? null);
+        return;
       case 'vote.revealed': {
         const p = msg.payload as RevealedPayload;
         this.roundState.set('revealed');
@@ -334,6 +411,9 @@ export class RoomSocketService {
         this.revealMode.update((r) => ({ ...r, anonymous: p.anonymous }));
         // The countdown is cosmetic only: whatever the reason, the round is over.
         this.deadline.set(null);
+        // Plus personne ne peut poser de jeton : le direct n'a plus d'objet.
+        this.liveTotals.set([]);
+        this.pendingBudgets.set(null);
         return;
       }
       case 'reveal.modeChanged':
@@ -352,6 +432,14 @@ export class RoomSocketService {
         this.result.set(null);
         this.myResponses.set({});
         this.deadline.set(null);
+        this.liveTotals.set([]);
+        this.pendingBudgets.set(null);
+        // Ce fait couvre aussi bien `vote.reset` (meme round, sa config ne
+        // change pas) que `round.select` (round DIFFERENT, sa config est
+        // inconnue) -- indiscernables sur ce seul payload. Reinitialiser
+        // reste le choix le plus sur : le defaut du reglage qu'il reflete
+        // (`liveTotals`) est deja le secret, jamais l'inverse.
+        this.roundConfig.set({});
         return;
       }
       case 'facilitator.changed': {
@@ -410,5 +498,13 @@ export class RoomSocketService {
     this.revealMode.set(s.reveal ?? { anonymous: false, canAnonymise: false });
     this.deadline.set(s.deadline ?? null);
     this.timer.set(s.timer ?? { enabled: false, seconds: 10 });
+    // Memes conditions que les diffusions `response.totals`/`response.pending`
+    // (contrat §8.7) : absent = rien a afficher, jamais un tableau/objet vide
+    // traite comme "tout est a zero".
+    this.liveTotals.set(s.liveTotals?.itemResults ?? []);
+    this.pendingBudgets.set(s.pendingBudgets ?? null);
+    // `state.sync` ne porte pas `Round.config` (voir la doc du signal) : un
+    // (re)connect ne peut donc jamais mieux faire que "config inconnue".
+    this.roundConfig.set({});
   }
 }

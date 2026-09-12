@@ -361,7 +361,8 @@
         "delegation_poker": "Delegation Poker",
         "poker_planning": "Planning Poker",
         "fist_of_five": "Fist of Five",
-        "roman_vote": "Romeinse stemming"
+        "roman_vote": "Romeinse stemming",
+        "dot_voting": "Stickerstemming"
       }
     },
     "reveal_mode": {
@@ -394,6 +395,26 @@
       "manual_title": "Selecteer wat wordt overgenomen",
       "no_candidates": "Geen kandidaten om over te nemen.",
       "resolve": "Selectie bevestigen"
+    },
+    "dot_voting": {
+      "title": "Stickerstemming",
+      "item_placeholder": "Tekst van het item",
+      "no_items": "Nog geen items.",
+      "remaining": "Nog {{count}} sticker(s)",
+      "add_dot": "Sticker plaatsen",
+      "remove_dot": "Sticker verwijderen",
+      "totals_hidden": "Totalen verborgen",
+      "points_label": "{{count}} pt",
+      "responses_label": "{{count}} reacties",
+      "ranking_title": "Ranglijst",
+      "items_label": "Items van de ronde",
+      "remove_item": "Item verwijderen",
+      "add_item": "Item toevoegen",
+      "pending_label": "Resterend per deelnemer",
+      "pending_unknown": "Nog geen gegevens.",
+      "totals_visible_label": "Totalen zichtbaar tijdens de stemming",
+      "totals_visible_hint": "Standaard uit: alleen totalen worden getoond, nooit wie wat plaatste.",
+      "conclude": "Afronden"
     }
   },
   "billing": {

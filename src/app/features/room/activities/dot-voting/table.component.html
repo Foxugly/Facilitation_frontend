@@ -1,0 +1,96 @@
+@if (socket.deckSnapshot(); as deck) {
+  <div class="stage">
+    <div class="subject-view">
+      <p-tag [severity]="badgeSeverity()" [value]="'vote_state.' + state() | transloco" />
+      <h2>{{ 'room.dot_voting.title' | transloco }}</h2>
+      <!-- Meme badge que le poker, avant meme de voter : un participant doit
+           savoir si sa reponse portera son nom des l'ouverture (contrat §6.a). -->
+      <span class="reveal-badge" [class.anonymous]="socket.revealMode().anonymous">
+        <i class="pi" [class.pi-eye-slash]="socket.revealMode().anonymous" [class.pi-eye]="!socket.revealMode().anonymous"></i>
+        {{ (socket.revealMode().anonymous ? 'room.reveal_mode.badge_anonymous' : 'room.reveal_mode.badge_nominative') | transloco }}
+      </span>
+    </div>
+
+    @if (state() === 'open') {
+      <p class="roster-progress">{{ socket.participation().voted }} / {{ socket.participation().total }}</p>
+    } @else if (state() === 'idle') {
+      <p class="roster-progress">{{ 'room.waiting_facilitator' | transloco }}</p>
+    }
+
+    <!-- La main : un item par ligne, +/- pour poser/retirer une gommette, pas de
+         glisser-depose (decision de conception, tactile). Reste visible en idle
+         (lecture seule, les boutons se desactivent via votable()) pour que les
+         items du round soient lisibles avant l'ouverture du vote. -->
+    @if (!outcomeVisible()) {
+      <div class="hand">
+        @if (votable()) {
+          <!-- L'information dont le participant a le plus besoin : ce qu'il lui
+               reste a poser, tous items confondus (design §4). -->
+          <span class="hand-label" [class.hand-label--empty]="remainingBudget() === 0">
+            {{ 'room.dot_voting.remaining' | transloco: { count: remainingBudget() } }}
+          </span>
+        }
+        <ul class="dot-items">
+          @for (item of items(); track item.id) {
+            <li class="dot-item">
+              <span class="dot-item-text">{{ item.text }}</span>
+              <div class="dot-controls">
+                @if (votable()) {
+                  <button type="button" class="dot-btn dot-btn--minus" [disabled]="!canDecrement(item)"
+                          [attr.aria-label]="'room.dot_voting.remove_dot' | transloco" (click)="decrement(item)">
+                    <i class="pi pi-minus"></i>
+                  </button>
+                }
+                <span class="dot-count">{{ pointsFor(item) }}</span>
+                @if (votable()) {
+                  <button type="button" class="dot-btn dot-btn--plus" [disabled]="!canIncrement(item)"
+                          [attr.aria-label]="'room.dot_voting.add_dot' | transloco" (click)="increment(item)">
+                    <i class="pi pi-plus"></i>
+                  </button>
+                }
+              </div>
+              <!-- Le total en direct n'existe que si le facilitateur l'a rendu
+                   visible (defaut : secret, design §5) -- absent, pas a zero. -->
+              @if (votable()) {
+                @if (liveTotalFor(item); as total) {
+                  <span class="dot-total">{{ 'room.dot_voting.points_label' | transloco: { count: total.totalPoints } }}</span>
+                } @else {
+                  <span class="dot-total dot-total--hidden">
+                    <i class="pi pi-eye-slash"></i>
+                    {{ 'room.dot_voting.totals_hidden' | transloco }}
+                  </span>
+                }
+              }
+            </li>
+          } @empty {
+            <li class="dot-item-empty">{{ 'room.dot_voting.no_items' | transloco }}</li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <!-- Meme bande, une fois les votes reveles : le classement fige (design §6)
+           remplace la main, qui n'a plus d'usage. -->
+      <div class="outcome">
+        <span class="outcome-label">{{ 'room.dot_voting.ranking_title' | transloco }}</span>
+        <ol class="ranking-list">
+          @for (row of ranking(); track row.itemId) {
+            <li class="ranking-row" [class.ranking-row--top]="row.rank === 1">
+              <span class="ranking-rank">#{{ row.rank }}</span>
+              <span class="ranking-text">{{ row.text }}</span>
+              <span class="ranking-points">{{ 'room.dot_voting.points_label' | transloco: { count: row.totalPoints } }}</span>
+              <span class="ranking-responses">{{ 'room.dot_voting.responses_label' | transloco: { count: row.responseCount } }}</span>
+              <!-- Vide sur un round anonyme : le serveur n'a jamais envoye le lien
+                   participant -> jetons, ce n'est pas l'interface qui le cache. -->
+              @if (!row.anonymous && row.voters) {
+                <span class="ranking-voters">{{ row.voters }}</span>
+              }
+            </li>
+          }
+        </ol>
+        @if (socket.revealMode().anonymous) {
+          <span class="outcome-hint">{{ 'room.reveal_anonymous_hint' | transloco }}</span>
+        }
+      </div>
+    }
+  </div>
+}

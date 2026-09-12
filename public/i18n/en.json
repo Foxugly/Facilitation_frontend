@@ -361,7 +361,8 @@
         "delegation_poker": "Delegation Poker",
         "poker_planning": "Planning Poker",
         "fist_of_five": "Fist of Five",
-        "roman_vote": "Roman Vote"
+        "roman_vote": "Roman Vote",
+        "dot_voting": "Dot Voting"
       }
     },
     "reveal_mode": {
@@ -394,6 +395,26 @@
       "manual_title": "Select what carries over",
       "no_candidates": "No candidates to chain.",
       "resolve": "Confirm selection"
+    },
+    "dot_voting": {
+      "title": "Dot Voting",
+      "item_placeholder": "Item text",
+      "no_items": "No items yet.",
+      "remaining": "{{count}} dots left",
+      "add_dot": "Add a dot",
+      "remove_dot": "Remove a dot",
+      "totals_hidden": "Totals hidden",
+      "points_label": "{{count}} pts",
+      "responses_label": "{{count}} responses",
+      "ranking_title": "Ranking",
+      "items_label": "Round items",
+      "remove_item": "Remove item",
+      "add_item": "Add item",
+      "pending_label": "Remaining per participant",
+      "pending_unknown": "No data yet.",
+      "totals_visible_label": "Totals visible during the vote",
+      "totals_visible_hint": "Off by default: only aggregated totals are ever shown, never who placed what.",
+      "conclude": "Conclude"
     }
   },
   "billing": {

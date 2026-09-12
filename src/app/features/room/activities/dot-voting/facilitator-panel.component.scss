@@ -1,0 +1,166 @@
+// Styles encapsules par composant (Angular) : reprend le vocabulaire de
+// delegation-poker/facilitator-panel.component.scss (.fac-panel, .panel-block,
+// .panel-block.guard, .timer-row, .reveal-row) pour un rendu coherent -- mais
+// chaque activite porte sa PROPRE copie, les styles ne traversant pas les
+// composants dynamiques (voir room.component.scss). Cout observe, non corrige
+// ici : voir task-6-report.md.
+.fac-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  align-self: start;
+  position: sticky;
+  top: 16px;
+}
+
+.panel-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.panel-block.guard {
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius);
+  padding: var(--s-3);
+  gap: var(--s-2);
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.round-form,
+.round-ready {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.reveal-row,
+.timer-row,
+.totals-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.timer-row .timer-icon {
+  margin-left: var(--s-1);
+  margin-right: var(--s-1);
+  color: var(--muted);
+}
+
+.timer-row :is(p-inputnumber, p-inputNumber) {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.reveal-mode-name,
+.totals-name {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.totals-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* --- Items du round (composition, etape 2) ----------------------------------- */
+
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2);
+}
+
+.item-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.add-item {
+  flex-direction: row;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* --- Reste a placer, reserve au facilitateur (contrat §8.7) ------------------ */
+
+.pending-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pending-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-2);
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.pending-row--done .pending-remaining {
+  color: var(--muted);
+}
+
+.pending-remaining {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pending-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .fac-panel {
+    min-width: 0;
+  }
+}

@@ -361,7 +361,8 @@
         "delegation_poker": "Delegation Poker",
         "poker_planning": "Poker Planning",
         "fist_of_five": "Fist of Five",
-        "roman_vote": "Vote romain"
+        "roman_vote": "Vote romain",
+        "dot_voting": "Vote par gommettes"
       }
     },
     "reveal_mode": {
@@ -394,6 +395,26 @@
       "manual_title": "Sélectionnez ce qui passe",
       "no_candidates": "Aucun candidat à reprendre.",
       "resolve": "Valider la sélection"
+    },
+    "dot_voting": {
+      "title": "Vote par gommettes",
+      "item_placeholder": "Texte de l'item",
+      "no_items": "Aucun item pour l'instant.",
+      "remaining": "{{count}} gommette(s) restante(s)",
+      "add_dot": "Poser une gommette",
+      "remove_dot": "Retirer une gommette",
+      "totals_hidden": "Totaux masqués",
+      "points_label": "{{count}} pts",
+      "responses_label": "{{count}} réponses",
+      "ranking_title": "Classement",
+      "items_label": "Items du round",
+      "remove_item": "Retirer l'item",
+      "add_item": "Ajouter un item",
+      "pending_label": "Reste à placer par participant",
+      "pending_unknown": "Aucune donnée pour l'instant.",
+      "totals_visible_label": "Totaux visibles pendant le vote",
+      "totals_visible_hint": "Désactivé par défaut : seuls des totaux agrégés sont montrés, jamais qui a posé quoi.",
+      "conclude": "Conclure"
     }
   },
   "billing": {
