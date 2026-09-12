@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { RoomSocketService } from './room-socket.service';
 import { StateSync } from './protocol';
@@ -405,6 +405,108 @@ describe('RoomSocketService Dot Voting (contrat §8.6/§8.7, design dot-voting)'
     expect(sent).toEqual([{ type: 'response.cast', payload: { itemId: 42, payload: { points: 2 } } }]);
     expect(svc.myResponses()['42']).toEqual({ points: 2 });
   });
+
+  describe(
+    'castResponse -- annulation de la mise a jour optimiste sur refus serveur ' +
+      '(round de correction 1, point 1 : ici un jeton refuse ALIMENTE le budget, pas seulement cosmetique)',
+    () => {
+      /** Le cid n'est expose ni par `castResponse` ni par `send` (mocke dans les
+       * autres tests) : on le lit dans `pendingResponses`, la MEME structure
+       * privee que le producteur utilise pour se souvenir de quoi annuler --
+       * meme motif d'acces que `onMessage`/`send` ailleurs dans ce fichier. */
+      function pendingCidFor(svc: RoomSocketService, itemId: number): string {
+        const pending = (
+          svc as unknown as { pendingResponses: Map<string, { itemId: number; previous: unknown }> }
+        ).pendingResponses;
+        for (const [cid, entry] of pending) if (entry.itemId === itemId) return cid;
+        throw new Error(`aucune reponse en vol pour l'item ${itemId}`);
+      }
+
+      it('un refus (error, rejectedType response.cast) REVIENT sur myResponses -- pas de reponse anterieure : la cle disparait', () => {
+        const svc = new RoomSocketService();
+        svc.castResponse(1, { points: 2 });
+        expect(svc.myResponses()['1']).toEqual({ points: 2 }); // optimiste
+
+        const cid = pendingCidFor(svc, 1);
+        feed(svc, 'error', { code: 'state.invalid_transition', message: 'refuse', rejectedType: 'response.cast', cid });
+
+        expect(svc.myResponses()).not.toHaveProperty('1');
+      });
+
+      it('un refus REVIENT sur la valeur PRECEDENTE quand il y en avait une (correction dun jeton deja pose)', () => {
+        const svc = new RoomSocketService();
+        svc.castResponse(1, { points: 1 }); // accepte (aucun refus simule ici)
+        const cidAccepte = pendingCidFor(svc, 1);
+        // Rien ne "confirme" une reponse acceptee (pas d'echo positif au
+        // contrat) : simuler l'acceptation revient simplement a ne PAS
+        // envoyer d'erreur pour ce cid -- l'entree reste en vol jusqu'au
+        // prochain essai sur le meme item (voir le test suivant), ce qui est
+        // le comportement reel du service.
+        void cidAccepte;
+
+        svc.castResponse(1, { points: 2 }); // tentative refusee
+        const cid = pendingCidFor(svc, 1);
+        expect(svc.myResponses()['1']).toEqual({ points: 2 }); // optimiste
+
+        feed(svc, 'error', { code: 'state.invalid_transition', message: 'refuse', rejectedType: 'response.cast', cid });
+
+        expect(svc.myResponses()['1']).toEqual({ points: 1 }); // revenu a AVANT ce dernier essai
+      });
+
+      it("un refus SANS cid correlable (autre intention, ou cid inconnu) ne touche PAS myResponses", () => {
+        const svc = new RoomSocketService();
+        svc.castResponse(1, { points: 2 });
+        feed(svc, 'error', { code: 'x', message: 'y', rejectedType: 'round.configure', cid: 'c-999-round.configure' });
+        expect(svc.myResponses()['1']).toEqual({ points: 2 }); // inchange : ce refus ne concerne pas cet essai
+      });
+
+      it(
+        'un essai PLUS RECENT sur le MEME item perime le precedent : le refus tardif du premier ' +
+          "n'ecrase pas la valeur du second (deux essais en vol, un seul compte pour l'annulation)",
+        () => {
+          const svc = new RoomSocketService();
+          svc.castResponse(1, { points: 1 }); // essai A
+          const cidA = pendingCidFor(svc, 1);
+          svc.castResponse(1, { points: 5 }); // essai B, plus recent -- perime A
+          expect(svc.myResponses()['1']).toEqual({ points: 5 });
+
+          // Le refus tardif de A arrive APRES B : ne doit RIEN annuler, A n'est
+          // plus l'essai courant sur cet item.
+          feed(svc, 'error', { code: 'x', message: 'y', rejectedType: 'response.cast', cid: cidA });
+          expect(svc.myResponses()['1']).toEqual({ points: 5 });
+        },
+      );
+
+      it(
+        'deux cid ne collisionnent jamais, MEME emis dans la meme milliseconde (double-clic rapide sur +/-) -- ' +
+          'trouve en testant deux essais rapproches, corrige par un compteur monotone en plus de performance.now()',
+        () => {
+          const svc = new RoomSocketService();
+          const spy = vi.spyOn(performance, 'now').mockReturnValue(1000); // fige la milliseconde pour les DEUX appels
+          svc.castResponse(1, { points: 1 });
+          svc.castResponse(2, { points: 1 }); // item DIFFERENT : pas perime par la garde de l'item 1
+          spy.mockRestore();
+
+          const pending = (svc as unknown as { pendingResponses: Map<string, unknown> }).pendingResponses;
+          // Une collision de cid aurait ecrase la premiere entree par la seconde :
+          // une seule survivrait la ou deux essais distincts sont en vol.
+          expect(pending.size).toBe(2);
+        },
+      );
+
+      it('vote.opened/vote.wasReset/state.sync purgent les essais en vol perimes (pas de fuite entre rounds)', () => {
+        const svc = new RoomSocketService();
+        svc.castResponse(1, { points: 2 });
+        expect(
+          (svc as unknown as { pendingResponses: Map<string, unknown> }).pendingResponses.size,
+        ).toBe(1);
+        feed(svc, 'vote.opened', { deadline: null });
+        expect(
+          (svc as unknown as { pendingResponses: Map<string, unknown> }).pendingResponses.size,
+        ).toBe(0);
+      });
+    },
+  );
 
   it("castVote continue de cibler l'item COURANT (generalisation castResponse, poker inchange)", () => {
     const svc = new RoomSocketService();

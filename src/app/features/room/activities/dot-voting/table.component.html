@@ -49,12 +49,15 @@
                   </button>
                 }
               </div>
-              <!-- Le total en direct n'existe que si le facilitateur l'a rendu
-                   visible (defaut : secret, design §5) -- absent, pas a zero. -->
+              <!-- Trois etats, jamais deux (round de correction 1, point 2) :
+                   visible (le total), masque (on SAIT qu'il l'est), ou
+                   inconnu -- ce dernier n'affiche RIEN, ni "0 pts" ni
+                   "masque", tant qu'aucun des deux n'est confirme. -->
               @if (votable()) {
-                @if (liveTotalFor(item); as total) {
-                  <span class="dot-total">{{ 'room.dot_voting.points_label' | transloco: { count: total.totalPoints } }}</span>
-                } @else {
+                @let display = totalsDisplay(item);
+                @if (display.kind === 'visible') {
+                  <span class="dot-total">{{ 'room.dot_voting.points_label' | transloco: { count: display.totalPoints } }}</span>
+                } @else if (display.kind === 'hidden') {
                   <span class="dot-total dot-total--hidden">
                     <i class="pi pi-eye-slash"></i>
                     {{ 'room.dot_voting.totals_hidden' | transloco }}

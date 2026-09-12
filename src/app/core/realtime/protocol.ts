@@ -402,6 +402,17 @@ export interface StateSync {
    * `{ remaining }` que porte l'evenement `response.pending` -- les deux
    * chemins ne sont pas serialises pareil cote serveur (§8.7). */
   pendingBudgets?: PendingBudgets;
+  /** La config du round courant (`Round.config`) -- NON CONFIRMEE au contrat
+   * au moment ou ce champ est ecrit ici (round de correction 1, point 3) :
+   * jusqu'ici seul `round.configured` l'exposait, en reponse a une ECRITURE,
+   * jamais en lecture au (re)connect, d'ou un reglage affiche a tort comme
+   * "off" apres un rechargement alors que le serveur le gardait "on". Le nom
+   * de cle suppose ici (`config`) reprend celui de `RoundConfiguredPayload`
+   * -- A VERIFIER contre le contrat une fois la correction serveur mergee.
+   * Absent (pas `{}`) tant que le serveur ne l'envoie pas encore : `roundConfig`
+   * (RoomSocketService) reste alors dans son etat "inconnu", qui n'affirme
+   * rien (voir sa doc). */
+  config?: Record<string, unknown>;
 }
 
 export interface Participation {

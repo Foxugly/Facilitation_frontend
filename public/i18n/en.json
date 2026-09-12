@@ -414,7 +414,8 @@
       "pending_unknown": "No data yet.",
       "totals_visible_label": "Totals visible during the vote",
       "totals_visible_hint": "Off by default: only aggregated totals are ever shown, never who placed what.",
-      "conclude": "Conclude"
+      "conclude": "Conclude",
+      "totals_visibility_unknown": "Setting unknown since reload -- reapply it if you want totals hidden or visible."
     }
   },
   "billing": {

@@ -46,6 +46,15 @@ export class RoomSocketService {
   private token = '';
   private manualClose = false;
   private reconnectAttempts = 0;
+  /** Compteur monotone pour `makeCid` -- `performance.now()` seul n'a que la
+   * resolution de la milliseconde (arrondie par `Math.floor`) : deux envois
+   * du MEME type dans la meme milliseconde (un double-clic rapide sur +/-,
+   * ou simplement deux tests synchrones) produisaient le MEME cid. Sans
+   * consequence tant que le cid n'etait qu'une trace ; devenu une CLE DE
+   * CORRELATION pour annuler une mise a jour optimiste (`castResponse`,
+   * round de correction 1, point 1), une collision revient sur la MAUVAISE
+   * reponse -- trouve en testant deux essais rapproches sur le meme item. */
+  private cidCounter = 0;
   private pingTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly connected = signal(false);
@@ -137,6 +146,16 @@ export class RoomSocketService {
    * ce signal ne sert qu'a refleter un choix que CE facilitateur vient de
    * faire, jamais a valider un geste. */
   readonly roundConfig = signal<Record<string, unknown>>({});
+  /** Reponses `response.cast` EN VOL, cid -> {itemId, valeur AVANT l'essai} --
+   * permet d'ANNULER la mise a jour optimiste si le serveur refuse (round de
+   * correction 1, point 1). Sans ceci, un jeton refuse laissait le
+   * participant croire qu'il lui restait moins de budget qu'en realite
+   * jusqu'au prochain `state.sync` -- cosmetique pour le poker (une carte
+   * surlignee a tort), mais ici cet etat ALIMENTE L'ARITHMETIQUE DU BUDGET.
+   * Une seule entree PAR ITEM : une nouvelle tentative sur le MEME item
+   * remplace l'ancienne (voir `castResponse`), pour qu'un refus tardif d'un
+   * essai deja perime ne revienne jamais sur une ecriture plus recente. */
+  private readonly pendingResponses = new Map<string, { itemId: number; previous: ResponsePayload | undefined }>();
 
   connect(code: string, token: string, role: Role): void {
     this.code = code.toUpperCase();
@@ -232,9 +251,19 @@ export class RoomSocketService {
    * item, il ne la complete pas (meme semantique que `cast_response` cote
    * serveur, `update_or_create`). */
   castResponse(itemId: number, payload: ResponsePayload) {
-    // The caster may see its own answer immediately (not a secret from itself, §6.a).
+    const cid = this.makeCid('response.cast');
+    // Un essai deja en vol sur ce MEME item devient perime : si son refus
+    // arrive plus tard, y revenir ecraserait cette ecriture plus recente.
+    // Un seul essai en vol par item a la fois compte pour l'annulation.
+    for (const [pendingCid, pending] of this.pendingResponses) {
+      if (pending.itemId === itemId) this.pendingResponses.delete(pendingCid);
+    }
+    this.pendingResponses.set(cid, { itemId, previous: this.myResponses()[String(itemId)] });
+    // The caster may see its own answer immediately (not a secret from itself,
+    // §6.a) -- ANNULE si le serveur refuse (voir `pendingResponses` et le cas
+    // `error` ci-dessous, round de correction 1, point 1).
     this.myResponses.update((r) => ({ ...r, [String(itemId)]: payload }));
-    this.send('response.cast', { itemId, payload });
+    this.send('response.cast', { itemId, payload }, cid);
   }
   /** Emet `response.cast` pour l'item courant (contrat §8.2.b) — le poker ne
    * joue jamais qu'un item par round, donc une seule carte a la fois. */
@@ -296,9 +325,16 @@ export class RoomSocketService {
     this.send('round.prepare', payload);
   }
 
-  private send(type: string, payload: unknown): void {
+  private makeCid(type: string): string {
+    return `c-${Math.floor(performance.now())}-${++this.cidCounter}-${type}`;
+  }
+
+  /** `cid` est normalement genere ici, mais peut etre fourni d'avance par
+   * l'appelant (`castResponse`) quand il doit le connaitre AVANT l'envoi,
+   * pour correler un refus ulterieur (`error.cid`) a l'intention precise
+   * qui l'a declenche. */
+  private send(type: string, payload: unknown, cid: string = this.makeCid(type)): void {
     if (this.ws?.readyState !== WebSocket.OPEN) return;
-    const cid = `c-${Math.floor(performance.now())}-${type}`;
     this.ws.send(JSON.stringify({ v: PROTOCOL_VERSION, type, payload, cid }));
   }
 
@@ -384,6 +420,7 @@ export class RoomSocketService {
         this.itemResults.set([]);
         this.result.set(null);
         this.myResponses.set({});
+        this.pendingResponses.clear();
         this.deadline.set(p?.deadline ?? null);
         // Round neuf (ou reouvert) : aucun total ni reste-a-placer n'a encore
         // ete diffuse -- vide plutot qu'un residu du round precedent. `roundConfig`
@@ -431,6 +468,7 @@ export class RoomSocketService {
         this.itemResults.set([]);
         this.result.set(null);
         this.myResponses.set({});
+        this.pendingResponses.clear();
         this.deadline.set(null);
         this.liveTotals.set([]);
         this.pendingBudgets.set(null);
@@ -456,9 +494,25 @@ export class RoomSocketService {
       case 'facilitator.presence':
         this.facilitatorPresent.set((msg.payload as { present: boolean }).present);
         return;
-      case 'error':
-        this.lastError.set(msg.payload as RoomError);
+      case 'error': {
+        const err = msg.payload as RoomError;
+        this.lastError.set(err);
+        // Annule la mise a jour optimiste du SEUL `response.cast` que ce refus
+        // vise (round de correction 1, point 1) -- correle par `cid`, jamais
+        // par itemId seul : deux essais en vol sur le meme item ne doivent pas
+        // se confondre (voir `castResponse`, qui perime l'entree precedente).
+        if (err.rejectedType === 'response.cast' && err.cid && this.pendingResponses.has(err.cid)) {
+          const pending = this.pendingResponses.get(err.cid)!;
+          this.pendingResponses.delete(err.cid);
+          this.myResponses.update((r) => {
+            const next = { ...r };
+            if (pending.previous === undefined) delete next[String(pending.itemId)];
+            else next[String(pending.itemId)] = pending.previous;
+            return next;
+          });
+        }
         return;
+      }
       case 'pong':
         return;
     }
@@ -478,6 +532,9 @@ export class RoomSocketService {
     if (s.myParticipantId) this.myParticipantId.set(s.myParticipantId);
     this.items.set(s.items ?? []);
     this.myResponses.set(s.myResponses ?? {});
+    // Une (re)connexion neuve ne peut correler AUCUN refus a un essai d'avant
+    // elle : les cid d'une session precedente n'ont plus de sens ici.
+    this.pendingResponses.clear();
     this.result.set(s.result);
     this.resultLayout.set(s.resultLayout ?? 'cards');
     this.facilitatorPresent.set(s.facilitatorPresent);
@@ -503,8 +560,9 @@ export class RoomSocketService {
     // traite comme "tout est a zero".
     this.liveTotals.set(s.liveTotals?.itemResults ?? []);
     this.pendingBudgets.set(s.pendingBudgets ?? null);
-    // `state.sync` ne porte pas `Round.config` (voir la doc du signal) : un
-    // (re)connect ne peut donc jamais mieux faire que "config inconnue".
-    this.roundConfig.set({});
+    // Round de correction 1, point 3 : `state.sync` porte desormais (cote
+    // serveur, en cours) `config`. Absent -> config inconnue (voir la doc de
+    // `StateSync.config` et de `roundConfig`), jamais suppose "off".
+    this.roundConfig.set(s.config ?? {});
   }
 }

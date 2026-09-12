@@ -89,9 +89,15 @@ export class DotVotingTableComponent {
         totalPoints: r.totalPoints ?? 0,
         responseCount: r.responseCount ?? 0,
         anonymous: r.anonymous,
-        voters: (r.votes ?? [])
-          .map((v) => `${noms.get(v.participantId) ?? '?'} (${v.points ?? 0})`)
-          .join(', '),
+        // Defense en profondeur (round de correction 1, point 4) : le secret
+        // tient DEJA par construction cote serveur (aucun round anonyme n'y
+        // ecrit jamais `votes`), mais ce composant ne doit pas non plus
+        // DEPENDRE de cette seule garantie amont pour rester correct -- un
+        // bloc anonyme qui porterait `votes` par erreur ne doit toujours rien
+        // afficher ici.
+        voters: r.anonymous
+          ? ''
+          : (r.votes ?? []).map((v) => `${noms.get(v.participantId) ?? '?'} (${v.points ?? 0})`).join(', '),
       }))
       .sort((a, b) => a.rank - b.rank);
   });
@@ -103,9 +109,32 @@ export class DotVotingTableComponent {
     return this.socket.myResponses()[String(item.id)]?.points ?? 0;
   }
 
-  /** Le total en direct de cet item, si le facilitateur l'a rendu visible. */
-  liveTotalFor(item: RoundItem): { totalPoints: number; responseCount: number } | null {
-    return this.liveTotalsByItem().get(item.id) ?? null;
+  /** Etat d'affichage des totaux pour CET item, pendant le vote (round de
+   * correction 1, point 2) -- TROIS etats, jamais deux : `hidden` (on SAIT
+   * que le facilitateur les masque), `visible` (on SAIT qu'ils sont
+   * montres), et `unknown`, qui ne doit RIEN affirmer -- ni "0 pts" (une
+   * valeur qui pourrait etre fausse), ni "masque" (qui pourrait l'etre tout
+   * autant). Avant ce correctif, l'absence de donnee etait UNIQUEMENT lue
+   * comme "masque" : un participant deja connecte avant l'ouverture du vote,
+   * avant tout premier jeton, affichait donc "Totaux masques" pendant qu'un
+   * autre qui rechargeait au meme instant lisait "0 pts" -- deux ecrans
+   * contradictoires dans la meme salle pour le meme etat reel.
+   *
+   * `visibility` vient de `roundConfig` (§8.3), pas de la presence d'un total
+   * en direct : les deux questions sont INDEPENDANTES (le reglage peut etre
+   * connu sans qu'aucun jeton n'ait encore ete pose). Quand `visibility` vaut
+   * `true` et qu'aucune entree n'existe encore dans `liveTotals()`, 0 est une
+   * valeur REELLE, pas une supposition : la toute premiere reponse posee sur
+   * CE round declenche deja une diffusion (contrat §8.7), donc l'absence
+   * d'entree ne peut signifier qu'"personne n'a encore rien pose". */
+  totalsDisplay(
+    item: RoundItem,
+  ): { kind: 'hidden' } | { kind: 'unknown' } | { kind: 'visible'; totalPoints: number; responseCount: number } {
+    const visibility = this.socket.roundConfig()['liveTotals'];
+    if (visibility === false) return { kind: 'hidden' };
+    if (visibility !== true) return { kind: 'unknown' };
+    const total = this.liveTotalsByItem().get(item.id);
+    return { kind: 'visible', totalPoints: total?.totalPoints ?? 0, responseCount: total?.responseCount ?? 0 };
   }
 
   /** Aucun geste impossible ne doit etre propose : ni au-dela du budget total,

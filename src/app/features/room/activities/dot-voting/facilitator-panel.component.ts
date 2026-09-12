@@ -143,10 +143,23 @@ export class DotVotingFacilitatorPanelComponent {
     this.moveItem(index, 1);
   }
 
-  /** Reglage de visibilite des totaux (design §5, contrat §8.3/§8.7) -- vue de
-   * meilleur effort (`socket.roundConfig`, voir sa doc), settable seulement
-   * `idle` (le serveur refuse `round.configure` sur un round deja ouvert). */
-  readonly liveTotalsOn = computed(() => this.socket.roundConfig()['liveTotals'] === true);
+  /** Reglage de visibilite des totaux (design §5, contrat §8.3/§8.7) --
+   * TROIS etats, jamais deux (round de correction 1, point 3) : `on`/`off`
+   * connus (le facilitateur les a poses CETTE connexion-ci, ou le serveur
+   * les a confirmes dans `state.sync`), et `unknown` -- avant ce correctif,
+   * un reglage inconnu s'affichait comme "off", une FAUSSE ASSURANCE sur un
+   * reglage de confidentialite : le facilitateur pouvait ouvrir le vote en
+   * croyant les totaux secrets alors que le serveur les gardait visibles
+   * depuis un reglage anterieur a un rechargement. `unknown` doit inviter a
+   * reposer le reglage, jamais laisser croire qu'il vaut "off". Settable
+   * seulement `idle` (le serveur refuse `round.configure` sur un round deja
+   * ouvert). */
+  readonly liveTotalsState = computed<'on' | 'off' | 'unknown'>(() => {
+    const v = this.socket.roundConfig()['liveTotals'];
+    if (v === true) return 'on';
+    if (v === false) return 'off';
+    return 'unknown';
+  });
 
   toggleLiveTotals(checked: boolean): void {
     const roundId = this.socket.currentRoundId();

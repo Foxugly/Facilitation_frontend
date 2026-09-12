@@ -115,13 +115,23 @@
 
           <!-- Premier usage reel de Round.config (design dot-voting §5) : le
                facilitateur decide, round par round, si les totaux sont
-               visibles pendant le vote -- defaut : secret. -->
+               visibles pendant le vote -- defaut : secret. Trois etats
+               (round de correction 1, point 3) : un reglage INCONNU (apres
+               un rechargement, avant que le serveur ne l'ait confirme) ne
+               doit jamais se lire comme "off" -- il invite a le reposer. -->
           <div class="panel-block totals-settings">
             <div class="totals-row">
-              <p-toggleswitch [ngModel]="liveTotalsOn()" (ngModelChange)="toggleLiveTotals($event)" />
+              <p-toggleswitch [ngModel]="liveTotalsState() === 'on'" (ngModelChange)="toggleLiveTotals($event)" />
               <span class="totals-name">{{ 'room.dot_voting.totals_visible_label' | transloco }}</span>
             </div>
-            <p class="totals-hint">{{ 'room.dot_voting.totals_visible_hint' | transloco }}</p>
+            @if (liveTotalsState() === 'unknown') {
+              <p class="totals-hint totals-hint--unknown">
+                <i class="pi pi-exclamation-triangle"></i>
+                {{ 'room.dot_voting.totals_visibility_unknown' | transloco }}
+              </p>
+            } @else {
+              <p class="totals-hint">{{ 'room.dot_voting.totals_visible_hint' | transloco }}</p>
+            }
           </div>
 
           <div class="panel-block controls">

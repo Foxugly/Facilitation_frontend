@@ -414,7 +414,8 @@
       "pending_unknown": "Aún no hay datos.",
       "totals_visible_label": "Totales visibles durante la votación",
       "totals_visible_hint": "Desactivado por defecto: solo se muestran totales agregados, nunca quién colocó qué.",
-      "conclude": "Concluir"
+      "conclude": "Concluir",
+      "totals_visibility_unknown": "Ajuste desconocido desde la recarga -- vuelva a aplicarlo si quiere totales ocultos o visibles."
     }
   },
   "billing": {

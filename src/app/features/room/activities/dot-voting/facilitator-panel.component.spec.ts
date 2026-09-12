@@ -140,35 +140,120 @@ describe('DotVotingFacilitatorPanelComponent -- items du round (etape 2)', () =>
   });
 });
 
-describe('DotVotingFacilitatorPanelComponent -- visibilite des totaux (design §5, contrat §8.3)', () => {
-  it('liveTotalsOn est FAUX par defaut (aucune config posee -- le secret est le defaut)', () => {
-    const { component } = setup();
-    expect(component.liveTotalsOn()).toBe(false);
-  });
-
-  it('toggleLiveTotals envoie round.configure sur le round COURANT quand il existe', () => {
-    const { component, socket, sent } = setup();
-    socket.agenda.set(agendaWithCurrent(7, ITEMS));
-    component.toggleLiveTotals(true);
-    expect(sent).toEqual([{ type: 'round.configure', payload: { roundId: 7, config: { liveTotals: true } } }]);
-  });
-
-  it("toggleLiveTotals ne fait rien tant qu aucun round n est courant (garde defensive)", () => {
-    const { component, sent } = setup();
-    component.toggleLiveTotals(true);
-    expect(sent).toEqual([]);
-  });
-
-  it('liveTotalsOn reflete round.configured une fois recu (round.configured, contrat §8.3)', () => {
-    const { component, socket } = setup();
-    (socket as unknown as { onMessage: (m: unknown) => void }).onMessage({
-      v: 1,
-      type: 'round.configured',
-      payload: { roundId: 7, deckSnapshot: deckSnapshot(), config: { liveTotals: true } },
+describe(
+  'DotVotingFacilitatorPanelComponent -- visibilite des totaux, TROIS etats ' +
+    '(design §5, contrat §8.3, round de correction 1 point 3)',
+  () => {
+    it("liveTotalsState est 'unknown' par defaut (aucune config posee ni recue) -- PAS 'off'", () => {
+      const { component } = setup();
+      // Avant ce correctif, un reglage inconnu s'affichait comme "off" : une
+      // FAUSSE ASSURANCE de confidentialite (le facilitateur pouvait ouvrir
+      // le vote en croyant les totaux secrets alors que le serveur les
+      // gardait "on" depuis un reglage anterieur a un rechargement).
+      expect(component.liveTotalsState()).toBe('unknown');
     });
-    expect(component.liveTotalsOn()).toBe(true);
-  });
-});
+
+    it("liveTotalsState est 'off' des que le serveur confirme liveTotals: false (distinct de 'unknown')", () => {
+      const { component, socket } = setup();
+      socket.roundConfig.set({ liveTotals: false });
+      expect(component.liveTotalsState()).toBe('off');
+    });
+
+    it('toggleLiveTotals envoie round.configure sur le round COURANT quand il existe', () => {
+      const { component, socket, sent } = setup();
+      socket.agenda.set(agendaWithCurrent(7, ITEMS));
+      component.toggleLiveTotals(true);
+      expect(sent).toEqual([{ type: 'round.configure', payload: { roundId: 7, config: { liveTotals: true } } }]);
+    });
+
+    it("toggleLiveTotals ne fait rien tant qu aucun round n est courant (garde defensive)", () => {
+      const { component, sent } = setup();
+      component.toggleLiveTotals(true);
+      expect(sent).toEqual([]);
+    });
+
+    it("liveTotalsState reflete round.configured une fois recu (round.configured, contrat §8.3)", () => {
+      const { component, socket } = setup();
+      (socket as unknown as { onMessage: (m: unknown) => void }).onMessage({
+        v: 1,
+        type: 'round.configured',
+        payload: { roundId: 7, deckSnapshot: deckSnapshot(), config: { liveTotals: true } },
+      });
+      expect(component.liveTotalsState()).toBe('on');
+    });
+
+    it(
+      "liveTotalsState redevient 'unknown' apres un rechargement (state.sync SANS config) meme si le " +
+        "serveur, lui, garde le reglage precedent -- l'affichage ne doit plus jamais mentir en 'off'",
+      () => {
+        const { component, socket } = setup();
+        (socket as unknown as { onMessage: (m: unknown) => void }).onMessage({
+          v: 1,
+          type: 'round.configured',
+          payload: { roundId: 7, deckSnapshot: deckSnapshot(), config: { liveTotals: true } },
+        });
+        expect(component.liveTotalsState()).toBe('on');
+
+        socket.agenda.set(agendaWithCurrent(7, ITEMS));
+        (socket as unknown as { onMessage: (m: unknown) => void }).onMessage({
+          v: 1,
+          type: 'state.sync',
+          payload: {
+            room: { code: 'ABC234', title: 'Retro' },
+            protocolVersion: 1,
+            roundState: 'idle',
+            subject: 'Item A',
+            availableDecks: [],
+            reveal: { anonymous: false, canAnonymise: false },
+            deckSnapshot: deckSnapshot(),
+            participants: [],
+            myResponses: {},
+            items: ITEMS,
+            result: null,
+            facilitatorPresent: true,
+            agenda: agendaWithCurrent(7, ITEMS),
+            deadline: null,
+            timer: { enabled: false, seconds: 10 },
+            // Pas de `config` : c'est exactement le cas que ce correctif couvre.
+          },
+        });
+        expect(component.liveTotalsState()).toBe('unknown');
+      },
+    );
+
+    it(
+      "liveTotalsState redevient 'on' quand le serveur confirme le reglage dans state.sync (round de " +
+        "correction 1, point 3 -- 'construis dessus' : cle suppose 'config', a verifier au contrat)",
+      () => {
+        const { component, socket } = setup();
+        socket.agenda.set(agendaWithCurrent(7, ITEMS));
+        (socket as unknown as { onMessage: (m: unknown) => void }).onMessage({
+          v: 1,
+          type: 'state.sync',
+          payload: {
+            room: { code: 'ABC234', title: 'Retro' },
+            protocolVersion: 1,
+            roundState: 'idle',
+            subject: 'Item A',
+            availableDecks: [],
+            reveal: { anonymous: false, canAnonymise: false },
+            deckSnapshot: deckSnapshot(),
+            participants: [],
+            myResponses: {},
+            items: ITEMS,
+            result: null,
+            facilitatorPresent: true,
+            agenda: agendaWithCurrent(7, ITEMS),
+            deadline: null,
+            timer: { enabled: false, seconds: 10 },
+            config: { liveTotals: true },
+          },
+        });
+        expect(component.liveTotalsState()).toBe('on');
+      },
+    );
+  },
+);
 
 describe('DotVotingFacilitatorPanelComponent -- reste a placer, reveal, conclusion', () => {
   it('pendingRows est vide tant qu aucune donnee n est arrivee (pas encore de response.cast)', () => {

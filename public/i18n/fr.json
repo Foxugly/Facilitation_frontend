@@ -414,7 +414,8 @@
       "pending_unknown": "Aucune donnée pour l'instant.",
       "totals_visible_label": "Totaux visibles pendant le vote",
       "totals_visible_hint": "Désactivé par défaut : seuls des totaux agrégés sont montrés, jamais qui a posé quoi.",
-      "conclude": "Conclure"
+      "conclude": "Conclure",
+      "totals_visibility_unknown": "Reglage inconnu depuis le rechargement -- reappliquez-le si vous voulez des totaux masques ou visibles."
     }
   },
   "billing": {

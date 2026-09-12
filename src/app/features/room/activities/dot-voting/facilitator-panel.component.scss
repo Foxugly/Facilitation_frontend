@@ -78,6 +78,18 @@
   font-size: 0.75rem;
 }
 
+/* Reglage inconnu apres rechargement (round de correction 1, point 3) : une
+   fausse assurance sur un reglage de confidentialite merite plus qu'une
+   simple ligne grise -- meme couleur d'avertissement que .chain-warning
+   (delegation-poker/facilitator-panel.component.scss), meme vocabulaire. */
+.totals-hint--unknown {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  color: #f59e0b;
+  font-style: italic;
+}
+
 /* --- Items du round (composition, etape 2) ----------------------------------- */
 
 .item-list {

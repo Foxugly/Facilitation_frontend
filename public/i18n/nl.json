@@ -414,7 +414,8 @@
       "pending_unknown": "Nog geen gegevens.",
       "totals_visible_label": "Totalen zichtbaar tijdens de stemming",
       "totals_visible_hint": "Standaard uit: alleen totalen worden getoond, nooit wie wat plaatste.",
-      "conclude": "Afronden"
+      "conclude": "Afronden",
+      "totals_visibility_unknown": "Instelling onbekend sinds herladen -- pas ze opnieuw toe als je totalen verborgen of zichtbaar wilt."
     }
   },
   "billing": {

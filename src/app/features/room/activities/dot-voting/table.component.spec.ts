@@ -23,6 +23,12 @@ const ITEMS: RoundItem[] = [
 ];
 
 function setup() {
+  // Reset explicite : un test compare parfois DEUX instances independantes
+  // (deux "clients" dans la meme salle) en appelant setup() deux fois de
+  // suite -- sans ce reset, la seconde reutiliserait le MEME singleton
+  // RoomSocketService que la premiere (TestBed refuse aussi de reconfigurer
+  // un module deja instancie).
+  TestBed.resetTestingModule();
   TestBed.configureTestingModule({ providers: [RoomSocketService] });
   const socket = TestBed.inject(RoomSocketService);
   socket.deckSnapshot.set(deckSnapshot());
@@ -114,18 +120,55 @@ describe('DotVotingTableComponent -- aucun geste impossible ne doit etre propose
   });
 });
 
-describe('DotVotingTableComponent -- totaux en direct (contrat §8.7)', () => {
-  it('liveTotalFor renvoie null tant que le facilitateur ne les a pas rendus visibles (defaut : secret)', () => {
+describe('DotVotingTableComponent -- totaux en direct, TROIS etats (round de correction 1, point 2)', () => {
+  it("totalsDisplay est 'unknown' tant que roundConfig ne dit rien (jamais 'hidden' par defaut -- un ecran inconnu ne doit rien affirmer)", () => {
     const { component } = setup();
-    expect(component.liveTotalFor(ITEMS[0])).toBeNull();
+    expect(component.totalsDisplay(ITEMS[0])).toEqual({ kind: 'unknown' });
   });
 
-  it('liveTotalFor renvoie le total de CET item quand la config du round l autorise', () => {
+  it("totalsDisplay est 'hidden' des que le round.configure recu dit liveTotals: false", () => {
     const { component, socket } = setup();
-    socket.liveTotals.set([{ itemId: 2, totalPoints: 5, responseCount: 2 }]);
-    expect(component.liveTotalFor(ITEMS[1])).toEqual({ itemId: 2, totalPoints: 5, responseCount: 2 });
-    expect(component.liveTotalFor(ITEMS[0])).toBeNull();
+    socket.roundConfig.set({ liveTotals: false });
+    expect(component.totalsDisplay(ITEMS[0])).toEqual({ kind: 'hidden' });
   });
+
+  it("totalsDisplay est 'visible' avec le total de CET item quand liveTotals contient une entree", () => {
+    const { component, socket } = setup();
+    socket.roundConfig.set({ liveTotals: true });
+    socket.liveTotals.set([{ itemId: 2, totalPoints: 5, responseCount: 2 }]);
+    expect(component.totalsDisplay(ITEMS[1])).toEqual({ kind: 'visible', totalPoints: 5, responseCount: 2 });
+  });
+
+  it(
+    "totalsDisplay est 'visible' a ZERO (pas 'unknown') quand la config l'autorise mais qu'aucun jeton " +
+      "n'a encore ete pose -- la toute premiere reponse du round declenche deja une diffusion, donc " +
+      "l'absence d'entree ne peut signifier que 'personne n'a encore rien pose', jamais 'je ne sais pas'",
+    () => {
+      const { component, socket } = setup();
+      socket.roundConfig.set({ liveTotals: true });
+      socket.liveTotals.set([]); // rien encore poste sur AUCUN item
+      expect(component.totalsDisplay(ITEMS[0])).toEqual({ kind: 'visible', totalPoints: 0, responseCount: 0 });
+    },
+  );
+
+  it(
+    "deux clients dans la MEME salle, meme roundConfig, meme etat -- 'unknown' avant que la config ne " +
+      "soit connue, 'visible' des qu'elle l'est : plus jamais deux ecrans contradictoires (l'un 'masque', " +
+      "l'autre '0 pts') pour le meme etat reel",
+    () => {
+      const { component: freshJoiner, socket: s1 } = setup(); // roundConfig encore {}
+      const { component: alreadyConnected, socket: s2 } = setup();
+      s2.roundConfig.set({ liveTotals: true }); // a recu round.configured en direct
+
+      expect(freshJoiner.totalsDisplay(ITEMS[0])).toEqual({ kind: 'unknown' });
+      expect(alreadyConnected.totalsDisplay(ITEMS[0])).toEqual({ kind: 'visible', totalPoints: 0, responseCount: 0 });
+
+      // Le meme reglage arrive enfin au premier (state.sync, ou round.configured) :
+      // les deux ecrans convergent, aucun n'a jamais affirme le contraire entre-temps.
+      s1.roundConfig.set({ liveTotals: true });
+      expect(freshJoiner.totalsDisplay(ITEMS[0])).toEqual(alreadyConnected.totalsDisplay(ITEMS[0]));
+    },
+  );
 });
 
 describe('DotVotingTableComponent -- classement fige a la revelation (design §6, contrat §8.6)', () => {
@@ -148,13 +191,34 @@ describe('DotVotingTableComponent -- classement fige a la revelation (design §6
     expect(component.ranking()).toEqual([]);
   });
 
-  it("ranking ne construit AUCUNE liste de votants sur un round anonyme, meme si le bloc en portait une par erreur", () => {
+  it(
+    "ranking ne construit AUCUNE liste de votants sur un round anonyme, MEME SI le bloc en porte une " +
+      "par erreur -- defense en profondeur (round de correction 1, point 4) : le composant ne doit pas " +
+      "dependre EXCLUSIVEMENT de la garantie serveur (aucun round anonyme n'ecrit jamais `votes`) pour " +
+      "rester correct si elle venait a faillir un jour.",
+    () => {
+      const { component, socket } = setup();
+      socket.roundState.set('revealed');
+      socket.participants.set([{ participantId: 'p1', username: 'Sam', role: 'voter', hasVoted: true }]);
+      socket.itemResults.set([
+        {
+          itemId: 1,
+          anonymous: true,
+          totalPoints: 2,
+          responseCount: 1,
+          rank: 1,
+          // Bloc volontairement mal forme : `votes` present malgre `anonymous: true`.
+          votes: [{ participantId: 'p1', points: 2 }],
+        },
+      ]);
+      expect(component.ranking()[0].voters).toBe('');
+    },
+  );
+
+  it('ranking ne construit aucune liste de votants sur un round anonyme SANS votes non plus (repli sur liste vide)', () => {
     const { component, socket } = setup();
     socket.roundState.set('revealed');
-    socket.participants.set([{ participantId: 'p1', username: 'Sam', role: 'voter', hasVoted: true }]);
-    socket.itemResults.set([
-      { itemId: 1, anonymous: true, totalPoints: 2, responseCount: 1, rank: 1 },
-    ]);
+    socket.itemResults.set([{ itemId: 1, anonymous: true, totalPoints: 2, responseCount: 1, rank: 1 }]);
     expect(component.ranking()[0].voters).toBe('');
   });
 
