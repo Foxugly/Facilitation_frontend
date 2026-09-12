@@ -126,7 +126,12 @@
                     <p-checkbox [binary]="true" [inputId]="'chain-cand-' + c.sourceItemId"
                                 [ngModel]="isChainCandidateChecked(c.sourceItemId)"
                                 (ngModelChange)="toggleChainCandidate(c.sourceItemId, $event)" />
-                    <label [for]="'chain-cand-' + c.sourceItemId">{{ c.text }}</label>
+                    <label [for]="'chain-cand-' + c.sourceItemId">
+                      {{ c.text }}
+                      @if (chainAuthorName(c.authorId); as author) {
+                        <span class="chain-candidate-author">— {{ author }}</span>
+                      }
+                    </label>
                   </li>
                 } @empty {
                   <li class="chain-candidate-empty">{{ 'room.chain.no_candidates' | transloco }}</li>
@@ -155,7 +160,7 @@
                             appendTo="body" styleClass="grow" />
                 </div>
 
-                @if (effectiveChainTake() === 'results') {
+                @if (offersChainTop()) {
                   <p-inputNumber [ngModel]="chainTopDraft()" (ngModelChange)="onChainTopChange($event)"
                                  [min]="1" [placeholder]="'room.chain.top_placeholder' | transloco"
                                  [showButtons]="true" styleClass="w-full" />

@@ -124,7 +124,7 @@ export class DelegationPokerFacilitatorPanelComponent {
   readonly chainSourceOptions = computed(() =>
     this.socket.agenda()
       .filter((a) => a.id !== this.socket.currentRoundId())
-      .map((a) => ({ value: a.id, label: a.text || `#${a.id}`, everDecided: a.everDecided })),
+      .map((a) => ({ value: a.id, label: a.text || `#${a.id}`, everDecided: a.everDecided, canRank: a.canRank })),
   );
   /** Cette activite consomme-t-elle quelque chose ? Une activite future
    * `consumes: 'none'` n'a rien ou poser une copie — le geste ne doit alors
@@ -138,6 +138,15 @@ export class DelegationPokerFacilitatorPanelComponent {
    * proposer un geste que le serveur refuserait presque a coup sur. */
   readonly chainSourceEverDecided = computed(
     () => this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.everDecided ?? false,
+  );
+  /** La source choisie sait-elle classer (`AgendaItem.canRank`, round de
+   * correction 1) ? Vient du registre serveur (`ActivitySpec.rank_value`) —
+   * AUCUNE activite actuelle n'en declare (un consensus par item n'est pas un
+   * ordre ENTRE items), donc ce champ vaut toujours `false` aujourd'hui. Lu
+   * depuis l'agenda plutot que code en dur : le jour ou une activite classera,
+   * le champ « top N » s'affichera de lui-meme, sans readaptation du front. */
+  readonly chainSourceCanRank = computed(
+    () => this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.canRank ?? false,
   );
   readonly canBindChain = computed(() => this.chainSourceDraft() !== null);
   /** `results` n'apparait dans la liste que si la source l'autorise (voir
@@ -155,6 +164,13 @@ export class DelegationPokerFacilitatorPanelComponent {
   readonly effectiveChainTake = computed<'items' | 'results'>(() =>
     this.chainTakeDraft() === 'results' && this.chainSourceEverDecided() ? 'results' : 'items',
   );
+  /** Le champ « top N » n'a de sens QUE si `take: results` ET que la source
+   * sait classer (`chainSourceCanRank`) — le serveur refuse systematiquement
+   * un `top` pose sans classement disponible (`bind_round`). Purement derive,
+   * comme `effectiveChainTake` : affichage et `bindChain` s'y referent tous
+   * les deux, le geste impossible n'est donc jamais ni montre ni envoye. */
+  readonly offersChainTop = computed(() => this.effectiveChainTake() === 'results' && this.chainSourceCanRank());
+  readonly effectiveChainTop = computed<number | null>(() => (this.offersChainTop() ? this.chainTopDraft() : null));
   readonly chainModeOptions = computed(() =>
     (['auto', 'manual'] as const).map((value) => ({ value, label: this.transloco.translate(`room.chain.mode.${value}`) })),
   );
@@ -207,11 +223,10 @@ export class DelegationPokerFacilitatorPanelComponent {
     const roundId = this.socket.currentRoundId();
     const sourceRoundId = this.chainSourceDraft();
     if (roundId === null || sourceRoundId === null) return;
-    const take = this.effectiveChainTake();
     const rule: ChainRule = {
-      take,
+      take: this.effectiveChainTake(),
       mode: this.chainModeDraft(),
-      top: take === 'results' ? this.chainTopDraft() : null,
+      top: this.effectiveChainTop(),
     };
     this.socket.bindRound(roundId, sourceRoundId, rule);
     this.socket.selectRound(roundId);
@@ -227,6 +242,18 @@ export class DelegationPokerFacilitatorPanelComponent {
     if (roundId === null) return;
     this.socket.resolveChaining(roundId, [...this.chainChecked()]);
     this.chainChecked.set(new Set());
+  }
+
+  /** Le nom d'affichage de l'auteur d'un candidat, s'il est resolvable. Meme
+   * UUID public que `ParticipantView.participantId` (round de correction 1) :
+   * comparable tel quel a la liste des participants deja connue du front,
+   * sans jointure hasardeuse entre deux espaces d'identifiants. `null` sans
+   * auteur, OU si l'auteur a quitte la salle depuis (son `Participant` n'est
+   * plus dans la liste courante) -- les deux cas sont indiscernables ici, et
+   * ce n'est pas grave : dans les deux cas il n'y a rien a afficher. */
+  chainAuthorName(authorId: string | null): string | null {
+    if (!authorId) return null;
+    return this.socket.participants().find((p) => p.participantId === authorId)?.username ?? null;
   }
 
   /** On acte sur le NOM du niveau, pas sur le nombre. */

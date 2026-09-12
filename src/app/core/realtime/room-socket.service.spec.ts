@@ -32,7 +32,7 @@ const SYNC: StateSync = {
   items: [{ id: 1, text: 'Budget?', sequence: 1 }],
   result: null,
   facilitatorPresent: true,
-  agenda: [{ id: 1, text: 'Budget?', status: 'current', state: 'open', everDecided: false, result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
+  agenda: [{ id: 1, text: 'Budget?', status: 'current', state: 'open', everDecided: false, canRank: false, result: null, items: [{ id: 1, text: 'Budget?', sequence: 1 }] }],
   deadline: null,
   timer: { enabled: false, seconds: 10 },
 };
@@ -173,8 +173,8 @@ describe('RoomSocketService reducer', () => {
     const svc = new RoomSocketService();
     feed(svc, 'agenda.updated', {
       agenda: [
-        { id: 1, text: 'Q1', status: 'done', state: 'acted', everDecided: true, result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
-        { id: 2, text: 'Q2', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
+        { id: 1, text: 'Q1', status: 'done', state: 'acted', everDecided: true, canRank: false, result: '5', items: [{ id: 10, text: 'Q1', sequence: 1 }] },
+        { id: 2, text: 'Q2', status: 'current', state: 'idle', everDecided: false, canRank: false, result: null, items: [{ id: 20, text: 'Q2', sequence: 1 }] },
       ],
     });
     expect(svc.agenda().length).toBe(2);
@@ -367,7 +367,7 @@ describe('RoomSocketService chaining (contrat §8.5, design §7)', () => {
     expect(svc.currentChainingCandidates()).toBeNull();
   });
 
-  it('state.sync porte chainingCandidates pour le round courant (contrat §5.1, reservé au facilitateur)', () => {
+  it('state.sync porte chainingCandidates pour le round courant (contrat §5.1, reserve au facilitateur)', () => {
     const svc = new RoomSocketService();
     feed(svc, 'state.sync', { ...SYNC, chainingCandidates: [{ sourceItemId: 3, text: 'Post-it', authorId: 7 }] });
     expect(svc.currentChainingCandidates()).toEqual([{ sourceItemId: 3, text: 'Post-it', authorId: 7 }]);
@@ -389,8 +389,8 @@ describe('RoomSocketService chaining (contrat §8.5, design §7)', () => {
     feed(svc, 'round.candidates', { roundId: 1, candidates: [{ sourceItemId: 9, text: 'Un', authorId: null }] });
     feed(svc, 'agenda.updated', {
       agenda: [
-        { id: 1, text: 'Budget?', status: 'done', state: 'acted', everDecided: true, result: '5', items: [] },
-        { id: 2, text: 'Suivant', status: 'current', state: 'idle', everDecided: false, result: null, items: [{ id: 20, text: 'Suivant', sequence: 1 }] },
+        { id: 1, text: 'Budget?', status: 'done', state: 'acted', everDecided: true, canRank: false, result: '5', items: [] },
+        { id: 2, text: 'Suivant', status: 'current', state: 'idle', everDecided: false, canRank: false, result: null, items: [{ id: 20, text: 'Suivant', sequence: 1 }] },
       ],
     });
     expect(svc.currentChainingCandidates()).toBeNull();
