@@ -206,6 +206,76 @@
   font-size: 0.9rem;
 }
 
+/* --- Chainage (design 5e, contrat §8.5) --------------------------------------- */
+.chain-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  .pi {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+}
+.chain-rule-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--s-2);
+
+  .grow {
+    flex: 1;
+    min-width: 0;
+  }
+}
+.chain-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0;
+  padding: var(--s-2);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  color: var(--ink);
+  font-size: 0.8rem;
+
+  .pi {
+    color: #f59e0b;
+    margin-top: 2px;
+  }
+}
+.chain-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.chain-candidates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.chain-candidate {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.chain-candidate-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
 /* --- Mobile : la main d'abord, la table en defilant ---------------------------
 
    Sur un ecran etroit, faire tenir la table ET la main dans la fenetre ne laissait

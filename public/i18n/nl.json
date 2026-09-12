@@ -376,7 +376,25 @@
     "launch": "Stemming starten",
     "edit": "Bewerken",
     "queue_add": "Aan wachtrij toevoegen",
-    "reveal_title": "Uitslag"
+    "reveal_title": "Uitslag",
+    "chain": {
+      "toggle": "Overnemen uit een vorige ronde",
+      "pick_source": "Kies de bronronde",
+      "take": {
+        "items": "De items",
+        "results": "De resultaten"
+      },
+      "mode": {
+        "auto": "Automatisch",
+        "manual": "Handmatig"
+      },
+      "top_placeholder": "Behoud de eerste N",
+      "reopen_warning": "De bronronde opnieuw openen werkt reeds gemaakte kopieën niet bij.",
+      "bind": "Koppelen",
+      "manual_title": "Selecteer wat wordt overgenomen",
+      "no_candidates": "Geen kandidaten om over te nemen.",
+      "resolve": "Selectie bevestigen"
+    }
   },
   "billing": {
     "title": "Abonnement",

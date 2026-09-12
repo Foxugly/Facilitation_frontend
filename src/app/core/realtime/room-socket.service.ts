@@ -4,6 +4,8 @@ import { getRuntimeConfig } from '../runtime-config';
 import {
   AgendaItem,
   AvailableDeck,
+  ChainCandidate,
+  ChainRule,
   DeckSnapshot,
   Envelope,
   ItemResult,
@@ -15,8 +17,11 @@ import {
   Role,
   RoomError,
   ResultLayout,
+  RoundBoundPayload,
+  RoundCandidatesPayload,
   RoundConfigurePayload,
   RoundItem,
+  RoundResolvedPayload,
   RoundState,
   StateSync,
   TimerSettings,
@@ -82,6 +87,24 @@ export class RoomSocketService {
   readonly currentRoundId = computed<number | null>(
     () => this.agenda().find((a) => a.status === 'current')?.id ?? null,
   );
+  /** Les candidats de chainage du round courant, tant qu'ils n'ont pas ete
+   * resolus (contrat §8.5.a) — reserve au facilitateur, le serveur ne les
+   * envoie qu'a lui. Porte le roundId auquel ils se rapportent, jamais suppose
+   * etre celui du round affiche : l'ordre d'arrivee est contre-intuitif
+   * (`round.candidates` precede `round.selected`/`agenda.updated` sur la
+   * connexion du facilitateur, contrat §8.5.a) — `currentChainingCandidates`
+   * compare deux valeurs deja posees, sans jamais supposer un ordre d'arrivee. */
+  readonly chainingCandidates = signal<{ roundId: number; candidates: ChainCandidate[] } | null>(null);
+  /** Les candidats, UNIQUEMENT s'ils concernent le round actuellement courant —
+   * protege contre des candidats perimes d'un round quitte depuis (une
+   * nouvelle liaison, ou une resolution, les invalide deja explicitement dans
+   * `onMessage`, mais cette garde reste la ligne de defense qui ne depend
+   * d'aucun ordre de reception). */
+  readonly currentChainingCandidates = computed<ChainCandidate[] | null>(() => {
+    const c = this.chainingCandidates();
+    const id = this.currentRoundId();
+    return c && id !== null && c.roundId === id ? c.candidates : null;
+  });
   readonly myRole = signal<Role>('voter');
   /** Notre identifiant public, pour se reconnaitre dans les diffusions. Vide tant
    * que le premier `state.sync` n'est pas arrive. */
@@ -189,6 +212,26 @@ export class RoomSocketService {
    * round precis, jamais au deck actif de la room. */
   configureRound(payload: RoundConfigurePayload) { this.send('round.configure', payload); }
   setRevealMode(anonymous: boolean) { this.send('reveal.setMode', { anonymous }); }
+  /** Declare une liaison de chainage (`round.bind`, contrat §8.5, design §7) —
+   * ne copie RIEN : la liaison ne change ni les items ni l'etat d'aucun round.
+   * La resolution suit un chemin distinct : automatique des que le round lie
+   * DEVIENT courant (`selectRound`), ou explicite via `resolveChaining` en
+   * mode manuel. Un round DEJA courant au moment du bind (le cas courant du
+   * panneau de preparation) ne se re-resout pas tout seul — `selectRound` sur
+   * ce meme round juste apres force la resolution auto, ou l'envoi des
+   * candidats en mode manuel, exactement comme le ferait sa premiere
+   * selection (palliatif documente cote serveur, sans effet destructeur sur
+   * un round deja idle). */
+  bindRound(roundId: number, sourceRoundId: number, rule: ChainRule) {
+    this.send('round.bind', { roundId, sourceRoundId, rule });
+  }
+  /** Valide une selection manuelle de candidats (`round.resolve`, contrat
+   * §8.5). `sourceItemIds` vient de `currentChainingCandidates()` — omis, le
+   * serveur l'exige en mode manuel (refus sinon) et l'ignore de toute facon en
+   * mode auto (il reprend alors tous les candidats). */
+  resolveChaining(roundId: number, sourceItemIds?: number[]) {
+    this.send('round.resolve', { roundId, ...(sourceItemIds ? { sourceItemIds } : {}) });
+  }
   /** Step 1 of the two-step flow: compose + announce the next round (subject + deck +
    * reveal mode + timer) atomically, leaving it idle. Opening is a separate step. */
   prepareRound(payload: {
@@ -240,6 +283,25 @@ export class RoomSocketService {
         // le dupliquer ici. `config` n'a aucun lecteur cote front aujourd'hui
         // — le poker declare un config_schema vide (`realtime/activities.py`).
         return;
+      case 'round.bound': {
+        // La liaison ne change ni les items ni l'etat d'aucun round (contrat
+        // §8.5) : rien a appliquer ici, sauf invalider une liste de candidats
+        // deja recue pour CE round — elle portait sur l'ancienne source/regle,
+        // une nouvelle (re)selection la remplacera.
+        const p = msg.payload as RoundBoundPayload;
+        if (this.chainingCandidates()?.roundId === p.roundId) this.chainingCandidates.set(null);
+        return;
+      }
+      case 'round.candidates':
+        return this.chainingCandidates.set(msg.payload as RoundCandidatesPayload);
+      case 'round.resolved': {
+        // Les items copies arrivent aussi via agenda.updated/subject.updated
+        // (contrat §8.5), deja geres ci-dessous : on se contente ici de clore
+        // la selection en cours, resolue.
+        const p = msg.payload as RoundResolvedPayload;
+        if (this.chainingCandidates()?.roundId === p.roundId) this.chainingCandidates.set(null);
+        return;
+      }
       case 'participation.update': return this.participation.set(msg.payload as Participation);
       case 'agenda.updated': {
         const agenda = (msg.payload as { agenda: AgendaItem[] }).agenda;
@@ -332,6 +394,14 @@ export class RoomSocketService {
     this.resultLayout.set(s.resultLayout ?? 'cards');
     this.facilitatorPresent.set(s.facilitatorPresent);
     this.agenda.set(s.agenda ?? []);
+    // Le serveur ne pose cette cle que si CE destinataire est le facilitateur
+    // ET que le round courant (deja pose ci-dessus via `agenda`) est lie en
+    // mode manuel, pas encore resolu (contrat §5.1, §8.5.a) — absente (pas
+    // vide) dans tous les autres cas, jamais un masquage cote client.
+    const currentId = this.currentRoundId();
+    this.chainingCandidates.set(
+      s.chainingCandidates && currentId !== null ? { roundId: currentId, candidates: s.chainingCandidates } : null,
+    );
     // Le serveur fusionne desormais `itemResults` dans state.sync pour un round
     // revele/acte (meme mecanique que les cles plates depreciees). Repli sur []
     // pour un round idle/open, qui n'en porte pas : sans lui, le depouillement

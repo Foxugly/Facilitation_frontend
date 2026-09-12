@@ -237,3 +237,161 @@ describe('DelegationPokerFacilitatorPanelComponent — gestes non proposes (gard
     expect(component.isLast(1)).toBe(false);
   });
 });
+
+describe('DelegationPokerFacilitatorPanelComponent — chainage (design 5e, contrat §8.5)', () => {
+  it('chainSourceOptions exclut le round courant, garde les autres', () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda()); // B (id 2) est current
+
+    expect(component.chainSourceOptions().map((o) => o.value)).toEqual([1, 3]);
+  });
+
+  it('chainOffered est faux sans aucun autre round a proposer comme source', () => {
+    const { component, socket } = setup();
+    socket.agenda.set([
+      { id: 2, text: 'B', status: 'current', state: 'idle', everDecided: false, result: null, items: [] },
+    ]);
+    expect(component.chainOffered()).toBe(false);
+  });
+
+  it('chainOffered devient vrai des qu au moins un autre round existe', () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda());
+    expect(component.chainOffered()).toBe(true);
+  });
+
+  it("take: results n'est PAS propose tant que la source choisie n'a jamais ete decidee — le geste ne doit pas etre offert (§4)", () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda());
+    component.onChainSourceChange(1); // A : pending, everDecided false
+
+    expect(component.chainTakeOptions().map((o) => o.value)).toEqual(['items']);
+  });
+
+  it('take: results apparait des que la source choisie a deja ete decidee (everDecided)', () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda());
+    component.onChainSourceChange(3); // C : done, everDecided true
+
+    expect(component.chainTakeOptions().map((o) => o.value)).toEqual(['items', 'results']);
+  });
+
+  it('onChainTakeChange(items) efface le brouillon top (top exige take: results)', () => {
+    const { component } = setup();
+    component.chainTopDraft.set(3);
+
+    component.onChainTakeChange('items');
+
+    expect(component.chainTopDraft()).toBeNull();
+  });
+
+  it('un changement de source qui invalide take: results retombe sur items dans la valeur EFFECTIVE — sans jamais offrir le geste devenu impossible', () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda());
+    component.onChainSourceChange(3); // C : deja decide
+    component.onChainTakeChange('results');
+    expect(component.effectiveChainTake()).toBe('results');
+
+    component.onChainSourceChange(1); // A : jamais decide -- results n'est plus offert
+
+    // Purement derive (aucun effet a attendre) : la valeur EFFECTIVE retombe
+    // aussitot sur 'items', meme si le brouillon brut porte encore 'results'.
+    expect(component.effectiveChainTake()).toBe('items');
+  });
+
+  it('bindChain emet round.bind PUIS round.select sur le round courant (le bind seul ne resoudrait rien, le round est deja courant)', () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda()); // B (id 2) est current
+    component.onChainSourceChange(1);
+    component.onChainModeChange('manual');
+
+    component.bindChain();
+
+    expect(sent).toEqual([
+      { type: 'round.bind', payload: { roundId: 2, sourceRoundId: 1, rule: { take: 'items', mode: 'manual', top: null } } },
+      { type: 'round.select', payload: { roundId: 2 } },
+    ]);
+  });
+
+  it("bindChain porte top uniquement quand take: results, jamais sinon (rule TOUJOURS les trois cles)", () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set(threeRoundAgenda());
+    component.onChainSourceChange(3);
+    component.onChainTakeChange('results');
+    component.onChainTopChange(2);
+
+    component.bindChain();
+
+    const bind = sent.find((s) => s.type === 'round.bind');
+    expect(bind!.payload).toEqual({ roundId: 2, sourceRoundId: 3, rule: { take: 'results', mode: 'auto', top: 2 } });
+  });
+
+  it('bindChain n emet rien sans source choisie', () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set([
+      { id: 2, text: 'B', status: 'current', state: 'idle', everDecided: false, result: null, items: [] },
+    ]);
+
+    component.bindChain();
+
+    expect(sent).toEqual([]);
+  });
+
+  it('resolveChain emet round.resolve avec les sourceItemIds coches (des items de la SOURCE, jamais du round courant)', () => {
+    const { component, socket, sent } = setup();
+    socket.agenda.set([
+      { id: 2, text: 'B', status: 'current', state: 'idle', everDecided: false, result: null, items: [] },
+    ]);
+    component.toggleChainCandidate(101, true);
+    component.toggleChainCandidate(102, true);
+    component.toggleChainCandidate(102, false); // decoche
+
+    component.resolveChain();
+
+    expect(sent).toEqual([{ type: 'round.resolve', payload: { roundId: 2, sourceItemIds: [101] } }]);
+  });
+
+  it('resolveChain n emet rien sans round courant connu', () => {
+    const { component, sent } = setup();
+    component.toggleChainCandidate(101, true);
+
+    component.resolveChain();
+
+    expect(sent).toEqual([]);
+  });
+
+  it('isChainCandidateChecked reflete l etat coche/decoche', () => {
+    const { component } = setup();
+    expect(component.isChainCandidateChecked(5)).toBe(false);
+
+    component.toggleChainCandidate(5, true);
+    expect(component.isChainCandidateChecked(5)).toBe(true);
+
+    component.toggleChainCandidate(5, false);
+    expect(component.isChainCandidateChecked(5)).toBe(false);
+  });
+
+  it('bindChain remet a zero la selection cochee — une nouvelle liaison rend toute coche anterieure hors-sujet', () => {
+    const { component, socket } = setup();
+    socket.agenda.set(threeRoundAgenda());
+    component.toggleChainCandidate(101, true);
+    expect(component.isChainCandidateChecked(101)).toBe(true);
+
+    component.onChainSourceChange(1);
+    component.bindChain();
+
+    expect(component.isChainCandidateChecked(101)).toBe(false);
+  });
+
+  it('resolveChain remet a zero la selection cochee apres validation', () => {
+    const { component, socket } = setup();
+    socket.agenda.set([
+      { id: 2, text: 'B', status: 'current', state: 'idle', everDecided: false, result: null, items: [] },
+    ]);
+    component.toggleChainCandidate(101, true);
+
+    component.resolveChain();
+
+    expect(component.isChainCandidateChecked(101)).toBe(false);
+  });
+});
