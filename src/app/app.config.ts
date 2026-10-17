@@ -9,9 +9,9 @@ import {
 import * as Sentry from '@sentry/angular';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter } from '@angular/router';
+import { provideRouter, TitleStrategy } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
@@ -25,6 +25,7 @@ import { languageHeaderInterceptor } from './core/i18n/language.interceptor';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { AuthService } from './core/auth/auth.service';
 import { StaleChunkService } from './core/app-update/stale-chunk.service';
+import { AppTitleStrategy } from './core/title/app-title.strategy';
 
 // Aura preset with Emerald as primary; `green` primitive → emerald so `success`
 // buttons match `primary` (one green across the UI, §3.15). Dark via `.dark-mode`.
@@ -42,6 +43,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideAnimationsAsync(),
     providePrimeNG({ theme: { preset: AuraEmerald, options: { darkModeSelector: '.dark-mode' } } }),
     provideHttpClient(withInterceptors([authInterceptor, languageHeaderInterceptor])),
@@ -66,5 +68,6 @@ export const appConfig: ApplicationConfig = {
     // called, i.e. no DSN in dev). See main.ts.
     { provide: ErrorHandler, useValue: Sentry.createErrorHandler() },
     MessageService,
+    ConfirmationService,
   ],
 };

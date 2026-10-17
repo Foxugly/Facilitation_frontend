@@ -3,7 +3,8 @@
     type="button"
     class="lang__trigger"
     [attr.aria-expanded]="open()"
-    aria-haspopup="listbox"
+    aria-haspopup="menu"
+    [attr.aria-label]="'common.language_switcher.aria' | transloco"
     [pTooltip]="currentName()"
     tooltipPosition="bottom"
     (click)="toggle()"
@@ -12,22 +13,23 @@
   </button>
 
   @if (open()) {
-    <ul class="lang__panel" role="listbox" [attr.aria-label]="currentName()">
+    <ul class="lang__panel" role="menu" [attr.aria-label]="'common.language_switcher.aria' | transloco">
       @for (l of languages; track l.code; let i = $index) {
         <li role="none">
           <button
             #menuitem
             type="button"
-            role="option"
+            role="menuitem"
+            [attr.lang]="l.code"
+            [attr.aria-label]="l.name"
             class="lang__option"
             [class.lang__option--active]="l.code === current()"
-            [attr.aria-selected]="l.code === current()"
+            [attr.aria-current]="l.code === current() ? 'true' : null"
             (click)="select(l.code)"
           >
             <span class="lang__option-code">{{ l.short }}</span>
-            <span class="lang__option-name">{{ l.name }}</span>
             @if (l.code === current()) {
-              <i class="pi pi-check"></i>
+              <i class="pi pi-check" aria-hidden="true"></i>
             }
           </button>
         </li>

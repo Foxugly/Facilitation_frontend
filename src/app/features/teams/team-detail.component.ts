@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -478,6 +478,7 @@ export class TeamDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private messages = inject(MessageService);
+  private confirmation = inject(ConfirmationService);
   private transloco = inject(TranslocoService);
   private language = inject(LanguageService);
   private auth = inject(AuthService);
@@ -780,7 +781,7 @@ export class TeamDetailComponent implements OnInit {
 
   async deleteBackground(background: Background, event: Event): Promise<void> {
     event.stopPropagation();
-    if (!confirm(this.transloco.translate('teams.surface.delete_confirm'))) return;
+    if (!(await this.ask('teams.surface.delete_confirm'))) return;
     try {
       await this.teamsService.deleteBackground(background.id);
       if (background.id === this.selectedBackgroundId()) this.selectedBackgroundId.set(null);
@@ -887,7 +888,7 @@ export class TeamDetailComponent implements OnInit {
 
   async deleteBack(back: CardBack, event: Event): Promise<void> {
     event.stopPropagation();
-    if (!confirm(this.transloco.translate('teams.surface.delete_confirm'))) return;
+    if (!(await this.ask('teams.surface.delete_confirm'))) return;
     try {
       await this.teamsService.deleteCardBack(back.id);
       await this.loadDecks();
@@ -898,7 +899,7 @@ export class TeamDetailComponent implements OnInit {
 
   async deleteFelt(felt: Felt, event: Event): Promise<void> {
     event.stopPropagation();
-    if (!confirm(this.transloco.translate('teams.surface.delete_confirm'))) return;
+    if (!(await this.ask('teams.surface.delete_confirm'))) return;
     try {
       await this.teamsService.deleteFelt(felt.id);
       await this.loadDecks();
@@ -1066,8 +1067,25 @@ export class TeamDetailComponent implements OnInit {
     this.zoomImage.set(null);
   }
 
+  /** Confirmation de suppression (p-confirmdialog) ; résout false si l'utilisateur annule ou ferme. */
+  private ask(messageKey: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.confirmation.confirm({
+        header: this.transloco.translate('action.confirm_title'),
+        message: this.transloco.translate(messageKey),
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: this.transloco.translate('action.delete'),
+        rejectLabel: this.transloco.translate('action.cancel'),
+        acceptButtonProps: { severity: 'danger' },
+        rejectButtonProps: { severity: 'secondary', outlined: true },
+        accept: () => resolve(true),
+        reject: () => resolve(false),
+      });
+    });
+  }
+
   async remove_team(): Promise<void> {
-    if (!confirm(this.transloco.translate('teams.delete_confirm'))) return;
+    if (!(await this.ask('teams.delete_confirm'))) return;
     await this.teamsService.deleteTeam(this.id);
     this.router.navigate(['/teams']);
   }

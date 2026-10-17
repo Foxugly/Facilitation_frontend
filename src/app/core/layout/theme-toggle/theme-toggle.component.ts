@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { TranslocoModule } from '@jsverse/transloco';
 
 import { ThemeService } from '../../theme/theme.service';
 
@@ -10,11 +11,12 @@ import { ThemeService } from '../../theme/theme.service';
 @Component({
   selector: 'app-theme-toggle',
   standalone: true,
+  imports: [TranslocoModule],
   template: `
     <button
       type="button"
       class="theme-toggle"
-      [attr.aria-label]="theme.theme() === 'dark' ? 'Light mode' : 'Dark mode'"
+      [attr.aria-label]="'topmenu.theme' | transloco"
       (click)="theme.toggle()"
     >
       <i class="pi" [class.pi-sun]="theme.theme() === 'dark'" [class.pi-moon]="theme.theme() !== 'dark'"></i>

@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
+import { MessageModule } from 'primeng/message';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -8,16 +9,16 @@ import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.c
 @Component({
   selector: 'app-confirm-email',
   standalone: true,
-  imports: [RouterLink, TranslocoModule, AuthCardComponent],
+  imports: [RouterLink, TranslocoModule, MessageModule, AuthCardComponent],
   styleUrl: './auth.scss',
   template: `
     <app-auth-card icon="pi pi-check-circle" [title]="titleKey() | transloco">
       @switch (state()) {
         @case ('ok') {
-          <p class="lead">{{ 'auth.confirm.ok_lead' | transloco }}</p>
+          <p-message severity="success" [text]="'auth.confirm.ok_lead' | transloco" />
         }
         @case ('error') {
-          <p class="lead err">{{ 'auth.confirm.error_lead' | transloco }}</p>
+          <p-message severity="error" [text]="'auth.confirm.error_lead' | transloco" />
           <div class="links"><a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a></div>
         }
       }

@@ -5,11 +5,13 @@ import { TranslocoModule } from '@jsverse/transloco';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
 import { TurnstileController } from '../../shared/turnstile/turnstile';
+import { authErrorKey } from './auth-errors';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +23,7 @@ import { TurnstileController } from '../../shared/turnstile/turnstile';
     ButtonModule,
     CheckboxModule,
     InputTextModule,
+    MessageModule,
     PasswordModule,
     AuthCardComponent,
   ],
@@ -31,7 +34,7 @@ import { TurnstileController } from '../../shared/turnstile/turnstile';
         <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
           <div class="field">
             <label for="email">{{ 'auth.email' | transloco }}</label>
-            <input id="email" pInputText type="email" formControlName="email" autocomplete="username" required />
+            <input id="email" pInputText type="email" formControlName="email" autocomplete="email" required />
           </div>
           <div class="field">
             <label for="password">{{ 'auth.password' | transloco }}</label>
@@ -47,12 +50,13 @@ import { TurnstileController } from '../../shared/turnstile/turnstile';
             />
           </div>
 
-          @if (error()) { <p class="err">{{ error()! | transloco }}</p> }
+          @if (error()) { <p-message severity="error" [text]="error()! | transloco" /> }
+          @if (info()) { <p-message severity="success" [text]="info()! | transloco" /> }
           @if (needsConfirm()) {
-            <p class="err">
+            <p-message severity="warn">
               {{ 'auth.login.not_confirmed' | transloco }}
-              <a (click)="resend()">{{ 'auth.login.resend' | transloco }}</a>
-            </p>
+              <button type="button" class="link-btn" (click)="resend()">{{ 'auth.login.resend' | transloco }}</button>
+            </p-message>
           }
 
           <div class="auth-meta">
@@ -77,7 +81,8 @@ import { TurnstileController } from '../../shared/turnstile/turnstile';
           <p-button
             [label]="'auth.login.magic' | transloco"
             icon="pi pi-envelope"
-            styleClass="u-full magic-btn"
+            severity="secondary"
+            styleClass="u-full"
             (onClick)="enterMagicMode()"
           />
         </form>
@@ -85,9 +90,10 @@ import { TurnstileController } from '../../shared/turnstile/turnstile';
         <form [formGroup]="magicForm" (ngSubmit)="sendMagic()" class="auth-form">
           <div class="field">
             <label for="magicEmail">{{ 'auth.email' | transloco }}</label>
-            <input id="magicEmail" pInputText type="email" formControlName="email" autocomplete="username" required />
+            <input id="magicEmail" pInputText type="email" formControlName="email" autocomplete="email" required />
           </div>
-          @if (magicSent()) { <p class="note ok">{{ 'auth.magic.sent' | transloco }}</p> }
+          @if (magicSent()) { <p-message severity="success" [text]="'auth.magic.sent' | transloco" /> }
+          @if (error()) { <p-message severity="error" [text]="error()! | transloco" /> }
           @if (turnstile.enabled) { <div #magicTurnstileEl class="turnstile-widget"></div> }
           <p-button
             type="submit"
@@ -140,7 +146,10 @@ export class LoginComponent implements OnDestroy {
   }
 
   readonly busy = signal(false);
+  /** Clé i18n d'erreur de page : persistante, elle ne disparaît qu'à la prochaine action. */
   readonly error = signal<string | null>(null);
+  /** Clé i18n de confirmation (ex. lien renvoyé). */
+  readonly info = signal<string | null>(null);
   readonly needsConfirm = signal(false);
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -157,6 +166,7 @@ export class LoginComponent implements OnDestroy {
 
   async submit(): Promise<void> {
     this.error.set(null);
+    this.info.set(null);
     this.needsConfirm.set(false);
     if (this.busy() || this.form.invalid) return;
     this.busy.set(true);
@@ -169,7 +179,7 @@ export class LoginComponent implements OnDestroy {
       const status = (e as { status?: number }).status;
       const code = (e as { error?: { code?: string } }).error?.code;
       if (status === 403 && code === 'email_not_verified') this.needsConfirm.set(true);
-      else this.error.set('auth.errors.invalid_credentials');
+      else this.error.set(authErrorKey(e, { badRequestKey: 'auth.errors.invalid_credentials' }));
     } finally {
       this.busy.set(false);
     }
@@ -177,13 +187,20 @@ export class LoginComponent implements OnDestroy {
 
   async resend(): Promise<void> {
     const email = this.form.getRawValue().email.trim().toLowerCase();
-    if (email) await this.auth.resendConfirmation(email);
-    this.needsConfirm.set(false);
-    this.error.set('auth.login.resent');
+    this.error.set(null);
+    try {
+      if (email) await this.auth.resendConfirmation(email);
+      this.needsConfirm.set(false);
+      this.info.set('auth.login.resent');
+    } catch (e) {
+      this.error.set(authErrorKey(e));
+    }
   }
 
   enterMagicMode(): void {
     this.error.set(null);
+    this.info.set(null);
+    this.needsConfirm.set(false);
     this.magicSent.set(false);
     this.magicForm.reset({ email: this.form.getRawValue().email });
     this.magicMode.set(true);
@@ -196,6 +213,8 @@ export class LoginComponent implements OnDestroy {
 
   async sendMagic(): Promise<void> {
     if (this.magicBusy() || this.magicForm.invalid) return;
+    this.error.set(null);
+    this.magicSent.set(false);
     let token = '';
     if (this.turnstile.enabled) {
       token = this.turnstile.readToken();
@@ -210,6 +229,7 @@ export class LoginComponent implements OnDestroy {
       this.magicSent.set(true);
     } catch (e) {
       if (this.turnstile.enabled && (e as { error?: { code?: string } })?.error?.code === 'captcha_failed') this.turnstile.reset();
+      this.error.set(authErrorKey(e));
     } finally {
       this.magicBusy.set(false);
     }

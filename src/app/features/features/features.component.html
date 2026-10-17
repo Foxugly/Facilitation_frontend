@@ -25,16 +25,16 @@
             <td class="feature-col">{{ 'features.rows.' + row.key | transloco }}</td>
             <td>
               @if (row.free) {
-                <i class="pi pi-check yes" aria-label="yes"></i>
+                <i class="pi pi-check yes" role="img" [attr.aria-label]="'features.yes' | transloco"></i>
               } @else {
-                <span class="no" aria-label="no">—</span>
+                <span class="no" role="img" [attr.aria-label]="'features.no' | transloco">—</span>
               }
             </td>
             <td>
               @if (row.paid) {
-                <i class="pi pi-check yes" aria-label="yes"></i>
+                <i class="pi pi-check yes" role="img" [attr.aria-label]="'features.yes' | transloco"></i>
               } @else {
-                <span class="no" aria-label="no">—</span>
+                <span class="no" role="img" [attr.aria-label]="'features.no' | transloco">—</span>
               }
             </td>
           </tr>

@@ -36,10 +36,6 @@
   width: 100%;
 }
 
-.actions {
-  margin-top: var(--s-4);
-}
-
 .turnstile-widget {
   margin: 0.75rem 0;
 }
@@ -70,24 +66,6 @@
   color: var(--danger);
   font-size: 0.85rem;
   margin: var(--s-1) 0 0;
-}
-
-.err a {
-  color: var(--danger);
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.ok {
-  color: var(--accent-strong);
-}
-
-.note {
-  font-size: 0.875rem;
-  text-align: center;
-  color: var(--muted);
-  margin: 0;
 }
 
 // Login "meta" row: remember-me (left) + forgot-password (right), same line.
@@ -138,17 +116,21 @@
   width: 100%;
 }
 
-// Magic-link button — full-width, emerald-outlined (soft fill).
-:host ::ng-deep .magic-btn.p-button {
-  justify-content: center;
-  border: 1px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  box-shadow: none;
+// Inline action inside a message (e.g. « Renvoyer le lien ») : a real <button>,
+// focusable, styled like a link.
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-:host ::ng-deep .magic-btn.p-button:not(:disabled):hover {
-  background: color-mix(in srgb, var(--accent-soft) 65%, var(--accent) 35%);
-  border-color: var(--accent-strong);
-  color: var(--accent-strong);
+// Page messages (p-message) span the card width.
+:host ::ng-deep p-message,
+:host ::ng-deep .p-message {
+  width: 100%;
 }
