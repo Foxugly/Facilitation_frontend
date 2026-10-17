@@ -9,7 +9,7 @@
       class="topbar__toggle"
       type="button"
       [attr.aria-expanded]="mobileOpen()"
-      aria-label="Menu"
+      [attr.aria-label]="(mobileOpen() ? 'topmenu.close' : 'topmenu.open') | transloco"
       (click)="toggleMobile($event)"
     >
       <i class="pi" [class.pi-bars]="!mobileOpen()" [class.pi-times]="mobileOpen()"></i>

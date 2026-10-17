@@ -46,6 +46,16 @@ describe('LanguageService.revision', () => {
     expect(service.revision()).toBe(before);
   });
 
+  it('met a jour <html lang> a chaque changement de langue', () => {
+    const { service } = serviceWithEvents();
+
+    service.set('nl');
+    expect(document.documentElement.lang).toBe('nl');
+
+    service.set('es');
+    expect(document.documentElement.lang).toBe('es');
+  });
+
   it('change aussi a la bascule de langue', () => {
     const { service } = serviceWithEvents();
     const before = service.revision();

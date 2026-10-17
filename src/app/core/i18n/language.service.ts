@@ -44,6 +44,8 @@ export class LanguageService {
   set(lang: AppLang): void {
     this.active.set(lang);
     this.transloco.setActiveLang(lang);
+    // WCAG 3.1.1 : lecteurs d'écran et traduction automatique suivent <html lang>.
+    document.documentElement.lang = lang;
     localStorage.setItem(LANG_KEY, lang);
   }
 

@@ -7,6 +7,7 @@ import {
   signal,
   viewChildren,
 } from '@angular/core';
+import { TranslocoModule } from '@jsverse/transloco';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { LanguageService } from '../language.service';
@@ -21,7 +22,7 @@ import { AVAILABLE_LANGS, AppLang, LANG_LABELS } from '../available-languages';
 @Component({
   selector: 'app-language-switcher',
   standalone: true,
-  imports: [TooltipModule],
+  imports: [TranslocoModule, TooltipModule],
   templateUrl: './language-switcher.component.html',
   styleUrl: './language-switcher.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

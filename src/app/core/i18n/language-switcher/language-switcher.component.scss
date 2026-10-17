@@ -33,7 +33,7 @@
   right: 0;
   top: calc(100% + 0.4rem);
   z-index: 60;
-  min-width: 11rem;
+  min-width: 6rem;
   margin: 0;
   padding: 0.3rem;
   list-style: none;
@@ -74,11 +74,8 @@
   font-weight: 700;
 }
 
-.lang__option-name {
-  flex: 1;
-}
-
 .lang__option .pi-check {
+  margin-left: auto;
   color: var(--accent-strong);
   font-size: 0.8rem;
 }
