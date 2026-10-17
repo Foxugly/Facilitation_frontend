@@ -250,7 +250,6 @@
     "or": "o",
     "login": {
       "title": "Iniciar sesión",
-      "lead": "Accede a tu equipo y tu historial.",
       "cta": "Iniciar sesión",
       "forgot": "¿Olvidaste tu contraseña?",
       "magic": "Enviarme un enlace de acceso por correo",

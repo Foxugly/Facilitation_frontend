@@ -250,7 +250,6 @@
     "or": "o",
     "login": {
       "title": "Accedi",
-      "lead": "Accedi al tuo team e alla cronologia.",
       "cta": "Accedi",
       "forgot": "Password dimenticata?",
       "magic": "Inviami un link di accesso via email",
