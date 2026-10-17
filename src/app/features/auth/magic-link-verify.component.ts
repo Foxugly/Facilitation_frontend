@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
+import { MessageModule } from 'primeng/message';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -8,7 +9,7 @@ import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.c
 @Component({
   selector: 'app-magic-link-verify',
   standalone: true,
-  imports: [RouterLink, TranslocoModule, AuthCardComponent],
+  imports: [RouterLink, TranslocoModule, MessageModule, AuthCardComponent],
   styleUrl: './auth.scss',
   template: `
     <app-auth-card
@@ -16,8 +17,10 @@ import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.c
       [title]="(state() === 'error' ? 'auth.magic.error_title' : 'auth.magic.verifying') | transloco"
     >
       @if (state() === 'error') {
-        <p class="lead err">{{ 'auth.magic.error_lead' | transloco }}</p>
-        <div class="links"><a routerLink="/login">{{ 'auth.magic.request_new' | transloco }}</a></div>
+        <p-message severity="error" [text]="'auth.magic.error_lead' | transloco" />
+        <div class="links">
+          <a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a>
+        </div>
       }
     </app-auth-card>
   `,
