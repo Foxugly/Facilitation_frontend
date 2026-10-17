@@ -250,7 +250,6 @@
     "or": "or",
     "login": {
       "title": "Sign in",
-      "lead": "Access your team and history.",
       "cta": "Sign in",
       "forgot": "Forgot your password?",
       "magic": "Email me a sign-in link",

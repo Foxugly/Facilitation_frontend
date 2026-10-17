@@ -249,8 +249,7 @@
     "remember_me": "Se souvenir de moi",
     "or": "ou",
     "login": {
-      "title": "Se connecter",
-      "lead": "Accédez à votre équipe et votre historique.",
+      "title": "Connexion",
       "cta": "Se connecter",
       "forgot": "Mot de passe oublié ?",
       "magic": "Recevoir un lien de connexion par e-mail",

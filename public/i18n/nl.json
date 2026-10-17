@@ -249,8 +249,7 @@
     "remember_me": "Onthoud mij",
     "or": "of",
     "login": {
-      "title": "Aanmelden",
-      "lead": "Toegang tot je team en geschiedenis.",
+      "title": "Inloggen",
       "cta": "Aanmelden",
       "forgot": "Wachtwoord vergeten?",
       "magic": "Stuur me een aanmeldlink per e-mail",
