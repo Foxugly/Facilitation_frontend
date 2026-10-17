@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "Poker",
-    "tagline": "Decisioni condivise, in tempo reale — Poker Planning e Delegation Poker."
+    "title": "Facilitation",
+    "tagline": "Guida le decisioni del tuo team in tempo reale — Delegation Poker, Planning Poker, voto con adesivi."
   },
   "footer": {
     "version_label": "Versione {{version}}",
@@ -25,7 +25,9 @@
     "cancel": "Annulla",
     "save": "Salva",
     "quit": "Esci",
-    "back": "Indietro"
+    "back": "Indietro",
+    "delete": "Elimina",
+    "confirm_title": "Conferma"
   },
   "teams": {
     "title": "Team",
@@ -61,13 +63,13 @@
       "email_mismatch": "Accedi con l'email a cui è stato inviato l'invito."
     },
     "deck": {
-      "tab": "Tipo di poker",
-      "title": "Tipo di poker",
+      "tab": "Tipo di attività",
+      "title": "Tipo di attività",
       "loading": "Caricamento…",
-      "intro": "I tipi di poker giocabili nelle sessioni di questo team. Il facilitatore sceglie quale usare nella stanza, round dopo round.",
+      "intro": "I tipi di attività giocabili nelle sessioni di questo team. Il facilitatore sceglie quale usare nella stanza, round dopo round.",
       "custom": "Mazzo personalizzato",
       "in_use": "In uso",
-      "saved": "Tipi di poker salvati.",
+      "saved": "Tipi di attività salvati.",
       "create": "Crea un mazzo",
       "create_soon": "La creazione di mazzi personalizzati arriverà presto.",
       "create_paid": "I mazzi personalizzati sono riservati ai team con un abbonamento.",
@@ -115,7 +117,7 @@
   "home": {
     "eyebrow": "Decisioni condivise",
     "title": "Decidete insieme, in tempo reale",
-    "intro": "Poker unisce Poker Planning e Delegation Poker: crea una stanza, invita il team, votate e rivelate i risultati insieme.",
+    "intro": "Facilitation riunisce attività di decisione e allineamento in tempo reale (Delegation Poker, Planning Poker, Fist of Five, voto romano, voto con adesivi): crea una stanza, invita il team, votate e rivelate i risultati insieme.",
     "create_title": "Crea una stanza",
     "room_title": "Titolo della stanza (opzionale)",
     "create_cta": "Crea la stanza",
@@ -125,7 +127,7 @@
   },
   "support": {
     "title": "Sostieni",
-    "why_title": "Perché sostenere Poker?",
+    "why_title": "Perché sostenere Facilitation?",
     "reasons": {
       "free": {
         "title": "Gratis per l'essenziale",
@@ -155,7 +157,7 @@
     "title": "Prezzi",
     "intro": "Crea una stanza gratis in pochi secondi. Passa a un piano team per il Delegation Board, la cronologia e l'aspetto personalizzato.",
     "free_title": "Gratis",
-    "free_f1": "Delegation Poker e Poker Planning in tempo reale",
+    "free_f1": "Attività in tempo reale: Delegation Poker, Planning Poker, voto con adesivi…",
     "free_f2": "Fino a 15 persone per stanza",
     "free_f3": "Nessun account richiesto",
     "team1_title": "1 team",
@@ -180,13 +182,13 @@
     "tab_company": "Società",
     "tab_legal": "Note legali",
     "tab_technical": "Tecnica",
-    "company_body": "Poker è pubblicato da Foxugly SRL, una società belga. Costruiamo strumenti semplici per i team che decidono insieme.",
+    "company_body": "Facilitation è pubblicato da Foxugly SRL, una società belga. Costruiamo strumenti semplici per i team che decidono insieme.",
     "legal_body": "Editore: Foxugly SRL — Belgio. Contatto: info@foxugly.com. Hosting: Amazon Web Services (Irlanda, regione eu-west-1). Le stanze anonime sono temporanee e scadono dopo un periodo di inattività.",
     "technical_body": "Applicazione in tempo reale: backend Django e Django Channels (WebSocket), frontend Angular e PrimeNG. Multilingue (5 lingue), temi chiaro e scuro."
   },
   "privacy": {
     "title": "Privacy",
-    "intro": "Questa informativa spiega quali dati tratta Poker, perché e come li proteggiamo. Poker è gestito da Foxugly SRL (Belgio).",
+    "intro": "Questa informativa spiega quali dati tratta Facilitation, perché e come li proteggiamo. Facilitation è gestito da Foxugly SRL (Belgio).",
     "updated": "Ultimo aggiornamento: luglio 2026.",
     "sections": {
       "data": {
@@ -236,12 +238,15 @@
       "prepared_votes": "Voti preparati in anticipo",
       "export": "Esportazione CSV / PDF",
       "email_history": "Invio della cronologia via email"
-    }
+    },
+    "yes": "Incluso",
+    "no": "Non incluso"
   },
   "auth": {
     "email": "Indirizzo email",
     "password": "Password",
     "new_password": "Nuova password",
+    "password_confirm": "Conferma password",
     "display_name": "Nome visualizzato",
     "logout": "Esci",
     "back_to_login": "Torna all'accesso",
@@ -252,7 +257,7 @@
       "title": "Accedi",
       "cta": "Accedi",
       "forgot": "Password dimenticata?",
-      "magic": "Inviami un link di accesso via email",
+      "magic": "Ricevi un link di accesso",
       "no_account": "Non hai un account?",
       "not_confirmed": "Conferma prima la tua email.",
       "resend": "Reinvia il link",
@@ -260,8 +265,7 @@
     },
     "register": {
       "title": "Crea un account",
-      "lead": "Crea il tuo account per gestire un team.",
-      "cta": "Crea account",
+      "cta": "Crea il mio account",
       "have_account": "Hai già un account?",
       "done_title": "Controlla la posta",
       "done_lead": "Ti abbiamo inviato un link per confermare il tuo indirizzo."
@@ -273,7 +277,7 @@
       "sent": "Se l'indirizzo esiste, è stato inviato un link di reimpostazione."
     },
     "reset": {
-      "title": "Reimposta la password",
+      "title": "Scegli una nuova password",
       "cta": "Reimposta",
       "done": "Password reimpostata. Ora puoi accedere."
     },
@@ -285,21 +289,21 @@
       "error_lead": "Questo link di conferma non è valido o è scaduto."
     },
     "magic": {
-      "title": "Link di accesso",
-      "lead": "Inserisci la tua email e ti invieremo un link per accedere.",
       "cta": "Invia il link",
       "sent": "Se l'account esiste, è stato inviato un link di accesso.",
       "verifying": "Accesso in corso…",
       "error_title": "Link non valido",
-      "error_lead": "Questo link non è valido, è scaduto o è già stato usato.",
-      "request_new": "Richiedi un nuovo link"
+      "error_lead": "Questo link non è valido, è scaduto o è già stato usato."
     },
     "errors": {
       "invalid_credentials": "Email o password errati.",
+      "too_many": "Troppi tentativi. Riprova tra qualche minuto.",
       "password_short": "Almeno 8 caratteri.",
       "generic": "Qualcosa è andato storto. Riprova.",
       "reset_invalid": "Link non valido o scaduto.",
-      "captcha": "Completa il captcha."
+      "captcha": "Completa il captcha.",
+      "password_invalid": "Questa password non è accettata. Scegline una più robusta.",
+      "password_mismatch": "Le password non coincidono."
     }
   },
   "vote_state": {
@@ -354,7 +358,7 @@
       "sec_suffix": " sec"
     },
     "deck": {
-      "label": "Tipo di poker",
+      "label": "Tipo di attività",
       "locked": "Concludi il round per cambiare tipo.",
       "type": {
         "delegation_poker": "Delegation Poker",
@@ -486,7 +490,10 @@
     "room_full": "Questa stanza è piena (massimo 15 persone)."
   },
   "common": {
-    "skip_to_content": "Vai al contenuto"
+    "skip_to_content": "Vai al contenuto",
+    "language_switcher": {
+      "aria": "Scegli la lingua"
+    }
   },
   "me": {
     "title": "Il mio account",
@@ -548,5 +555,10 @@
   "appUpdate": {
     "title": "Nuova versione disponibile",
     "detail": "L'app è stata aggiornata mentre eri qui. Ricarica la pagina per continuare."
+  },
+  "topmenu": {
+    "open": "Apri menu",
+    "close": "Chiudi menu",
+    "theme": "Cambia tema"
   }
 }

@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "Poker",
-    "tagline": "Samen beslissen, in realtime — Poker Planning & Delegation Poker."
+    "title": "Facilitation",
+    "tagline": "Leid de beslissingen van je team in realtime — Delegation Poker, Planning Poker, stickerstemming."
   },
   "footer": {
     "version_label": "Versie {{version}}",
@@ -25,7 +25,9 @@
     "cancel": "Annuleren",
     "save": "Opslaan",
     "quit": "Verlaten",
-    "back": "Terug"
+    "back": "Terug",
+    "delete": "Verwijderen",
+    "confirm_title": "Bevestiging"
   },
   "teams": {
     "title": "Teams",
@@ -61,13 +63,13 @@
       "email_mismatch": "Meld je aan met het e-mailadres waarnaar de uitnodiging is gestuurd."
     },
     "deck": {
-      "tab": "Pokertype",
-      "title": "Pokertype",
+      "tab": "Activiteitstype",
+      "title": "Activiteitstype",
       "loading": "Laden…",
-      "intro": "De pokertypes die in de sessies van dit team gespeeld kunnen worden. De facilitator kiest per ronde welke in de room wordt gebruikt.",
+      "intro": "De activiteitstypes die in de sessies van dit team gespeeld kunnen worden. De facilitator kiest per ronde welke in de room wordt gebruikt.",
       "custom": "Eigen kaartspel",
       "in_use": "In gebruik",
-      "saved": "Pokertypes opgeslagen.",
+      "saved": "Activiteitstypes opgeslagen.",
       "create": "Kaartspel maken",
       "create_soon": "Eigen kaartspellen maken komt binnenkort.",
       "create_paid": "Eigen kaartspellen zijn beschikbaar voor teams met een abonnement.",
@@ -115,7 +117,7 @@
   "home": {
     "eyebrow": "Samen beslissen",
     "title": "Beslis samen, in realtime",
-    "intro": "Poker verenigt Poker Planning en Delegation Poker: maak een kamer, nodig je team uit, stem en onthul de resultaten samen.",
+    "intro": "Facilitation verenigt realtime beslissings- en afstemmingsactiviteiten (Delegation Poker, Planning Poker, Fist of Five, Romeinse stemming, stickerstemming): maak een kamer, nodig je team uit, stem en onthul de resultaten samen.",
     "create_title": "Kamer maken",
     "room_title": "Kamertitel (optioneel)",
     "create_cta": "Kamer maken",
@@ -125,7 +127,7 @@
   },
   "support": {
     "title": "Steunen",
-    "why_title": "Waarom Poker steunen?",
+    "why_title": "Waarom Facilitation steunen?",
     "reasons": {
       "free": {
         "title": "Gratis voor het essentiële",
@@ -155,7 +157,7 @@
     "title": "Tarieven",
     "intro": "Maak in enkele seconden gratis een kamer. Ga over op een teamformule voor het Delegation Board, geschiedenis en aangepast uiterlijk.",
     "free_title": "Gratis",
-    "free_f1": "Delegation Poker & Poker Planning in realtime",
+    "free_f1": "Realtime activiteiten: Delegation Poker, Planning Poker, stickerstemming…",
     "free_f2": "Tot 15 personen per kamer",
     "free_f3": "Geen account nodig",
     "team1_title": "1 team",
@@ -180,13 +182,13 @@
     "tab_company": "Bedrijf",
     "tab_legal": "Juridische vermeldingen",
     "tab_technical": "Technisch",
-    "company_body": "Poker wordt uitgegeven door Foxugly SRL, een Belgisch bedrijf. Wij bouwen eenvoudige tools voor teams die samen beslissen.",
+    "company_body": "Facilitation wordt uitgegeven door Foxugly SRL, een Belgisch bedrijf. Wij bouwen eenvoudige tools voor teams die samen beslissen.",
     "legal_body": "Uitgever: Foxugly SRL — België. Contact: info@foxugly.com. Hosting: Amazon Web Services (Ierland, regio eu-west-1). Anonieme kamers zijn tijdelijk en verlopen na een periode van inactiviteit.",
     "technical_body": "Een realtime-applicatie: backend met Django en Django Channels (WebSocket), frontend met Angular en PrimeNG. Meertalig (5 talen), lichte en donkere thema's."
   },
   "privacy": {
     "title": "Privacy",
-    "intro": "Deze verklaring legt uit welke gegevens Poker verwerkt, waarom en hoe we ze beschermen. Poker wordt beheerd door Foxugly SRL (België).",
+    "intro": "Deze verklaring legt uit welke gegevens Facilitation verwerkt, waarom en hoe we ze beschermen. Facilitation wordt beheerd door Foxugly SRL (België).",
     "updated": "Laatst bijgewerkt: juli 2026.",
     "sections": {
       "data": {
@@ -236,12 +238,15 @@
       "prepared_votes": "Vooraf voorbereide stemmingen",
       "export": "CSV / PDF-export",
       "email_history": "Geschiedenis per e-mail versturen"
-    }
+    },
+    "yes": "Inbegrepen",
+    "no": "Niet inbegrepen"
   },
   "auth": {
     "email": "E-mailadres",
     "password": "Wachtwoord",
     "new_password": "Nieuw wachtwoord",
+    "password_confirm": "Bevestig wachtwoord",
     "display_name": "Weergavenaam",
     "logout": "Afmelden",
     "back_to_login": "Terug naar aanmelden",
@@ -252,7 +257,7 @@
       "title": "Inloggen",
       "cta": "Aanmelden",
       "forgot": "Wachtwoord vergeten?",
-      "magic": "Stuur me een aanmeldlink per e-mail",
+      "magic": "Een aanmeldlink ontvangen",
       "no_account": "Nog geen account?",
       "not_confirmed": "Bevestig eerst je e-mail.",
       "resend": "Link opnieuw sturen",
@@ -260,8 +265,7 @@
     },
     "register": {
       "title": "Account aanmaken",
-      "lead": "Maak je account om een team te beheren.",
-      "cta": "Account aanmaken",
+      "cta": "Mijn account aanmaken",
       "have_account": "Heb je al een account?",
       "done_title": "Controleer je inbox",
       "done_lead": "We hebben je een link gestuurd om je adres te bevestigen."
@@ -273,7 +277,7 @@
       "sent": "Als dat adres bestaat, is een herstellink verstuurd."
     },
     "reset": {
-      "title": "Wachtwoord opnieuw instellen",
+      "title": "Kies een nieuw wachtwoord",
       "cta": "Opnieuw instellen",
       "done": "Wachtwoord opnieuw ingesteld. Je kunt je nu aanmelden."
     },
@@ -285,21 +289,21 @@
       "error_lead": "Deze bevestigingslink is ongeldig of verlopen."
     },
     "magic": {
-      "title": "Aanmeldlink",
-      "lead": "Voer je e-mail in en we sturen je een link om je aan te melden.",
       "cta": "Link versturen",
       "sent": "Als dat account bestaat, is een aanmeldlink verstuurd.",
       "verifying": "Aanmelden…",
       "error_title": "Ongeldige link",
-      "error_lead": "Deze link is ongeldig, verlopen of al gebruikt.",
-      "request_new": "Nieuwe link aanvragen"
+      "error_lead": "Deze link is ongeldig, verlopen of al gebruikt."
     },
     "errors": {
       "invalid_credentials": "Onjuist e-mailadres of wachtwoord.",
+      "too_many": "Te veel pogingen. Probeer het over enkele minuten opnieuw.",
       "password_short": "Minstens 8 tekens.",
       "generic": "Er ging iets mis. Probeer opnieuw.",
       "reset_invalid": "Ongeldige of verlopen link.",
-      "captcha": "Voltooi de captcha."
+      "captcha": "Voltooi de captcha.",
+      "password_invalid": "Dit wachtwoord wordt niet geaccepteerd. Kies een sterker wachtwoord.",
+      "password_mismatch": "De wachtwoorden komen niet overeen."
     }
   },
   "vote_state": {
@@ -354,7 +358,7 @@
       "sec_suffix": " sec"
     },
     "deck": {
-      "label": "Pokertype",
+      "label": "Activiteitstype",
       "locked": "Rond de ronde af om van type te wisselen.",
       "type": {
         "delegation_poker": "Delegation Poker",
@@ -486,7 +490,10 @@
     "room_full": "Deze kamer is vol (maximaal 15 personen)."
   },
   "common": {
-    "skip_to_content": "Naar de inhoud"
+    "skip_to_content": "Naar de inhoud",
+    "language_switcher": {
+      "aria": "Taal kiezen"
+    }
   },
   "me": {
     "title": "Mijn account",
@@ -548,5 +555,10 @@
   "appUpdate": {
     "title": "Nieuwe versie beschikbaar",
     "detail": "De app is bijgewerkt terwijl u bezig was. Herlaad de pagina om verder te gaan."
+  },
+  "topmenu": {
+    "open": "Menu openen",
+    "close": "Menu sluiten",
+    "theme": "Thema wisselen"
   }
 }

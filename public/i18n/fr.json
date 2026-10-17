@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "Poker",
-    "tagline": "La prise de décision commune, en temps réel — Poker Planning & Delegation Poker."
+    "title": "Facilitation",
+    "tagline": "Animez les décisions de votre équipe en temps réel — Delegation Poker, Planning Poker, vote par gommettes."
   },
   "footer": {
     "version_label": "Version {{version}}",
@@ -25,7 +25,9 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "quit": "Quitter",
-    "back": "Retour"
+    "back": "Retour",
+    "delete": "Supprimer",
+    "confirm_title": "Confirmation"
   },
   "teams": {
     "title": "Équipes",
@@ -61,13 +63,13 @@
       "email_mismatch": "Connectez-vous avec l'adresse à laquelle l'invitation a été envoyée."
     },
     "deck": {
-      "tab": "Type de poker",
-      "title": "Type de poker",
+      "tab": "Type d'activité",
+      "title": "Type d'activité",
       "loading": "Chargement…",
-      "intro": "Les types de poker jouables dans les sessions de cette équipe. Le facilitateur choisit lequel utiliser dans la salle, d'un round à l'autre.",
+      "intro": "Les types d'activité jouables dans les sessions de cette équipe. Le facilitateur choisit lequel utiliser dans la salle, d'un round à l'autre.",
       "custom": "Jeu personnalisé",
       "in_use": "Utilisé",
-      "saved": "Types de poker enregistrés.",
+      "saved": "Types d'activité enregistrés.",
       "create": "Créer un jeu",
       "create_soon": "La création de jeux personnalisés arrive bientôt.",
       "create_paid": "La création de jeux personnalisés est réservée aux équipes avec un abonnement.",
@@ -115,7 +117,7 @@
   "home": {
     "eyebrow": "Prise de décision commune",
     "title": "Décidez ensemble, en temps réel",
-    "intro": "Poker réunit Poker Planning et Delegation Poker : créez une salle, invitez votre équipe, votez et révélez les résultats ensemble.",
+    "intro": "Facilitation réunit des activités de décision et d'alignement en temps réel (Delegation Poker, Planning Poker, Fist of Five, vote romain, vote par gommettes) : créez une salle, invitez votre équipe, votez et révélez les résultats ensemble.",
     "create_title": "Créer une salle",
     "room_title": "Titre de la salle (optionnel)",
     "create_cta": "Créer la salle",
@@ -125,7 +127,7 @@
   },
   "support": {
     "title": "Soutenir",
-    "why_title": "Pourquoi soutenir Poker ?",
+    "why_title": "Pourquoi soutenir Facilitation ?",
     "reasons": {
       "free": {
         "title": "Gratuit pour l'essentiel",
@@ -155,7 +157,7 @@
     "title": "Tarifs",
     "intro": "Créez une salle gratuitement en quelques secondes. Passez à une formule d'équipe pour le Delegation Board, l'historique et l'apparence personnalisée.",
     "free_title": "Gratuit",
-    "free_f1": "Delegation Poker & Poker Planning en temps réel",
+    "free_f1": "Activités en temps réel : Delegation Poker, Planning Poker, vote par gommettes…",
     "free_f2": "Jusqu'à 15 personnes par salle",
     "free_f3": "Aucun compte requis",
     "team1_title": "1 équipe",
@@ -180,13 +182,13 @@
     "tab_company": "Société",
     "tab_legal": "Mentions légales",
     "tab_technical": "Technique",
-    "company_body": "Poker est édité par Foxugly SRL, une société belge. Nous construisons des outils simples pour les équipes qui décident ensemble.",
+    "company_body": "Facilitation est édité par Foxugly SRL, une société belge. Nous construisons des outils simples pour les équipes qui décident ensemble.",
     "legal_body": "Éditeur : Foxugly SRL — Belgique. Contact : info@foxugly.com. Hébergement : Amazon Web Services (Irlande, région eu-west-1). Les salles anonymes sont temporaires et expirent après une période d'inactivité.",
     "technical_body": "Application temps réel : backend Django et Django Channels (WebSocket), frontend Angular et PrimeNG. Multilingue (5 langues), thèmes clair et sombre."
   },
   "privacy": {
     "title": "Confidentialité",
-    "intro": "Cette notice explique quelles données Poker traite, pourquoi, et comment nous les protégeons. Poker est édité par Foxugly SRL (Belgique).",
+    "intro": "Cette notice explique quelles données Facilitation traite, pourquoi, et comment nous les protégeons. Facilitation est édité par Foxugly SRL (Belgique).",
     "updated": "Dernière mise à jour : juillet 2026.",
     "sections": {
       "data": {
@@ -236,14 +238,17 @@
       "prepared_votes": "Votes préparés à l'avance",
       "export": "Export CSV / PDF",
       "email_history": "Envoi de l'historique par email"
-    }
+    },
+    "yes": "Inclus",
+    "no": "Non inclus"
   },
   "auth": {
     "email": "Adresse e-mail",
     "password": "Mot de passe",
     "new_password": "Nouveau mot de passe",
+    "password_confirm": "Confirmer le mot de passe",
     "display_name": "Nom affiché",
-    "logout": "Se déconnecter",
+    "logout": "Déconnexion",
     "back_to_login": "Retour à la connexion",
     "back_to_password": "Retour au mot de passe",
     "remember_me": "Se souvenir de moi",
@@ -252,7 +257,7 @@
       "title": "Connexion",
       "cta": "Se connecter",
       "forgot": "Mot de passe oublié ?",
-      "magic": "Recevoir un lien de connexion par e-mail",
+      "magic": "Recevoir un lien de connexion",
       "no_account": "Pas encore de compte ?",
       "not_confirmed": "Confirmez d'abord votre e-mail.",
       "resend": "Renvoyer le lien",
@@ -260,8 +265,7 @@
     },
     "register": {
       "title": "Créer un compte",
-      "lead": "Créez votre compte pour gérer une équipe.",
-      "cta": "Créer le compte",
+      "cta": "Créer mon compte",
       "have_account": "Déjà un compte ?",
       "done_title": "Vérifiez votre boîte mail",
       "done_lead": "Nous vous avons envoyé un lien pour confirmer votre adresse."
@@ -273,7 +277,7 @@
       "sent": "Si cette adresse existe, un lien de réinitialisation a été envoyé."
     },
     "reset": {
-      "title": "Réinitialiser le mot de passe",
+      "title": "Choisir un nouveau mot de passe",
       "cta": "Réinitialiser",
       "done": "Mot de passe réinitialisé. Vous pouvez vous connecter."
     },
@@ -285,21 +289,21 @@
       "error_lead": "Ce lien de confirmation est invalide ou expiré."
     },
     "magic": {
-      "title": "Lien de connexion",
-      "lead": "Entrez votre e-mail, on vous envoie un lien pour vous connecter.",
       "cta": "Envoyer le lien",
       "sent": "Si ce compte existe, un lien de connexion a été envoyé.",
       "verifying": "Connexion en cours…",
       "error_title": "Lien invalide",
-      "error_lead": "Ce lien est invalide, expiré ou déjà utilisé.",
-      "request_new": "Demander un nouveau lien"
+      "error_lead": "Ce lien est invalide, expiré ou déjà utilisé."
     },
     "errors": {
       "invalid_credentials": "E-mail ou mot de passe incorrect.",
+      "too_many": "Trop de tentatives. Réessayez dans quelques minutes.",
       "password_short": "Au moins 8 caractères.",
       "generic": "Une erreur est survenue. Réessayez.",
       "reset_invalid": "Lien invalide ou expiré.",
-      "captcha": "Veuillez valider le captcha."
+      "captcha": "Veuillez valider le captcha.",
+      "password_invalid": "Ce mot de passe n'est pas accepté. Choisissez-en un plus robuste.",
+      "password_mismatch": "Les mots de passe ne correspondent pas."
     }
   },
   "vote_state": {
@@ -354,7 +358,7 @@
       "sec_suffix": " sec"
     },
     "deck": {
-      "label": "Type de poker",
+      "label": "Type d'activité",
       "locked": "Terminez le round pour changer de type.",
       "type": {
         "delegation_poker": "Delegation Poker",
@@ -486,7 +490,10 @@
     "room_full": "Cette salle est pleine (15 personnes maximum)."
   },
   "common": {
-    "skip_to_content": "Aller au contenu"
+    "skip_to_content": "Aller au contenu",
+    "language_switcher": {
+      "aria": "Choisir la langue"
+    }
   },
   "me": {
     "title": "Mon compte",
@@ -548,5 +555,10 @@
   "appUpdate": {
     "title": "Nouvelle version disponible",
     "detail": "L'application a été mise à jour pendant votre visite. Rechargez la page pour continuer."
+  },
+  "topmenu": {
+    "open": "Ouvrir le menu",
+    "close": "Fermer le menu",
+    "theme": "Basculer le thème"
   }
 }

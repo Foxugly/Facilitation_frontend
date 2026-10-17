@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "Poker",
-    "tagline": "Shared decision-making, in real time — Poker Planning & Delegation Poker."
+    "title": "Facilitation",
+    "tagline": "Run your team's decisions in real time — Delegation Poker, Planning Poker, dot voting."
   },
   "footer": {
     "version_label": "Version {{version}}",
@@ -25,7 +25,9 @@
     "cancel": "Cancel",
     "save": "Save",
     "quit": "Leave",
-    "back": "Back"
+    "back": "Back",
+    "delete": "Delete",
+    "confirm_title": "Confirmation"
   },
   "teams": {
     "title": "Teams",
@@ -61,13 +63,13 @@
       "email_mismatch": "Sign in with the email the invitation was sent to."
     },
     "deck": {
-      "tab": "Poker type",
-      "title": "Poker type",
+      "tab": "Activity type",
+      "title": "Activity type",
       "loading": "Loading…",
-      "intro": "The poker types playable in this team's sessions. The facilitator picks which one to use in the room, round by round.",
+      "intro": "The activity types playable in this team's sessions. The facilitator picks which one to use in the room, round by round.",
       "custom": "Custom deck",
       "in_use": "In use",
-      "saved": "Poker types saved.",
+      "saved": "Activity types saved.",
       "create": "Create a deck",
       "create_soon": "Custom deck creation is coming soon.",
       "create_paid": "Custom decks are available to teams with a subscription.",
@@ -115,7 +117,7 @@
   "home": {
     "eyebrow": "Shared decision-making",
     "title": "Decide together, in real time",
-    "intro": "Poker brings together Poker Planning and Delegation Poker: create a room, invite your team, vote and reveal the results together.",
+    "intro": "Facilitation brings together real-time decision and alignment activities (Delegation Poker, Planning Poker, Fist of Five, Roman Vote, Dot Voting): create a room, invite your team, vote and reveal the results together.",
     "create_title": "Create a room",
     "room_title": "Room title (optional)",
     "create_cta": "Create the room",
@@ -125,7 +127,7 @@
   },
   "support": {
     "title": "Support",
-    "why_title": "Why support Poker?",
+    "why_title": "Why support Facilitation?",
     "reasons": {
       "free": {
         "title": "Free for the essentials",
@@ -155,7 +157,7 @@
     "title": "Pricing",
     "intro": "Create a room for free in seconds. Move to a team plan for the Delegation Board, history and custom appearance.",
     "free_title": "Free",
-    "free_f1": "Delegation Poker & Poker Planning in real time",
+    "free_f1": "Real-time activities: Delegation Poker, Planning Poker, Dot Voting…",
     "free_f2": "Up to 15 people per room",
     "free_f3": "No account required",
     "team1_title": "1 team",
@@ -180,13 +182,13 @@
     "tab_company": "Company",
     "tab_legal": "Legal notice",
     "tab_technical": "Technical",
-    "company_body": "Poker is published by Foxugly SRL, a Belgian company. We build simple tools for teams that decide together.",
+    "company_body": "Facilitation is published by Foxugly SRL, a Belgian company. We build simple tools for teams that decide together.",
     "legal_body": "Publisher: Foxugly SRL — Belgium. Contact: info@foxugly.com. Hosting: Amazon Web Services (Ireland, eu-west-1 region). Anonymous rooms are temporary and expire after a period of inactivity.",
     "technical_body": "A real-time application: Django and Django Channels (WebSocket) backend, Angular and PrimeNG frontend. Multilingual (5 languages), light and dark themes."
   },
   "privacy": {
     "title": "Privacy",
-    "intro": "This notice explains what data Poker handles, why, and how we protect it. Poker is operated by Foxugly SRL (Belgium).",
+    "intro": "This notice explains what data Facilitation handles, why, and how we protect it. Facilitation is operated by Foxugly SRL (Belgium).",
     "updated": "Last updated: July 2026.",
     "sections": {
       "data": {
@@ -236,12 +238,15 @@
       "prepared_votes": "Votes prepared in advance",
       "export": "CSV / PDF export",
       "email_history": "Email the history"
-    }
+    },
+    "yes": "Included",
+    "no": "Not included"
   },
   "auth": {
     "email": "Email address",
     "password": "Password",
     "new_password": "New password",
+    "password_confirm": "Confirm password",
     "display_name": "Display name",
     "logout": "Sign out",
     "back_to_login": "Back to sign in",
@@ -252,7 +257,7 @@
       "title": "Sign in",
       "cta": "Sign in",
       "forgot": "Forgot your password?",
-      "magic": "Email me a sign-in link",
+      "magic": "Get a sign-in link",
       "no_account": "No account yet?",
       "not_confirmed": "Please confirm your email first.",
       "resend": "Resend the link",
@@ -260,8 +265,7 @@
     },
     "register": {
       "title": "Create an account",
-      "lead": "Create your account to manage a team.",
-      "cta": "Create account",
+      "cta": "Create my account",
       "have_account": "Already have an account?",
       "done_title": "Check your inbox",
       "done_lead": "We've sent you a link to confirm your address."
@@ -273,7 +277,7 @@
       "sent": "If that address exists, a reset link has been sent."
     },
     "reset": {
-      "title": "Reset password",
+      "title": "Choose a new password",
       "cta": "Reset",
       "done": "Password reset. You can now sign in."
     },
@@ -285,21 +289,21 @@
       "error_lead": "This confirmation link is invalid or has expired."
     },
     "magic": {
-      "title": "Sign-in link",
-      "lead": "Enter your email and we'll send you a link to sign in.",
       "cta": "Send the link",
       "sent": "If that account exists, a sign-in link has been sent.",
       "verifying": "Signing in…",
       "error_title": "Invalid link",
-      "error_lead": "This link is invalid, expired, or already used.",
-      "request_new": "Request a new link"
+      "error_lead": "This link is invalid, expired, or already used."
     },
     "errors": {
       "invalid_credentials": "Incorrect email or password.",
+      "too_many": "Too many attempts. Please try again in a few minutes.",
       "password_short": "At least 8 characters.",
       "generic": "Something went wrong. Please try again.",
       "reset_invalid": "Invalid or expired link.",
-      "captcha": "Please complete the captcha."
+      "captcha": "Please complete the captcha.",
+      "password_invalid": "This password isn't accepted. Please choose a stronger one.",
+      "password_mismatch": "The passwords don't match."
     }
   },
   "vote_state": {
@@ -354,7 +358,7 @@
       "sec_suffix": " sec"
     },
     "deck": {
-      "label": "Poker type",
+      "label": "Activity type",
       "locked": "Finish the round to switch type.",
       "type": {
         "delegation_poker": "Delegation Poker",
@@ -486,7 +490,10 @@
     "room_full": "This room is full (15 people maximum)."
   },
   "common": {
-    "skip_to_content": "Skip to content"
+    "skip_to_content": "Skip to content",
+    "language_switcher": {
+      "aria": "Choose language"
+    }
   },
   "me": {
     "title": "My account",
@@ -548,5 +555,10 @@
   "appUpdate": {
     "title": "A new version is available",
     "detail": "The app was updated while you were here. Reload the page to continue."
+  },
+  "topmenu": {
+    "open": "Open menu",
+    "close": "Close menu",
+    "theme": "Toggle theme"
   }
 }
