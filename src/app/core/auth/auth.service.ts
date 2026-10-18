@@ -1,12 +1,21 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-import { getRuntimeConfig } from '../runtime-config';
+import { authApiBase, NO_AUTH_RETRY } from './auth-endpoints';
 import { AuthUser, TokenPair } from './auth.models';
 
-const ACCESS_KEY = 'poker.access';
-const REFRESH_KEY = 'poker.refresh';
+// Storage keys inherited from the Poker fork: renaming them would sign everyone out.
+export const ACCESS_KEY = 'poker.access';
+export const REFRESH_KEY = 'poker.refresh';
+/** Web Locks name serialising token/refresh/ across every tab of the origin. */
+export const REFRESH_LOCK_NAME = 'facilitation.refresh';
+
+/** 401/403 from token/refresh/ = refresh token rejected (expired, blacklisted).
+ * Anything else (network, 5xx during a deploy, 429) is transient: keep the session. */
+function isRejectedRefresh(err: unknown): boolean {
+  return err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403);
+}
 
 /**
  * Email-only authentication (Phase 2). "Remember me" governs where the token
@@ -15,14 +24,30 @@ const REFRESH_KEY = 'poker.refresh';
  * and token refresh read from whichever store currently holds them. The rotated
  * refresh token MUST be persisted on every refresh (the backend blacklists the
  * old one — fleet JWT-rotation rule). `currentUser` is a signal the UI reacts to.
+ *
+ * Multi-tab: tokens are always read from storage (never cached), a `storage`
+ * event resyncs `currentUser` (login / logout in another tab), and the refresh
+ * runs under a Web Lock; once inside, if another tab already rotated the refresh
+ * token we adopt its pair instead of presenting the now-blacklisted one.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private base = getRuntimeConfig().apiBaseUrl + '/api/v1/auth';
+  private base = authApiBase();
 
   readonly currentUser = signal<AuthUser | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
+
+  /** In-tab single flight: concurrent 401s share one refresh. */
+  private refreshInFlight: Promise<string | null> | null = null;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const onStorage = (event: StorageEvent) => this.onStorage(event);
+      window.addEventListener('storage', onStorage);
+      inject(DestroyRef).onDestroy(() => window.removeEventListener('storage', onStorage));
+    }
+  }
 
   get accessToken(): string | null {
     return localStorage.getItem(ACCESS_KEY) ?? sessionStorage.getItem(ACCESS_KEY);
@@ -41,14 +66,23 @@ export class AuthService {
     const other = store === localStorage ? sessionStorage : localStorage;
     other.removeItem(ACCESS_KEY);
     other.removeItem(REFRESH_KEY);
+    // Overwrite in place (never remove-then-set): other tabs must not see a
+    // transient "no refresh token" (= logged out). Access first, so a tab woken
+    // by the refresh write reads the matching access token.
     store.setItem(ACCESS_KEY, access);
     store.setItem(REFRESH_KEY, refresh);
   }
   private clearTokens(): void {
-    localStorage.removeItem(ACCESS_KEY);
+    // Refresh first: it is the key other tabs treat as "logged out".
     localStorage.removeItem(REFRESH_KEY);
-    sessionStorage.removeItem(ACCESS_KEY);
     sessionStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(ACCESS_KEY);
+    sessionStorage.removeItem(ACCESS_KEY);
+  }
+  /** Drop the local session (no server call). */
+  clearSession(): void {
+    this.clearTokens();
+    this.currentUser.set(null);
   }
   private adopt(pair: TokenPair, store?: Storage): AuthUser {
     this.storeTokens(pair.access, pair.refresh, store ?? this.activeStore());
@@ -96,34 +130,113 @@ export class AuthService {
     return this.adopt(await firstValueFrom(this.http.post<TokenPair>(`${this.base}/magic-link/verify/`, { token })));
   }
 
+  /** Best-effort server logout (blacklists the refresh token), then always
+   * drops the local session. With an expired access token the logout would 401,
+   * so refresh first; the logout itself is never retried by the interceptor. */
   async logout(): Promise<void> {
+    if (this.refreshToken && this.accessTokenExpired()) {
+      try {
+        await this.refresh();
+      } catch {
+        /* transient: still try the logout below */
+      }
+    }
     const refresh = this.refreshToken;
     if (refresh) {
       try {
-        await firstValueFrom(this.http.post(`${this.base}/logout/`, { refresh }));
+        await firstValueFrom(
+          this.http.post(`${this.base}/logout/`, { refresh }, { context: new HttpContext().set(NO_AUTH_RETRY, true) }),
+        );
       } catch {
         /* blacklist best-effort */
       }
     }
-    this.clearTokens();
-    this.currentUser.set(null);
+    this.clearSession();
   }
 
-  /** Refresh the access token, persisting the rotated refresh token. Returns the
-   * new access token, or null if the refresh is invalid (session ended). */
-  async refresh(): Promise<string | null> {
-    const refresh = this.refreshToken;
-    if (!refresh) return null;
+  /** Delete the signed-in account (RGPD art. 17). The server checks the
+   * password, deletes the account and revokes its refresh tokens: on success
+   * there is nothing left to log out from, so the local session is dropped. */
+  async deleteAccount(currentPassword: string): Promise<void> {
+    await firstValueFrom(this.http.post(`${this.base}/account/delete/`, { current_password: currentPassword }));
+    this.clearSession();
+  }
+
+  /**
+   * Refresh the access token, persisting the rotated refresh token. Resolves the
+   * new access token, or null when the refresh token was rejected (401/403: the
+   * session is cleared). Throws on a transient failure (network, 5xx): the tokens
+   * are kept and the next call retries.
+   */
+  refresh(): Promise<string | null> {
+    const used = this.refreshToken;
+    if (!used) return Promise.resolve(null);
+    if (!this.refreshInFlight) {
+      this.refreshInFlight = this.withRefreshLock(() => this.refreshOrAdopt(used)).finally(() => {
+        this.refreshInFlight = null;
+      });
+    }
+    return this.refreshInFlight;
+  }
+
+  private async refreshOrAdopt(used: string): Promise<string | null> {
+    // Re-read storage inside the lock: another tab may have rotated (or ended)
+    // the session while we waited.
+    const stored = this.refreshToken;
+    if (!stored) {
+      this.currentUser.set(null);
+      return null;
+    }
+    const storedAccess = this.accessToken;
+    if (stored !== used && storedAccess) {
+      return storedAccess; // adopt the pair the other tab just stored
+    }
     try {
       const res = await firstValueFrom(
-        this.http.post<{ access: string; refresh: string }>(`${this.base}/token/refresh/`, { refresh }),
+        this.http.post<{ access: string; refresh: string }>(
+          `${this.base}/token/refresh/`,
+          { refresh: stored },
+          { context: new HttpContext().set(NO_AUTH_RETRY, true) },
+        ),
       );
       this.storeTokens(res.access, res.refresh); // persist the ROTATED refresh
       return res.access;
+    } catch (err) {
+      if (isRejectedRefresh(err)) {
+        this.clearSession();
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  /** Run `task` under the cross-tab refresh lock; plain call without Web Locks. */
+  private withRefreshLock<T>(task: () => Promise<T>): Promise<T> {
+    const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+    if (!locks?.request) return task();
+    return locks.request(REFRESH_LOCK_NAME, task) as Promise<T>;
+  }
+
+  /** Another tab wrote the session keys (event.key null = storage.clear()). */
+  private onStorage(event: StorageEvent): void {
+    if (event.key !== null && event.key !== REFRESH_KEY && event.key !== ACCESS_KEY) return;
+    if (!this.refreshToken) {
+      this.currentUser.set(null); // logged out elsewhere
+    } else if (!this.currentUser()) {
+      // Logged in elsewhere; a failure here changes nothing.
+      this.me().then((user) => this.currentUser.set(user), () => undefined);
+    }
+  }
+
+  /** Whether the access token's `exp` is past (5 s skew). False when undecodable. */
+  accessTokenExpired(): boolean {
+    const payload = this.accessToken?.split('.')[1];
+    if (!payload) return false;
+    try {
+      const { exp } = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      return typeof exp === 'number' && exp * 1000 <= Date.now() + 5000;
     } catch {
-      this.clearTokens();
-      this.currentUser.set(null);
-      return null;
+      return false;
     }
   }
 
@@ -158,16 +271,12 @@ export class AuthService {
   async bootstrap(): Promise<void> {
     if (!this.refreshToken) return;
     try {
+      // An expired access 401s; the interceptor refreshes once and retries.
       this.currentUser.set(await this.me());
-    } catch {
-      // access likely expired → try one refresh, then re-fetch
-      if (await this.refresh()) {
-        try {
-          this.currentUser.set(await this.me());
-        } catch {
-          this.clearTokens();
-        }
-      }
+    } catch (err) {
+      // Rejected refresh: refresh() already cleared the session. A transient
+      // failure (API down during a deploy) keeps the tokens for the next load.
+      if (err instanceof HttpErrorResponse && err.status === 401) this.clearSession();
     }
   }
 }

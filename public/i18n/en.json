@@ -513,7 +513,22 @@
     "avatar_remove": "Remove avatar",
     "avatar_hint": "PNG, JPEG or WebP, 3 MB max.",
     "avatar_saved": "Avatar saved.",
-    "avatar_invalid": "Image rejected."
+    "avatar_invalid": "Image rejected.",
+    "delete": {
+      "title": "Delete my account",
+      "lead": "Deletion is permanent: your profile, your avatar and your team memberships are erased.",
+      "button": "Delete my account",
+      "dialog_title": "Delete my account?",
+      "dialog_intro": "This cannot be undone. Your account, profile, avatar and team memberships will be deleted, and you will be signed out on all your devices.",
+      "dialog_teams": "If you own a team, delete it first.",
+      "password": "Confirm with your password",
+      "confirm": "Delete permanently",
+      "password_required": "Enter your password.",
+      "password_invalid": "Incorrect password.",
+      "owns_teams": "You own at least one team: delete it first. Your account has not been deleted.",
+      "throttled": "Too many attempts. Try again in a few minutes.",
+      "success": "Your account has been deleted."
+    }
   },
   "subscription": {
     "title": "Subscription",

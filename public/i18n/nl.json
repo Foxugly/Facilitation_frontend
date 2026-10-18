@@ -513,7 +513,22 @@
     "avatar_remove": "Avatar verwijderen",
     "avatar_hint": "PNG, JPEG of WebP, max. 3 MB.",
     "avatar_saved": "Avatar opgeslagen.",
-    "avatar_invalid": "Afbeelding geweigerd."
+    "avatar_invalid": "Afbeelding geweigerd.",
+    "delete": {
+      "title": "Mijn account verwijderen",
+      "lead": "Verwijderen is definitief: je profiel, je avatar en je teamlidmaatschappen worden gewist.",
+      "button": "Mijn account verwijderen",
+      "dialog_title": "Mijn account verwijderen?",
+      "dialog_intro": "Dit kan niet ongedaan worden gemaakt. Je account, profiel, avatar en teamlidmaatschappen worden verwijderd en je wordt op al je toestellen afgemeld.",
+      "dialog_teams": "Ben je eigenaar van een team? Verwijder het dan eerst.",
+      "password": "Bevestig met je wachtwoord",
+      "confirm": "Definitief verwijderen",
+      "password_required": "Vul je wachtwoord in.",
+      "password_invalid": "Onjuist wachtwoord.",
+      "owns_teams": "Je bent eigenaar van minstens één team: verwijder het eerst. Je account is niet verwijderd.",
+      "throttled": "Te veel pogingen. Probeer het over enkele minuten opnieuw.",
+      "success": "Je account is verwijderd."
+    }
   },
   "subscription": {
     "title": "Abonnement",
