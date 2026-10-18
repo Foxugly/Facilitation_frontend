@@ -7,7 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getRuntimeConfig } from '../runtime-config';
 import { isPublicAuthEndpoint } from './auth-endpoints';
 import { authInterceptor } from './auth.interceptor';
-import { ACCESS_KEY, AuthService, REFRESH_KEY } from './auth.service';
+import { AuthService, SESSION_HINT_KEY } from './auth.service';
+import { AuthUser } from './auth.models';
 
 const api = getRuntimeConfig().apiBaseUrl;
 const auth = `${api}/api/v1/auth`;
@@ -32,11 +33,12 @@ describe('isPublicAuthEndpoint', () => {
     expect(isPublicAuthEndpoint(`${auth}/login/`)).toBe(true);
     expect(isPublicAuthEndpoint(`${auth}/magic-link/verify/`)).toBe(true);
     expect(isPublicAuthEndpoint(`${auth}/email/confirm/`)).toBe(true);
+    // Cookie-only: an expired access token must not turn the logout into a 401.
+    expect(isPublicAuthEndpoint(`${auth}/logout/`)).toBe(true);
   });
   it('leaves the authenticated auth endpoints and other APIs out', () => {
     expect(isPublicAuthEndpoint(`${auth}/me/`)).toBe(false);
     expect(isPublicAuthEndpoint(`${auth}/account/delete/`)).toBe(false);
-    expect(isPublicAuthEndpoint(`${auth}/logout/`)).toBe(false);
     expect(isPublicAuthEndpoint(`${api}/api/v1/teams/`)).toBe(false);
   });
 });
@@ -45,41 +47,54 @@ describe('authInterceptor', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    localStorage.setItem(ACCESS_KEY, 'old-access');
-    localStorage.setItem(REFRESH_KEY, 'old-refresh');
   });
   afterEach(() => {
     TestBed.inject(HttpTestingController).verify();
     localStorage.clear();
   });
 
-  it('attaches the Bearer to API calls but not to anonymous auth endpoints', () => {
-    const { http, ctrl } = setup();
+  /** Signed in with 'old-access' in memory (the refresh is in the HttpOnly cookie). */
+  async function signedIn() {
+    const ctx = setup();
+    const login = ctx.service.login('a@b.c', 'pw');
+    ctx.ctrl.expectOne(`${auth}/login/`).flush({ access: 'old-access', user: { id: 1 } as AuthUser });
+    await login;
+    return ctx;
+  }
+
+  it('attaches the Bearer to API calls, without credentials, but not to anonymous auth endpoints', async () => {
+    const { http, ctrl } = await signedIn();
     http.get(`${api}/api/v1/teams/`).subscribe();
     http.post(`${auth}/login/`, {}).subscribe();
-    expect(ctrl.expectOne(`${api}/api/v1/teams/`).request.headers.get('Authorization')).toBe('Bearer old-access');
+    const teams = ctrl.expectOne(`${api}/api/v1/teams/`);
+    expect(teams.request.headers.get('Authorization')).toBe('Bearer old-access');
+    expect(teams.request.withCredentials).toBe(false);
+    expect(teams.request.headers.has('X-Auth-Mode')).toBe(false);
     expect(ctrl.expectOne(`${auth}/login/`).request.headers.has('Authorization')).toBe(false);
   });
 
-  it('refreshes once on a 401, persists the rotated pair and retries', async () => {
-    const { http, ctrl } = setup();
+  it('refreshes once on a 401 through the cookie and retries with the new access token', async () => {
+    const { http, ctrl, service } = await signedIn();
     const result = firstValueFrom(http.get(`${api}/api/v1/teams/`));
     ctrl.expectOne(`${api}/api/v1/teams/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     await flush();
     const refresh = ctrl.expectOne(`${auth}/token/refresh/`);
-    expect(refresh.request.body).toEqual({ refresh: 'old-refresh' });
+    expect(refresh.request.body).toEqual({});
+    expect(refresh.request.withCredentials).toBe(true);
+    expect(refresh.request.headers.get('X-Auth-Mode')).toBe('cookie');
     expect(refresh.request.headers.has('Authorization')).toBe(false);
-    refresh.flush({ access: 'new-access', refresh: 'new-refresh' });
+    refresh.flush({ access: 'new-access' });
     await flush();
     const retry = ctrl.expectOne(`${api}/api/v1/teams/`);
     expect(retry.request.headers.get('Authorization')).toBe('Bearer new-access');
+    expect(retry.request.withCredentials).toBe(false);
     retry.flush([]);
     await expect(result).resolves.toEqual([]);
-    expect(localStorage.getItem(REFRESH_KEY)).toBe('new-refresh');
+    expect(service.accessToken).toBe('new-access');
   });
 
   it('a 401 from token/refresh/ clears the session once — no refresh loop', async () => {
-    const { http, ctrl, service } = setup();
+    const { http, ctrl, service } = await signedIn();
     const result = firstValueFrom(http.get(`${api}/api/v1/teams/`));
     ctrl.expectOne(`${api}/api/v1/teams/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     await flush();
@@ -87,60 +102,49 @@ describe('authInterceptor', () => {
     await expect(result).rejects.toMatchObject({ status: 401 });
     await flush();
     ctrl.expectNone(`${auth}/token/refresh/`);
-    expect(localStorage.getItem(REFRESH_KEY)).toBeNull();
+    expect(localStorage.getItem(SESSION_HINT_KEY)).toBeNull();
     expect(service.currentUser()).toBeNull();
   });
 
-  it.each([0, 502])('a %s from token/refresh/ keeps the tokens', async (status) => {
-    const { http, ctrl } = setup();
+  it.each([0, 502])('a %s from token/refresh/ keeps the session', async (status) => {
+    const { http, ctrl, service } = await signedIn();
     const result = firstValueFrom(http.get(`${api}/api/v1/teams/`));
     ctrl.expectOne(`${api}/api/v1/teams/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     await flush();
     ctrl.expectOne(`${auth}/token/refresh/`).flush(null, { status, statusText: 'Bad Gateway' });
     await expect(result).rejects.toMatchObject({ status });
-    expect(localStorage.getItem(REFRESH_KEY)).toBe('old-refresh');
-    expect(localStorage.getItem(ACCESS_KEY)).toBe('old-access');
+    expect(localStorage.getItem(SESSION_HINT_KEY)).not.toBeNull();
+    expect(service.accessToken).toBe('old-access');
   });
 
   it('concurrent 401s share a single refresh', async () => {
-    const { http, ctrl } = setup();
+    const { http, ctrl } = await signedIn();
     const a = firstValueFrom(http.get(`${api}/api/v1/a/`));
     const b = firstValueFrom(http.get(`${api}/api/v1/b/`));
     ctrl.expectOne(`${api}/api/v1/a/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     ctrl.expectOne(`${api}/api/v1/b/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     await flush();
-    ctrl.expectOne(`${auth}/token/refresh/`).flush({ access: 'new-access', refresh: 'new-refresh' });
+    ctrl.expectOne(`${auth}/token/refresh/`).flush({ access: 'new-access' });
     await flush();
     ctrl.expectOne(`${api}/api/v1/a/`).flush(1);
     ctrl.expectOne(`${api}/api/v1/b/`).flush(2);
     await expect(Promise.all([a, b])).resolves.toEqual([1, 2]);
   });
 
-  it('adopts a refresh token another tab rotated while we waited for the lock', async () => {
-    let release!: () => void;
-    const gate = new Promise<void>((r) => (release = r));
-    const locks = { request: async (_name: string, task: () => Promise<unknown>) => { await gate; return task(); } };
-    Object.defineProperty(navigator, 'locks', { value: locks, configurable: true });
-    try {
-      const { ctrl, service } = setup();
-      const pending = service.refresh(); // holds 'old-refresh', waits for the lock
-      // Another tab (holding the lock) rotates the pair, then releases it.
-      localStorage.setItem(ACCESS_KEY, 'tab-b-access');
-      localStorage.setItem(REFRESH_KEY, 'tab-b-refresh');
-      release();
-      await expect(pending).resolves.toBe('tab-b-access');
-      ctrl.expectNone(`${auth}/token/refresh/`);
-    } finally {
-      delete (navigator as { locks?: unknown }).locks;
-    }
-  });
-
-  it('does not retry a 401 on the retried request', async () => {
+  it('an anonymous 401 (no session) is not refreshed', async () => {
     const { http, ctrl } = setup();
     const result = firstValueFrom(http.get(`${api}/api/v1/teams/`));
     ctrl.expectOne(`${api}/api/v1/teams/`).flush(null, { status: 401, statusText: 'Unauthorized' });
+    await expect(result).rejects.toMatchObject({ status: 401 });
+    ctrl.expectNone(`${auth}/token/refresh/`);
+  });
+
+  it('does not retry a 401 on the retried request', async () => {
+    const { http, ctrl } = await signedIn();
+    const result = firstValueFrom(http.get(`${api}/api/v1/teams/`));
+    ctrl.expectOne(`${api}/api/v1/teams/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     await flush();
-    ctrl.expectOne(`${auth}/token/refresh/`).flush({ access: 'new-access', refresh: 'new-refresh' });
+    ctrl.expectOne(`${auth}/token/refresh/`).flush({ access: 'new-access' });
     await flush();
     ctrl.expectOne(`${api}/api/v1/teams/`).flush(null, { status: 401, statusText: 'Unauthorized' });
     await expect(result).rejects.toMatchObject({ status: 401 });

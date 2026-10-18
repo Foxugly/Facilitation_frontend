@@ -28,7 +28,9 @@ declare global {
 
 export function getRuntimeConfig(): RuntimeConfig {
   const injected = (typeof window !== 'undefined' && window.__FACILITATION__) || {};
-  const apiBaseUrl = (injected.apiBaseUrl ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
+  // `localhost` (not 127.0.0.1): same site as `ng serve` on localhost:4200, so
+  // the SameSite=Lax HttpOnly refresh cookie is sent in dev too.
+  const apiBaseUrl = (injected.apiBaseUrl ?? 'http://localhost:8000').replace(/\/$/, '');
   // WS base is derived from the API base (http→ws) unless explicitly provided.
   const wsBaseUrl = (injected.wsBaseUrl ?? apiBaseUrl.replace(/^http/, 'ws')).replace(/\/$/, '');
   const s = injected.sentry ?? {};
