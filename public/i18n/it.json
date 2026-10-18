@@ -513,7 +513,22 @@
     "avatar_remove": "Rimuovi avatar",
     "avatar_hint": "PNG, JPEG o WebP, max 3 MB.",
     "avatar_saved": "Avatar salvato.",
-    "avatar_invalid": "Immagine rifiutata."
+    "avatar_invalid": "Immagine rifiutata.",
+    "delete": {
+      "title": "Elimina il mio account",
+      "lead": "L'eliminazione è definitiva: il tuo profilo, il tuo avatar e le tue appartenenze ai team vengono cancellati.",
+      "button": "Elimina il mio account",
+      "dialog_title": "Eliminare il mio account?",
+      "dialog_intro": "Questa azione è irreversibile. Il tuo account, il profilo, l'avatar e le appartenenze ai team saranno eliminati e verrai disconnesso su tutti i tuoi dispositivi.",
+      "dialog_teams": "Se sei proprietario di un team, eliminalo prima.",
+      "password": "Conferma con la tua password",
+      "confirm": "Elimina definitivamente",
+      "password_required": "Inserisci la tua password.",
+      "password_invalid": "Password errata.",
+      "owns_teams": "Sei proprietario di almeno un team: eliminalo prima. Il tuo account non è stato eliminato.",
+      "throttled": "Troppi tentativi. Riprova tra qualche minuto.",
+      "success": "Il tuo account è stato eliminato."
+    }
   },
   "subscription": {
     "title": "Abbonamento",

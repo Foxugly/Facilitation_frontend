@@ -9,6 +9,7 @@ import { TagModule } from 'primeng/tag';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
+import { DeleteAccountComponent } from './delete-account.component';
 
 const AVATAR_COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6', '#6366f1'];
 
@@ -19,7 +20,7 @@ const AVATAR_COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#
 @Component({
   selector: 'app-me',
   standalone: true,
-  imports: [FormsModule, RouterLink, TranslocoModule, ButtonModule, InputTextModule, TagModule, PageHeaderComponent],
+  imports: [FormsModule, RouterLink, TranslocoModule, ButtonModule, InputTextModule, TagModule, PageHeaderComponent, DeleteAccountComponent],
   styleUrl: './account.scss',
   template: `
     <section class="page page--narrow">
@@ -86,6 +87,8 @@ const AVATAR_COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#
           <p-button [label]="'auth.logout' | transloco" icon="pi pi-sign-out"
                     severity="danger" [outlined]="true" (onClick)="logout()" />
         </div>
+
+        <app-delete-account />
       }
     </section>
   `,

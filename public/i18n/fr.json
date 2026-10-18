@@ -513,7 +513,22 @@
     "avatar_remove": "Retirer l'avatar",
     "avatar_hint": "PNG, JPEG ou WebP, 3 Mo max.",
     "avatar_saved": "Avatar enregistré.",
-    "avatar_invalid": "Image refusée."
+    "avatar_invalid": "Image refusée.",
+    "delete": {
+      "title": "Supprimer mon compte",
+      "lead": "La suppression est définitive : votre profil, votre avatar et vos appartenances aux équipes sont effacés.",
+      "button": "Supprimer mon compte",
+      "dialog_title": "Supprimer mon compte ?",
+      "dialog_intro": "Cette action est irréversible. Votre compte, votre profil, votre avatar et vos appartenances aux équipes seront supprimés, et vous serez déconnecté sur tous vos appareils.",
+      "dialog_teams": "Si vous êtes propriétaire d'une équipe, supprimez-la d'abord.",
+      "password": "Confirmez avec votre mot de passe",
+      "confirm": "Supprimer définitivement",
+      "password_required": "Saisissez votre mot de passe.",
+      "password_invalid": "Mot de passe incorrect.",
+      "owns_teams": "Vous êtes propriétaire d'au moins une équipe : supprimez-la d'abord. Votre compte n'a pas été supprimé.",
+      "throttled": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "success": "Votre compte a été supprimé."
+    }
   },
   "subscription": {
     "title": "Abonnement",
