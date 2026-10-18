@@ -9,7 +9,7 @@ import fr from '../../../../public/i18n/fr.json';
 import { AuthService } from '../../core/auth/auth.service';
 import { DeleteAccountComponent } from './delete-account.component';
 
-function setup(deleteAccount: (pw: string) => Promise<void>) {
+function setup(deleteAccount: (pw: string) => Promise<void>, exportData: () => Promise<void> = () => Promise.resolve()) {
   const messages = { add: vi.fn() };
   TestBed.configureTestingModule({
     imports: [
@@ -20,7 +20,7 @@ function setup(deleteAccount: (pw: string) => Promise<void>) {
       provideRouter([]),
       provideTranslocoScope({ scope: '' }),
       { provide: MessageService, useValue: messages },
-      { provide: AuthService, useValue: { deleteAccount: vi.fn(deleteAccount) } },
+      { provide: AuthService, useValue: { deleteAccount: vi.fn(deleteAccount), exportData: vi.fn(exportData) } },
     ],
   });
   const fixture = TestBed.createComponent(DeleteAccountComponent);
@@ -61,5 +61,24 @@ describe('DeleteAccountComponent', () => {
     expect(cmp.error()).toBe(expected);
     expect(cmp.pending()).toBe(false);
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('exports the data without opening the dialog', async () => {
+    const { cmp, auth, messages } = setup(() => Promise.resolve());
+    await cmp.exportData();
+    expect(auth.exportData).toHaveBeenCalledTimes(1);
+    expect(auth.deleteAccount).not.toHaveBeenCalled();
+    expect(messages.add).not.toHaveBeenCalled();
+    expect(cmp.exporting()).toBe(false);
+  });
+
+  it.each([
+    [httpError(429), fr.me.export.throttled],
+    [httpError(500), fr.me.export.failed],
+  ])('shows a toast when the export fails (%#)', async (err, expected) => {
+    const { cmp, messages } = setup(() => Promise.resolve(), () => Promise.reject(err));
+    await cmp.exportData();
+    expect(messages.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error', summary: expected }));
+    expect(cmp.exporting()).toBe(false);
   });
 });

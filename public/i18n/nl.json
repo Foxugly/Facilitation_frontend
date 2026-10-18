@@ -528,6 +528,12 @@
       "owns_teams": "Je bent eigenaar van minstens één team: verwijder het eerst. Je account is niet verwijderd.",
       "throttled": "Te veel pogingen. Probeer het over enkele minuten opnieuw.",
       "success": "Je account is verwijderd."
+    },
+    "export": {
+      "button": "Mijn gegevens exporteren",
+      "hint": "U kunt eerst een kopie van uw gegevens (profiel, teams, uitnodigingen, kamers, uw antwoorden en uw bijdragen) downloaden als JSON-bestand.",
+      "throttled": "Te veel exports aangevraagd. Probeer het over een uur opnieuw.",
+      "failed": "Het exporteren van uw gegevens is mislukt. Probeer het later opnieuw."
     }
   },
   "subscription": {

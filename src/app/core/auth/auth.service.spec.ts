@@ -1,7 +1,7 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getRuntimeConfig } from '../runtime-config';
 import { authInterceptor } from './auth.interceptor';
@@ -117,6 +117,31 @@ describe('AuthService', () => {
     ctrl.expectOne(`${auth}/account/delete/`).flush({ code: 'current_password_invalid' }, { status: 400, statusText: 'Bad Request' });
     await expect(done).rejects.toMatchObject({ status: 400 });
     expect(localStorage.getItem(REFRESH_KEY)).toBe('r1');
+  });
+
+  it('exportData GETs the export and saves it under the server filename', async () => {
+    localStorage.setItem(ACCESS_KEY, 'a');
+    localStorage.setItem(REFRESH_KEY, 'r1');
+    const { ctrl, service } = setup();
+    const createUrl = vi.fn(() => 'blob:x');
+    const revokeUrl = vi.fn();
+    Object.assign(URL, { createObjectURL: createUrl, revokeObjectURL: revokeUrl });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      expect(this.download).toBe('app-export-2026-10-18.json');
+      expect(this.href).toBe('blob:x');
+    });
+    const done = service.exportData();
+    const req = ctrl.expectOne(`${auth}/account/export/`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer a');
+    req.flush(new Blob(['{}'], { type: 'application/json' }), {
+      headers: { 'Content-Disposition': 'attachment; filename="app-export-2026-10-18.json"' },
+    });
+    await done;
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(revokeUrl).toHaveBeenCalledWith('blob:x');
+    click.mockRestore();
   });
 
   it('bootstrap keeps the tokens when the API is unreachable', async () => {

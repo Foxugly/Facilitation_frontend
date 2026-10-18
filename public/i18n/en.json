@@ -528,6 +528,12 @@
       "owns_teams": "You own at least one team: delete it first. Your account has not been deleted.",
       "throttled": "Too many attempts. Try again in a few minutes.",
       "success": "Your account has been deleted."
+    },
+    "export": {
+      "button": "Export my data",
+      "hint": "You can first download a copy of your data (profile, teams, invitations, rooms, your responses and your contributions) as a JSON file.",
+      "throttled": "Too many exports requested. Try again in an hour.",
+      "failed": "Exporting your data failed. Please try again later."
     }
   },
   "subscription": {

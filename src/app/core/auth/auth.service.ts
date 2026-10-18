@@ -162,6 +162,25 @@ export class AuthService {
     this.clearSession();
   }
 
+  /** Download a copy of the signed-in user's data (RGPD art. 15 / 20) as a
+   * JSON file. The filename comes from the server's Content-Disposition. */
+  async exportData(): Promise<void> {
+    const resp = await firstValueFrom(
+      this.http.get(`${this.base}/account/export/`, { observe: 'response', responseType: 'blob' }),
+    );
+    const disposition = resp.headers.get('Content-Disposition') ?? '';
+    const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'export.json';
+    const url = URL.createObjectURL(resp.body ?? new Blob([], { type: 'application/json' }));
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
   /**
    * Refresh the access token, persisting the rotated refresh token. Resolves the
    * new access token, or null when the refresh token was rejected (401/403: the
