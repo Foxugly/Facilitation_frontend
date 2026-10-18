@@ -23,7 +23,7 @@ function errorCode(err: unknown): string | undefined {
 }
 
 /**
- * « Supprimer mon compte » (RGPD art. 17) — `POST /api/v1/auth/account/delete/`
+ * « Exporter mes données » (RGPD art. 15 / 20) and « Supprimer mon compte » (RGPD art. 17) — `POST /api/v1/auth/account/delete/`
  * with `{current_password}` (same contract as trainingmanager_server).
  *
  * The p-confirmdialog states what goes with the account and holds the password
@@ -41,8 +41,14 @@ function errorCode(err: unknown): string | undefined {
     <div class="section delete-account" data-testid="delete-account">
       <h3>{{ 'me.delete.title' | transloco }}</h3>
       <p class="meta-hint">{{ 'me.delete.lead' | transloco }}</p>
-      <p-button [label]="'me.delete.button' | transloco" icon="pi pi-trash" severity="danger"
-                data-testid="delete-account-open" (onClick)="open()" />
+      <p class="meta-hint">{{ 'me.export.hint' | transloco }}</p>
+      <div class="delete-account__actions">
+        <p-button [label]="'me.export.button' | transloco" icon="pi pi-download" severity="secondary"
+                  [outlined]="true" data-testid="export-data" [loading]="exporting()" [disabled]="exporting()"
+                  (onClick)="exportData()" />
+        <p-button [label]="'me.delete.button' | transloco" icon="pi pi-trash" severity="danger"
+                  data-testid="delete-account-open" (onClick)="open()" />
+      </div>
     </div>
 
     <p-confirmdialog [key]="confirmKey" [closable]="!pending()" [closeOnEscape]="!pending()"
@@ -69,6 +75,7 @@ function errorCode(err: unknown): string | undefined {
     </p-confirmdialog>
   `,
   styles: `
+    .delete-account__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .delete-account__dialog { display: flex; flex-direction: column; gap: 0.75rem; }
     .delete-account__dialog p { margin: 0; }
   `,
@@ -85,6 +92,21 @@ export class DeleteAccountComponent {
   readonly pending = signal(false);
   /** Localized message shown in the dialog. */
   readonly error = signal<string | null>(null);
+  readonly exporting = signal(false);
+
+  /** « Exporter mes données » (RGPD art. 15 / 20): `GET /api/v1/auth/account/export/`. */
+  async exportData(): Promise<void> {
+    if (this.exporting()) return;
+    this.exporting.set(true);
+    try {
+      await this.auth.exportData();
+    } catch (err) {
+      const key = (err as HttpErrorResponse)?.status === 429 ? 'me.export.throttled' : 'me.export.failed';
+      this.messages.add({ severity: 'error', summary: this.transloco.translate(key), life: 8000 });
+    } finally {
+      this.exporting.set(false);
+    }
+  }
 
   open(): void {
     this.password.set('');

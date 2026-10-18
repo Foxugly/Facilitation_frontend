@@ -528,6 +528,12 @@
       "owns_teams": "Eres propietario de al menos un equipo: elimínalo primero. Tu cuenta no se ha eliminado.",
       "throttled": "Demasiados intentos. Vuelve a intentarlo en unos minutos.",
       "success": "Tu cuenta ha sido eliminada."
+    },
+    "export": {
+      "button": "Exportar mis datos",
+      "hint": "Primero puede descargar una copia de sus datos (perfil, equipos, invitaciones, salas, sus respuestas y sus aportaciones) en formato JSON.",
+      "throttled": "Demasiadas exportaciones solicitadas. Inténtelo de nuevo dentro de una hora.",
+      "failed": "No se pudieron exportar sus datos. Inténtelo de nuevo más tarde."
     }
   },
   "subscription": {

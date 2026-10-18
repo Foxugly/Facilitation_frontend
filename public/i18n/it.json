@@ -528,6 +528,12 @@
       "owns_teams": "Sei proprietario di almeno un team: eliminalo prima. Il tuo account non è stato eliminato.",
       "throttled": "Troppi tentativi. Riprova tra qualche minuto.",
       "success": "Il tuo account è stato eliminato."
+    },
+    "export": {
+      "button": "Esporta i miei dati",
+      "hint": "Puoi prima scaricare una copia dei tuoi dati (profilo, team, inviti, stanze, le tue risposte e i tuoi contributi) in formato JSON.",
+      "throttled": "Troppe esportazioni richieste. Riprova tra un'ora.",
+      "failed": "L'esportazione dei tuoi dati non è riuscita. Riprova più tardi."
     }
   },
   "subscription": {

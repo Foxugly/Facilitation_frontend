@@ -528,6 +528,12 @@
       "owns_teams": "Vous êtes propriétaire d'au moins une équipe : supprimez-la d'abord. Votre compte n'a pas été supprimé.",
       "throttled": "Trop de tentatives. Réessayez dans quelques minutes.",
       "success": "Votre compte a été supprimé."
+    },
+    "export": {
+      "button": "Exporter mes données",
+      "hint": "Vous pouvez d'abord télécharger une copie de vos données (profil, équipes, invitations, salles, vos réponses et vos contributions) au format JSON.",
+      "throttled": "Trop d'exports demandés. Réessayez dans une heure.",
+      "failed": "L'export de vos données a échoué. Réessayez plus tard."
     }
   },
   "subscription": {
