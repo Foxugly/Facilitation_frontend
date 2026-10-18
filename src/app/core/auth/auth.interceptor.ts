@@ -7,13 +7,13 @@ import { isPublicAuthEndpoint, NO_AUTH_RETRY } from './auth-endpoints';
 import { AuthService } from './auth.service';
 
 /**
- * Attaches the access token to API calls and, on a 401, refreshes once (persisting
- * the rotated refresh token) and retries. The anonymous auth endpoints (login,
+ * Attaches the in-memory access token to API calls and, on a 401, refreshes once
+ * through the HttpOnly refresh cookie and retries. The anonymous auth endpoints (login,
  * token/refresh, …) get no Bearer and are never retried, nor is a request flagged
  * NO_AUTH_RETRY — so a rejected refresh can never re-enter the refresh.
  *
  * AuthService.refresh() resolves null when the refresh token was rejected (the
- * session is then cleared) and throws on a network error / 5xx (tokens kept): in
+ * session is then cleared) and throws on a network error / 5xx (session kept): in
  * both cases the caller gets an error, never a loop.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -29,7 +29,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(sent).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status !== 401 || !canRetry || !auth.refreshToken) {
+      if (err.status !== 401 || !canRetry || !auth.hasSession()) {
         return throwError(() => err);
       }
       return from(auth.refresh()).pipe(

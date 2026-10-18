@@ -11,9 +11,11 @@ export function authApiBase(): string {
 
 /** Anonymous auth endpoints: no Bearer is attached and a 401 never triggers a
  * refresh. `token/refresh/` is the one that matters — refreshing on its own 401
- * looped until the throttle answered 429. */
+ * looped until the throttle answered 429. `logout/` authenticates with the
+ * HttpOnly refresh cookie alone (an expired access token must not 401 it). */
 const PUBLIC_AUTH_PATHS = [
   'login/',
+  'logout/',
   'register/',
   'token/refresh/',
   'magic-link/',
