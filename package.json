@@ -23,7 +23,7 @@
     "@primeuix/themes": "^2.0.3",
     "@sentry/angular": "^10.76.2",
     "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.8",
+    "jspdf-autotable": "^5.0.9",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.10",
     "qrcode": "^1.5.4",
@@ -31,16 +31,16 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.26",
-    "@angular/cli": "^21.2.26",
+    "@angular/build": "^21.2.27",
+    "@angular/cli": "^21.2.27",
     "@angular/compiler-cli": "^21.2.25",
-    "@playwright/test": "^1.64.0",
+    "@playwright/test": "^1.64.1",
     "@types/qrcode": "^1.5.6",
     "jsdom": "^28.1.0",
-    "postcss": "^8.5.29",
-    "prettier": "^3.9.9",
+    "postcss": "^8.5.30",
+    "prettier": "^3.9.10",
     "typescript": "~5.9.2",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   },
   "//overrides": [
     "Derogation CIBLEE et non globale : le SDK MCP (tire par l'Angular CLI) accepte",
