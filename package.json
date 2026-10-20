@@ -50,6 +50,7 @@
   "overrides": {
     "@modelcontextprotocol/sdk": {
       "@hono/node-server": "^2.0.5"
-    }
+    },
+    "vite": "7.3.7"
   }
 }
