@@ -78,8 +78,8 @@ jobs:
           FE_VERSION: ${{ steps.pkg.outputs.version }}
         run: |
           # AWS-RunShellScript runs as ROOT under dash. Installs config from the
-          # COMMITTED git blob (never the django tree, §3.10) using `git -c
-          # safe.directory` inline (no $HOME needed), pulls the S3 bundle via the
+          # COMMITTED git blob (never the django tree, §3.10) read from root's own bare
+          # mirror (see M= below), pulls the S3 bundle via the
           # instance role (blank certbot creds), atomic-swaps the docroot, runs
           # the runtime-fetch (writes the SSM snippet), and reloads nginx.
           #
@@ -97,12 +97,19 @@ jobs:
           # generation n'ecrase la nouvelle (index.html et i18n en particulier).
           APP=/var/www/django_websites/Facilitation_frontend
           DOC="$APP/dist/Facilitation_frontend/browser"
-          GB="git -C $APP -c safe.directory=$APP show origin/main"
+          # Root lit les blobs qu'il installe dans SON PROPRE miroir nu (root:root 700),
+          # alimente depuis GitHub au SHA deploye — jamais dans le checkout django, dont
+          # .git (refs, config, hooks) est reecrivable par django (escalade vers root).
+          M=/var/lib/fleet-deploy/Facilitation_frontend.git
+          GB="git --git-dir=$M show $SHA"
           cat > /tmp/ssm-params.json <<EOF
           { "commands": [
             "set -eu",
             "chown -R django:www-data $APP",
             "sudo -u django bash -c 'umask 027; cd $APP && git fetch --quiet origin main && git reset --hard --quiet origin/main'",
+            "install -d -m 700 -o root -g root /var/lib/fleet-deploy",
+            "[ -d $M ] || git init --quiet --bare $M",
+            "git --git-dir=$M fetch --quiet --depth=1 https://github.com/Foxugly/Facilitation_frontend.git $SHA && git --git-dir=$M cat-file -e $SHA^{commit} || exit 1",
             "$GB:deploy/systemd/facilitation-frontend-runtime-fetch.service > /etc/systemd/system/facilitation-frontend-runtime-fetch.service",
             "$GB:deploy/fetch-frontend-runtime-from-ssm.sh > /usr/local/sbin/facilitation-frontend-runtime-fetch.sh && chmod 0755 /usr/local/sbin/facilitation-frontend-runtime-fetch.sh && chown root:root /usr/local/sbin/facilitation-frontend-runtime-fetch.sh",
             "$GB:deploy/nginx/facilitation-frontend.conf > /etc/nginx/sites-available/facilitation-frontend.conf && ln -sf /etc/nginx/sites-available/facilitation-frontend.conf /etc/nginx/sites-enabled/facilitation-frontend.conf",
