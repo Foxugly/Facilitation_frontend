@@ -102,10 +102,19 @@ jobs:
           # .git (refs, config, hooks) est reecrivable par django (escalade vers root).
           M=/var/lib/fleet-deploy/Facilitation_frontend.git
           GB="git --git-dir=$M show $SHA"
+          # Ecritures dans l'arbre de django = EN DJANGO (§3.10). django possede
+          # $APP : il pourrait y planter un lien symbolique pour qu'un rsync/tar/mv
+          # de root ecrive dans /etc. Root ne fait donc que ce qui exige root
+          # (miroir, units, nginx, systemctl). Le bundle S3, telecharge par root
+          # (role d'instance) dans un mktemp -d prive (700), est passe a django sur
+          # stdin (redirection ouverte par root) et extrait par django dans
+          # dist/.bundle-new AVANT toute rotation (echec = arret, docroot intact),
+          # puis tourne et publie par django. chown -R -h ne suit aucun lien ;
+          # le chmod final tourne en django.
           cat > /tmp/ssm-params.json <<EOF
           { "commands": [
             "set -eu",
-            "chown -R django:www-data $APP",
+            "chown -R -h django:www-data $APP",
             "sudo -u django bash -c 'umask 027; cd $APP && git fetch --quiet origin main && git reset --hard --quiet origin/main'",
             "install -d -m 700 -o root -g root /var/lib/fleet-deploy",
             "[ -d $M ] || git init --quiet --bare $M",
@@ -114,18 +123,18 @@ jobs:
             "$GB:deploy/fetch-frontend-runtime-from-ssm.sh > /usr/local/sbin/facilitation-frontend-runtime-fetch.sh && chmod 0755 /usr/local/sbin/facilitation-frontend-runtime-fetch.sh && chown root:root /usr/local/sbin/facilitation-frontend-runtime-fetch.sh",
             "$GB:deploy/nginx/facilitation-frontend.conf > /etc/nginx/sites-available/facilitation-frontend.conf && ln -sf /etc/nginx/sites-available/facilitation-frontend.conf /etc/nginx/sites-enabled/facilitation-frontend.conf",
             "systemctl daemon-reload && systemctl enable --quiet facilitation-frontend-runtime-fetch",
-            "env AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_CONFIG_FILE=/dev/null aws s3 cp s3://$BUCKET/builds/facilitation-frontend/$SHA.tar.gz /tmp/facilitationfe.tar.gz --region eu-west-1",
-            "rm -rf /tmp/facilitationfe && mkdir -p /tmp/facilitationfe && tar -xzf /tmp/facilitationfe.tar.gz -C /tmp/facilitationfe",
-            "rm -rf $APP/dist/.bundle-prev; [ -d $APP/dist/.bundle-current ] && mv $APP/dist/.bundle-current $APP/dist/.bundle-prev || true",
-            "mkdir -p $APP/dist",
-            "rm -rf $APP/dist/.bundle-current && cp -a /tmp/facilitationfe $APP/dist/.bundle-current",
-            "mkdir -p $DOC && rsync -a --delete $APP/dist/.bundle-current/ $DOC/",
-            "[ -d $APP/dist/.bundle-prev ] && rsync -a --ignore-existing $APP/dist/.bundle-prev/ $DOC/ || true",
-            "rm -rf /tmp/facilitationfe /tmp/facilitationfe.tar.gz",
+            "T=\$(mktemp -d) || exit 1",
+            "env AWS_SHARED_CREDENTIALS_FILE=/dev/null AWS_CONFIG_FILE=/dev/null aws s3 cp s3://$BUCKET/builds/facilitation-frontend/$SHA.tar.gz \$T/facilitationfe.tar.gz --region eu-west-1",
+            "sudo -u django sh -c 'umask 027; mkdir -p $APP/dist && rm -rf $APP/dist/.bundle-new && mkdir $APP/dist/.bundle-new && tar --no-same-owner --no-overwrite-dir -xzf - -C $APP/dist/.bundle-new' < \$T/facilitationfe.tar.gz || exit 1",
+            "sudo -u django sh -c 'rm -rf $APP/dist/.bundle-prev; [ -d $APP/dist/.bundle-current ] && mv $APP/dist/.bundle-current $APP/dist/.bundle-prev || true'",
+            "sudo -u django sh -c 'rm -rf $APP/dist/.bundle-current && mv $APP/dist/.bundle-new $APP/dist/.bundle-current'",
+            "sudo -u django sh -c 'umask 027; mkdir -p $DOC && rsync -a --delete $APP/dist/.bundle-current/ $DOC/'",
+            "sudo -u django sh -c '[ -d $APP/dist/.bundle-prev ] && rsync -a --ignore-existing $APP/dist/.bundle-prev/ $DOC/ || true'",
+            "rm -rf \$T",
             "systemctl restart facilitation-frontend-runtime-fetch",
             "echo 'set \$facilitation_version \"$FE_VERSION\";' > /etc/nginx/snippets/facilitation-frontend-runtime-version.conf",
             "nginx -t && systemctl reload nginx",
-            "chown -R django:www-data $APP && chmod -R g-w,o-rwx $APP"
+            "chown -R -h django:www-data $APP && sudo -u django chmod -R g-w,o-rwx $APP"
           ], "executionTimeout": ["900"] }
           EOF
           CMD_ID=$(aws ssm send-command \
