@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "title": "Decidete insieme, in tempo reale",
     "intro": "Facilitation riunisce attività di decisione e allineamento in tempo reale (Delegation Poker, Planning Poker, Fist of Five, voto romano, voto con adesivi): crea una stanza, invita il team, votate e rivelate i risultati insieme.",
     "create_title": "Crea una stanza",
     "room_title": "Titolo della stanza (opzionale)",
@@ -125,7 +124,13 @@
     "join_cta": "Entra",
     "login_cta": "Accedi",
     "register_cta": "Crea un account",
-    "contact_cta": "Contattami"
+    "contact_cta": "Contattami",
+    "stat_mode": "Modalità",
+    "stat_mode_visitor": "Visitatore",
+    "stat_mode_member": "Membro",
+    "stat_languages": "Lingue",
+    "stat_activities": "Attività",
+    "stat_activities_value": "Delegation Poker · Planning Poker · Fist of Five · voto romano · voto con adesivi"
   },
   "support": {
     "title": "Sostieni",

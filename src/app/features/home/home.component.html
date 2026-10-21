@@ -1,19 +1,36 @@
-<section class="page page--narrow">
-  <div class="hero">
-    <h2>{{ 'home.title' | transloco }}</h2>
-    <p class="lead">{{ 'home.intro' | transloco }}</p>
-    <div class="hero__actions">
-      <!-- Connexion / inscription : seulement pour un visiteur anonyme. -->
-      @if (!isAuthenticated()) {
-        <p-button routerLink="/login" icon="pi pi-sign-in" [label]="'home.login_cta' | transloco" />
-        <p-button routerLink="/register" icon="pi pi-user-plus" [label]="'home.register_cta' | transloco" severity="secondary" />
-      }
-      <button (click)="contactClick()" class="hero__contact" type="button">
-        <i class="pi pi-envelope"></i>
-        <span>{{ 'home.contact_cta' | transloco }}</span>
-      </button>
+<section class="page home-page">
+  <header class="hero">
+    <div class="hero__content">
+      <h1>Facilitation</h1>
+      <p class="hero__lead">{{ 'home.intro' | transloco }}</p>
+      <div class="hero__actions">
+        <!-- Connexion / inscription : seulement pour un visiteur anonyme. -->
+        @if (!isAuthenticated()) {
+          <p-button routerLink="/login" icon="pi pi-sign-in" [label]="'home.login_cta' | transloco" />
+          <p-button routerLink="/register" icon="pi pi-user-plus" [label]="'home.register_cta' | transloco" severity="secondary" />
+        }
+        <button (click)="contactClick()" class="hero__contact" type="button">
+          <i class="pi pi-envelope"></i>
+          <span>{{ 'home.contact_cta' | transloco }}</span>
+        </button>
+      </div>
     </div>
-  </div>
+
+    <aside class="hero__panel">
+      <div class="hero-stat">
+        <span class="hero-stat__label">{{ 'home.stat_mode' | transloco }}</span>
+        <strong>{{ (isAuthenticated() ? 'home.stat_mode_member' : 'home.stat_mode_visitor') | transloco }}</strong>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat__label">{{ 'home.stat_languages' | transloco }}</span>
+        <strong>FR · EN · NL · IT · ES</strong>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat__label">{{ 'home.stat_activities' | transloco }}</span>
+        <strong>{{ 'home.stat_activities_value' | transloco }}</strong>
+      </div>
+    </aside>
+  </header>
 
   <div class="home-actions">
     <!-- Create a room (in evidence) -->

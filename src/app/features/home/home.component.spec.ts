@@ -37,8 +37,24 @@ const text = (el: HTMLElement, sel: string) => Array.from(el.querySelectorAll(se
 describe('HomeComponent hero', () => {
   it('has no eyebrow above the title', () => {
     const { el } = setup(false);
-    expect(el.querySelector('.hero .eyebrow')).toBeNull();
-    expect(el.querySelector('.hero h2')?.textContent).toContain(fr.home.title);
+    expect(el.querySelector('.hero [class*="eyebrow"]')).toBeNull();
+    expect(el.querySelector('header.hero h1')?.textContent?.trim()).toBe('Facilitation');
+    expect(el.querySelector('.hero__lead')?.textContent?.trim()).toBe(fr.home.intro);
+  });
+
+  it('shows the side panel with three stats, mode = visitor when anonymous', () => {
+    const { el } = setup(false);
+    expect(text(el, '.hero__panel .hero-stat__label')).toEqual([fr.home.stat_mode, fr.home.stat_languages, fr.home.stat_activities]);
+    expect(text(el, '.hero__panel .hero-stat strong')).toEqual([
+      fr.home.stat_mode_visitor,
+      'FR · EN · NL · IT · ES',
+      fr.home.stat_activities_value,
+    ]);
+  });
+
+  it('shows mode = member when logged in', () => {
+    const { el } = setup(true);
+    expect(text(el, '.hero__panel .hero-stat strong')[0]).toBe(fr.home.stat_mode_member);
   });
 
   it('shows login, register and contact to an anonymous visitor', () => {

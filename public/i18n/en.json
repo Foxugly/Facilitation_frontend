@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "title": "Decide together, in real time",
     "intro": "Facilitation brings together real-time decision and alignment activities (Delegation Poker, Planning Poker, Fist of Five, Roman Vote, Dot Voting): create a room, invite your team, vote and reveal the results together.",
     "create_title": "Create a room",
     "room_title": "Room title (optional)",
@@ -125,7 +124,13 @@
     "join_cta": "Join",
     "login_cta": "Log in",
     "register_cta": "Create an account",
-    "contact_cta": "Contact me"
+    "contact_cta": "Contact me",
+    "stat_mode": "Mode",
+    "stat_mode_visitor": "Visitor",
+    "stat_mode_member": "Member",
+    "stat_languages": "Languages",
+    "stat_activities": "Activities",
+    "stat_activities_value": "Delegation Poker · Planning Poker · Fist of Five · Roman Vote · Dot Voting"
   },
   "support": {
     "title": "Support",
