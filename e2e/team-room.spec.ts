@@ -60,32 +60,37 @@ test('le timer arme une echeance annoncee a tous les participants', async ({ bro
   await voterCtx.close();
 });
 
-test('la revelation anonyme masque le lien participant -> carte', async ({ browser }) => {
-  const { ctx: facCtx, page: fac, code } = await openTeamRoom(browser);
-  const { ctx: voterCtx, page: voter } = await joinTeamRoom(browser, code);
+// Privacy invariant (anonymous reveal): never retried, a failure is a finding.
+test.describe('anonymat', () => {
+  test.describe.configure({ retries: 0 });
 
-  // Bascule en anonyme AVANT d'ouvrir : le mode est fige a l'ouverture, et les
-  // votants doivent le connaitre avant de jouer.
-  await fac.locator('.reveal-settings p-toggleswitch').click();
-  await fac.locator('#subjectDraft').fill('Anonymous round');
-  await fac.getByRole('button', { name: /Prepare the vote/ }).click();
+  test('la revelation anonyme masque le lien participant -> carte', async ({ browser }) => {
+    const { ctx: facCtx, page: fac, code } = await openTeamRoom(browser);
+    const { ctx: voterCtx, page: voter } = await joinTeamRoom(browser, code);
 
-  // Le mode est annonce a tous, y compris aux votants.
-  await expect(voter.getByText(/Anonymous/i).first()).toBeVisible();
+    // Bascule en anonyme AVANT d'ouvrir : le mode est fige a l'ouverture, et les
+    // votants doivent le connaitre avant de jouer.
+    await fac.locator('.reveal-settings p-toggleswitch').click();
+    await fac.locator('#subjectDraft').fill('Anonymous round');
+    await fac.getByRole('button', { name: /Prepare the vote/ }).click();
 
-  await fac.getByRole('button', { name: /Launch the vote/ }).click();
-  await voter.getByRole('button', { name: /Delegate/ }).click();
-  await expect(fac.getByText(/1 \/ \d/)).toBeVisible();
+    // Le mode est annonce a tous, y compris aux votants.
+    await expect(voter.getByText(/Anonymous/i).first()).toBeVisible();
 
-  await fac.getByRole('button', { name: /Reveal/ }).click();
-  await expectState(fac, 'Revealed');
+    await fac.getByRole('button', { name: /Launch the vote/ }).click();
+    await voter.getByRole('button', { name: /Delegate/ }).click();
+    await expect(fac.getByText(/1 \/ \d/)).toBeVisible();
 
-  // Le decompte est bien la, mais le tapis ne rattache aucune carte a un nom :
-  // en anonyme le serveur n'emet pas la cle `votes`, donc aucun siege ne se
-  // retourne. C'est l'invariant, et il tient cote SERVEUR, pas a l'affichage.
-  await expect(fac.getByText('Votes are anonymous')).toBeVisible();
-  await expect(fac.locator('.roster').getByText('Delegate', { exact: true })).toHaveCount(0);
+    await fac.getByRole('button', { name: /Reveal/ }).click();
+    await expectState(fac, 'Revealed');
 
-  await facCtx.close();
-  await voterCtx.close();
+    // Le decompte est bien la, mais le tapis ne rattache aucune carte a un nom :
+    // en anonyme le serveur n'emet pas la cle `votes`, donc aucun siege ne se
+    // retourne. C'est l'invariant, et il tient cote SERVEUR, pas a l'affichage.
+    await expect(fac.getByText('Votes are anonymous')).toBeVisible();
+    await expect(fac.locator('.roster').getByText('Delegate', { exact: true })).toHaveCount(0);
+
+    await facCtx.close();
+    await voterCtx.close();
+  });
 });

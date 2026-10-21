@@ -14,6 +14,11 @@ const API = 'http://localhost:8000';
 const COOKIE = 'facilitation_refresh';
 const PASSWORD = 'sup3rSecret!e2e';
 
+// Security tests: never retried. A failure here is a finding, not a flake — a
+// retry would hide an intermittent auth bug (playwright.config.ts retries the
+// rest of the suite once on CI).
+test.describe.configure({ retries: 0 });
+
 function createConfirmedUser(): string {
   const email = `e2e-cookie-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
   execFileSync(
@@ -52,10 +57,23 @@ async function signIn(page: Page, email: string): Promise<void> {
   await page.waitForURL((url) => !url.pathname.startsWith('/login'));
 }
 
+/**
+ * Load /me as a fresh page (memory is gone: the session must come back through
+ * the cookie) and wait until the restore has finished.
+ *
+ * Never call this right after `page.reload()`: the reloaded page starts its own
+ * boot-time refresh, the goto aborts it, and when the server already rotated the
+ * cookie's token (blacklisting the old one) the browser drops the Set-Cookie of
+ * the aborted response. The next load then presents a blacklisted token and is
+ * signed out (CI flake of 2026-10-21). `goto` is itself the reload.
+ *
+ * Sign out first, URL second: the URL reads /me as soon as the document loads,
+ * before the guard (which runs after the restore) has decided anything.
+ */
 async function expectSignedIn(page: Page): Promise<void> {
   await page.goto('/me');
-  await expect(page).toHaveURL(/\/me$/);
   await expect(page.getByRole('button', { name: /Sign out/ })).toBeVisible();
+  await expect(page).toHaveURL(/\/me$/);
 }
 
 test('login stores the refresh token in an HttpOnly cookie only, and a reload restores the session', async ({ browser }) => {
@@ -75,8 +93,7 @@ test('login stores the refresh token in an HttpOnly cookie only, and a reload re
   expect(dump).not.toMatch(/eyJ[\w-]+\.[\w-]+\.[\w-]+/); // no JWT at all
   expect(dump).toContain('facilitation.session');
 
-  // Reload: memory is gone, the cookie brings the session back (and rotates).
-  await page.reload();
+  // New page load: memory is gone, the cookie brings the session back (and rotates).
   await expectSignedIn(page);
   expect((await refreshCookie(ctx))?.value).not.toBe(cookie!.value);
   await ctx.close();
@@ -102,7 +119,7 @@ test('a legacy refresh token left in localStorage is migrated once to the cookie
     [access, refresh],
   );
 
-  await page.reload();
+  // New page load: the boot-time restore presents the legacy token once.
   await expectSignedIn(page);
   expect(await page.evaluate(() => [localStorage.getItem('poker.access'), localStorage.getItem('poker.refresh')])).toEqual([
     null,
@@ -111,7 +128,6 @@ test('a legacy refresh token left in localStorage is migrated once to the cookie
   expect((await refreshCookie(ctx))?.httpOnly).toBe(true);
 
   // The next load uses the cookie alone.
-  await page.reload();
   await expectSignedIn(page);
   await ctx.close();
 });

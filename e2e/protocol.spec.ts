@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { createRoom, expectState, joinRoom, openRound } from './helpers';
 
+// Security / privacy invariants: never retried. A failure here is a finding,
+// not a flake (playwright.config.ts retries the rest of the suite once on CI).
+test.describe.configure({ retries: 0 });
+
 /**
  * Invariants du contrat temps reel (delegation-poker-realtime-contract.md).
  *
