@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "title": "Décidez ensemble, en temps réel",
     "intro": "Facilitation réunit des activités de décision et d'alignement en temps réel (Delegation Poker, Planning Poker, Fist of Five, vote romain, vote par gommettes) : créez une salle, invitez votre équipe, votez et révélez les résultats ensemble.",
     "create_title": "Créer une salle",
     "room_title": "Titre de la salle (optionnel)",
@@ -125,7 +124,13 @@
     "join_cta": "Rejoindre",
     "login_cta": "Se connecter",
     "register_cta": "Créer un compte",
-    "contact_cta": "Me contacter"
+    "contact_cta": "Me contacter",
+    "stat_mode": "Mode",
+    "stat_mode_visitor": "Visiteur",
+    "stat_mode_member": "Membre",
+    "stat_languages": "Langues",
+    "stat_activities": "Activités",
+    "stat_activities_value": "Delegation Poker · Planning Poker · Fist of Five · vote romain · vote par gommettes"
   },
   "support": {
     "title": "Soutenir",
