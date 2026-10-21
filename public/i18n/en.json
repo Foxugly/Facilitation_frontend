@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "eyebrow": "Shared decision-making",
     "title": "Decide together, in real time",
     "intro": "Facilitation brings together real-time decision and alignment activities (Delegation Poker, Planning Poker, Fist of Five, Roman Vote, Dot Voting): create a room, invite your team, vote and reveal the results together.",
     "create_title": "Create a room",
@@ -123,7 +122,10 @@
     "create_cta": "Create the room",
     "join_title": "Join a room",
     "join_intro": "Got a room code or a link? Jump into the ongoing game.",
-    "join_cta": "Join"
+    "join_cta": "Join",
+    "login_cta": "Log in",
+    "register_cta": "Create an account",
+    "contact_cta": "Contact me"
   },
   "support": {
     "title": "Support",

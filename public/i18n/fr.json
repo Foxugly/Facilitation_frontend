@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "eyebrow": "Prise de décision commune",
     "title": "Décidez ensemble, en temps réel",
     "intro": "Facilitation réunit des activités de décision et d'alignement en temps réel (Delegation Poker, Planning Poker, Fist of Five, vote romain, vote par gommettes) : créez une salle, invitez votre équipe, votez et révélez les résultats ensemble.",
     "create_title": "Créer une salle",
@@ -123,7 +122,10 @@
     "create_cta": "Créer la salle",
     "join_title": "Rejoindre une salle",
     "join_intro": "Vous avez un code de salle ou un lien ? Rejoignez la partie en cours.",
-    "join_cta": "Rejoindre"
+    "join_cta": "Rejoindre",
+    "login_cta": "Se connecter",
+    "register_cta": "Créer un compte",
+    "contact_cta": "Me contacter"
   },
   "support": {
     "title": "Soutenir",

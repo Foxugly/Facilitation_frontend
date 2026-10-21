@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "eyebrow": "Samen beslissen",
     "title": "Beslis samen, in realtime",
     "intro": "Facilitation verenigt realtime beslissings- en afstemmingsactiviteiten (Delegation Poker, Planning Poker, Fist of Five, Romeinse stemming, stickerstemming): maak een kamer, nodig je team uit, stem en onthul de resultaten samen.",
     "create_title": "Kamer maken",
@@ -123,7 +122,10 @@
     "create_cta": "Kamer maken",
     "join_title": "Kamer binnengaan",
     "join_intro": "Heb je een kamercode of link? Doe mee met het lopende spel.",
-    "join_cta": "Deelnemen"
+    "join_cta": "Deelnemen",
+    "login_cta": "Inloggen",
+    "register_cta": "Account aanmaken",
+    "contact_cta": "Contacteer mij"
   },
   "support": {
     "title": "Steunen",

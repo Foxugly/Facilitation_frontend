@@ -1,18 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 
 import { RoomApiService } from '../../core/api/room-api.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { IdentityService } from '../../core/identity/identity.service';
+import { openContactEmail } from '../about/contact';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, TranslocoModule, ButtonModule, InputTextModule],
+  imports: [FormsModule, RouterLink, TranslocoModule, ButtonModule, InputTextModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -22,6 +24,9 @@ export class HomeComponent {
   private router = inject(Router);
   private messages = inject(MessageService);
   private transloco = inject(TranslocoService);
+  private auth = inject(AuthService);
+
+  readonly isAuthenticated = this.auth.isAuthenticated;
 
   readonly username = signal(this.identity.username);
   readonly title = signal('');
@@ -81,5 +86,9 @@ export class HomeComponent {
         this.messages.add({ severity: 'error', summary: this.transloco.translate(key) });
       },
     });
+  }
+
+  contactClick(): void {
+    openContactEmail('[Facilitation]');
   }
 }

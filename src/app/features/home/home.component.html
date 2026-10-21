@@ -1,8 +1,18 @@
 <section class="page page--narrow">
   <div class="hero">
-    <p class="eyebrow">{{ 'home.eyebrow' | transloco }}</p>
     <h2>{{ 'home.title' | transloco }}</h2>
     <p class="lead">{{ 'home.intro' | transloco }}</p>
+    <div class="hero__actions">
+      <!-- Connexion / inscription : seulement pour un visiteur anonyme. -->
+      @if (!isAuthenticated()) {
+        <p-button routerLink="/login" icon="pi pi-sign-in" [label]="'home.login_cta' | transloco" />
+        <p-button routerLink="/register" icon="pi pi-user-plus" [label]="'home.register_cta' | transloco" severity="secondary" />
+      }
+      <button (click)="contactClick()" class="hero__contact" type="button">
+        <i class="pi pi-envelope"></i>
+        <span>{{ 'home.contact_cta' | transloco }}</span>
+      </button>
+    </div>
   </div>
 
   <div class="home-actions">
