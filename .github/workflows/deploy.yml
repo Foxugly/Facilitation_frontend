@@ -27,6 +27,194 @@ jobs:
       - name: Build (validate compile)
         run: npm run build
 
+  # Suite Playwright (e2e/) contre le VRAI backend, branche main de Facilitation_server.
+  # Elle ne tournait qu'a la main : un changement de la page d'accueil l'a cassee
+  # sans que personne ne le voie. Les serveurs sont demarres ici, avant
+  # `playwright test` : playwright.config.ts les trouve deja en place
+  # (reuseExistingServer) et ne lance pas ses commandes webServer, ecrites pour
+  # le poste Windows.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Reglages dev du backend (STATE absent) : channel layer en memoire, Celery
+      # eager — ni Redis ni worker. Base PostgreSQL comme en production.
+      SECRET_KEY: e2e-secret-key
+      DB_ENGINE: postgresql
+      DB_NAME: facilitation
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      # Releve les quotas de debit (config/settings/dev.py), comme le pose
+      # playwright.config.ts en local.
+      E2E: "1"
+      # auth-cookie.spec.ts cree ses comptes par `manage.py shell` : il lui faut
+      # le checkout du backend et le python de setup-python.
+      FACILITATION_SERVER_DIR: ${{ github.workspace }}/.e2e-backend
+      FACILITATION_PYTHON: python
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Checkout du backend (Facilitation_server, main)
+        uses: actions/checkout@v7
+        with:
+          repository: Foxugly/Facilitation_server
+          ref: main
+          path: .e2e-backend
+
+      # PostgreSQL : meme schema que la CI du backend (OPERATIONS.md §3.22).
+      # Pas de `services:` (telecharge avant toute etape, sans cache possible) :
+      # l'image vit dans le cache d'Actions, un telechargement par mois au plus,
+      # trois tentatives, l'image du mois precedent en secours.
+      - name: Clé du cache de l'image PostgreSQL (une par mois)
+        id: cle-postgres
+        run: echo "mois=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Image PostgreSQL depuis le cache
+        id: cache-postgres
+        uses: actions/cache/restore@v6
+        with:
+          path: /tmp/postgres-16.tar
+          key: postgres-16-${{ steps.cle-postgres.outputs.mois }}
+          restore-keys: postgres-16-
+
+      - name: Image PostgreSQL depuis le registre (si le cache n'a pas celle du mois)
+        id: telechargement-postgres
+        if: steps.cache-postgres.outputs.cache-hit != 'true'
+        run: |
+          for essai in 1 2 3; do
+            if docker pull public.ecr.aws/docker/library/postgres:16; then
+              docker save public.ecr.aws/docker/library/postgres:16 -o /tmp/postgres-16.tar
+              echo "neuve=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep $((essai * 20))
+          done
+          if [ -f /tmp/postgres-16.tar ]; then
+            echo "::warning::Registre indisponible : image du cache d'un mois précédent."
+          else
+            echo "::error::Registre indisponible et aucune image en cache."
+            exit 1
+          fi
+
+      - name: Mettre l'image du mois en cache
+        if: steps.telechargement-postgres.outputs.neuve == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: /tmp/postgres-16.tar
+          key: postgres-16-${{ steps.cle-postgres.outputs.mois }}
+
+      - name: Démarrer PostgreSQL 16
+        run: |
+          docker load -i /tmp/postgres-16.tar
+          docker run -d --name postgres -p 5432:5432 \
+            -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=facilitation \
+            public.ecr.aws/docker/library/postgres:16
+          for i in $(seq 1 30); do
+            if docker exec postgres pg_isready -U postgres -h 127.0.0.1 >/dev/null 2>&1; then
+              echo "PostgreSQL prêt."; exit 0
+            fi
+            sleep 2
+          done
+          docker logs postgres
+          echo "::error::PostgreSQL ne répond pas."; exit 1
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: .e2e-backend/requirements.txt
+
+      - name: Dépendances du backend
+        run: pip install -r .e2e-backend/requirements.txt
+
+      - name: Migrer, semer, démarrer le backend (daphne via runserver)
+        working-directory: .e2e-backend
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_delegation_deck
+          python manage.py seed_icon_decks
+          python manage.py seed_e2e_team
+          nohup python manage.py runserver 127.0.0.1:8000 --noreload > "$RUNNER_TEMP/backend.log" 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/health/ >/dev/null 2>&1; then
+              echo "Backend prêt."; exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/backend.log"
+          echo "::error::Le backend ne répond pas sur /health/."; exit 1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+
+      # ng serve compile pendant l'installation du navigateur.
+      - name: Démarrer le frontend (ng serve)
+        run: nohup npm start > "$RUNNER_TEMP/frontend.log" 2>&1 &
+
+      # Navigateur : Chromium seul (unique projet de playwright.config.ts), en
+      # cache sous la version exacte de Playwright ; trois tentatives au
+      # telechargement (OPERATIONS.md §3.22). Les bibliotheques systeme passent
+      # par apt a chaque run, elles ne se mettent pas en cache.
+      - name: Version de Playwright
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Navigateur Playwright depuis le cache
+        id: cache-playwright
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ steps.playwright.outputs.version }}
+
+      - name: Installer Chromium (si absent du cache)
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: |
+          for essai in 1 2 3; do
+            npx playwright install chromium && exit 0
+            sleep $((essai * 20))
+          done
+          echo "::error::Téléchargement de Chromium impossible."; exit 1
+
+      - name: Dépendances système de Chromium
+        run: npx playwright install-deps chromium
+
+      - name: Attendre le frontend
+        run: |
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:4200 >/dev/null 2>&1; then
+              echo "Frontend prêt."; exit 0
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/frontend.log"
+          echo "::error::ng serve ne répond pas sur :4200."; exit 1
+
+      - name: Playwright
+        env:
+          PLAYWRIGHT_HTML_OPEN: never
+        run: npx playwright test --reporter=list,html
+
+      - name: Journaux des serveurs
+        if: failure()
+        run: |
+          echo "::group::backend"; cat "$RUNNER_TEMP/backend.log" || true; echo "::endgroup::"
+          echo "::group::frontend"; cat "$RUNNER_TEMP/frontend.log" || true; echo "::endgroup::"
+
+      - name: Rapport Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main'
