@@ -5,7 +5,6 @@ export type TeamRole = 'owner' | 'manager' | 'member';
 export interface Team {
   id: number;
   name: string;
-  owner_email: string;
   created_at: string;
   my_role: TeamRole;
   member_count: number;
@@ -27,7 +26,9 @@ export interface Team {
 
 export interface Membership {
   id: number;
-  user: { id: number; email: string; display_name: string; avatar_url: string };
+  /** `email` is null unless the viewer manages the team or it is their own row:
+   * teammates see names only. `display_name` may be empty. */
+  user: { id: number; email: string | null; display_name: string; avatar_url: string };
   role: TeamRole;
   joined_at: string;
 }

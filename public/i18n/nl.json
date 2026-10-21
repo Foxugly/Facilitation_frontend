@@ -36,6 +36,7 @@
     "name": "Teamnaam",
     "empty": "Je hebt nog geen team. Maak er een om leden uit te nodigen.",
     "members": "Leden",
+    "member_fallback": "Lid {{n}}",
     "invitations": "Uitnodigingen",
     "invite": "Uitnodigen",
     "invited": "Uitnodiging verstuurd.",
