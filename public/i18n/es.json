@@ -115,7 +115,6 @@
     }
   },
   "home": {
-    "eyebrow": "Decisiones compartidas",
     "title": "Decidid juntos, en tiempo real",
     "intro": "Facilitation reúne actividades de decisión y alineación en tiempo real (Delegation Poker, Planning Poker, Fist of Five, voto romano, votación con pegatinas): crea una sala, invita a tu equipo, votad y revelad los resultados juntos.",
     "create_title": "Crear una sala",
@@ -123,7 +122,10 @@
     "create_cta": "Crear la sala",
     "join_title": "Unirse a una sala",
     "join_intro": "¿Tienes un código de sala o un enlace? Únete a la partida en curso.",
-    "join_cta": "Unirse"
+    "join_cta": "Unirse",
+    "login_cta": "Iniciar sesión",
+    "register_cta": "Crear una cuenta",
+    "contact_cta": "Contáctame"
   },
   "support": {
     "title": "Apoyar",
