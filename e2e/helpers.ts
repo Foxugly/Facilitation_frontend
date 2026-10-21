@@ -26,7 +26,7 @@ export async function createRoom(browser: Browser, name = 'Sam'): Promise<{
   await page.goto('/');
   // 1er champ = titre de salle (facultatif), 2e = nom d'affichage.
   await page.getByRole('textbox').nth(1).fill(name);
-  await page.getByRole('button', { name: /Create/ }).click();
+  await page.getByRole('button', { name: /Create the room/ }).click();
   await page.waitForURL(/\/room\/[A-Z0-9]{6,8}/);
   const code = page.url().split('/room/')[1];
   expect(code).toMatch(/^[A-Z0-9]{6,8}$/);
