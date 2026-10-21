@@ -7,6 +7,9 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   workers: 1,
+  // CI: one retry absorbs a timing flake (auth-cookie legacy migration, 2026-10-22);
+  // a real regression still fails twice. Locally: no retry, failures stay visible.
+  retries: process.env['CI'] ? 1 : 0,
   timeout: 30_000,
   expect: { timeout: 10_000 },
   use: {
