@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { signIn } from './helpers';
 
+// Security / privacy invariants: never retried. A failure here is a finding,
+// not a flake (playwright.config.ts retries the rest of the suite once on CI).
+test.describe.configure({ retries: 0 });
+
 /**
  * Decision produit du 2026-10-21 : un membre voit le NOM de ses coequipiers,
  * jamais leur e-mail. Le serveur ne l'envoie qu'aux gestionnaires de l'equipe

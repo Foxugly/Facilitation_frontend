@@ -7,8 +7,10 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   workers: 1,
-  // CI: one retry absorbs a timing flake (auth-cookie legacy migration, 2026-10-22);
-  // a real regression still fails twice. Locally: no retry, failures stay visible.
+  // CI: one retry absorbs a UI timing flake; a real regression still fails twice.
+  // Security specs (auth-cookie, protocol, team-members, the anonymous reveal)
+  // opt out with test.describe.configure({ retries: 0 }): a retry there would hide
+  // an intermittent auth bug. Locally: no retry, failures stay visible.
   retries: process.env['CI'] ? 1 : 0,
   timeout: 30_000,
   expect: { timeout: 10_000 },
