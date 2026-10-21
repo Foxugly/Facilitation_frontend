@@ -3,7 +3,11 @@ import { Injectable } from '@angular/core';
 import { Role } from '../realtime/protocol';
 
 const NAME_KEY = 'facilitation.username';
-const SESSION_KEY = 'facilitation.session';
+// NOT 'facilitation.session': that key is AuthService's SESSION_HINT_KEY. Sharing it,
+// an anonymous reload saw the room session as an auth hint, tried a refresh, failed
+// and cleared it, sending the participant back to /join (e2e protocol.spec §8). An old
+// value left under the shared key is dropped by that same failed restore, once.
+const SESSION_KEY = 'facilitation.room';
 
 export interface RoomSession {
   code: string;
