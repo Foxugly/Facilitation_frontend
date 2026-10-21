@@ -26,6 +26,27 @@ declare global {
   }
 }
 
+export const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+
+/**
+ * Inject the Turnstile API <script> once, on demand (audit 2026-10-18, F-M2).
+ * It used to be loaded from index.html on every route (room, dashboard...),
+ * giving a third-party script same-origin access to the stored tokens
+ * everywhere; now only the forms that render the widget pull it in. Same
+ * approach as PushIT_frontend. CSP: script-src allowlists
+ * https://challenges.cloudflare.com, so a script element created by the
+ * (same-origin) bundle needs no nonce.
+ */
+export function loadTurnstileScript(): void {
+  if (typeof document === 'undefined' || window.turnstile) return;
+  if (document.querySelector(`script[src="${TURNSTILE_SCRIPT_SRC}"]`)) return;
+  const script = document.createElement('script');
+  script.src = TURNSTILE_SCRIPT_SRC;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
 export class TurnstileController {
   readonly siteKey = getRuntimeConfig().turnstileSiteKey;
   readonly enabled = this.siteKey.length > 0;
@@ -35,6 +56,7 @@ export class TurnstileController {
 
   render(container: HTMLElement | undefined, attempts = 0): void {
     if (!this.enabled || typeof window === 'undefined') return;
+    if (attempts === 0) loadTurnstileScript();
     if (!window.turnstile?.render) {
       if (attempts >= 20) return;
       this.retryTimer = setTimeout(() => this.render(container, attempts + 1), 500);
