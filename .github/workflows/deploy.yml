@@ -91,6 +91,19 @@ jobs:
             fi
             sleep $((essai * 20))
           done
+          # Second registre : le miroir Docker Hub de Google, sans la limite de
+          # données anonyme d'ECR (« Data limit exceeded », 2026-10-21/22).
+          # Même image officielle, retaguée sous le nom ECR utilisé plus bas.
+          for essai in 1 2; do
+            if docker pull mirror.gcr.io/library/postgres:16; then
+              docker tag mirror.gcr.io/library/postgres:16 public.ecr.aws/docker/library/postgres:16
+              docker save public.ecr.aws/docker/library/postgres:16 -o /tmp/postgres-16.tar
+              echo "::warning::ECR indisponible : image prise sur mirror.gcr.io."
+              echo "neuve=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 15
+          done
           if [ -f /tmp/postgres-16.tar ]; then
             echo "::warning::Registre indisponible : image du cache d'un mois précédent."
           else
