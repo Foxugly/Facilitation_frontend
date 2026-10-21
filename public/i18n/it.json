@@ -36,6 +36,7 @@
     "name": "Nome del team",
     "empty": "Non hai ancora un team. Creane uno per invitare membri.",
     "members": "Membri",
+    "member_fallback": "Membro {{n}}",
     "invitations": "Inviti",
     "invite": "Invita",
     "invited": "Invito inviato.",

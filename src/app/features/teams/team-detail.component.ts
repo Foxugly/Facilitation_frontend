@@ -19,6 +19,7 @@ import { IdentityService } from '../../core/identity/identity.service';
 import { LanguageService } from '../../core/i18n/language.service';
 import { TeamsService } from '../../core/teams/teams.service';
 import { Background, BackgroundStyle, CardBack, Deck, Felt, Invitation, Membership, ResultLayout, SurfaceStyle, Team, TeamRole } from '../../core/teams/teams.models';
+import { memberName } from '../../core/teams/member-name';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
 const AVATAR_COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6', '#6366f1'];
@@ -78,16 +79,20 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
             <p-tabpanel value="members">
               <!-- Members -->
               <div class="section">
-                @for (m of members(); track m.id) {
+                @for (m of members(); track m.id; let i = $index) {
+                  @let name = memberName(m.user, ('teams.member_fallback' | transloco: { n: i + 1 }));
                   <div class="member-row">
                     @if (m.user.avatar_url) {
                       <img class="avatar avatar--img" [src]="m.user.avatar_url" alt="" />
                     } @else {
-                      <div class="avatar" [style.background]="color(m.user.email)">{{ initials(m.user.display_name || m.user.email) }}</div>
+                      <div class="avatar" [style.background]="color('user-' + m.user.id)">{{ initials(name) }}</div>
                     }
                     <div class="who">
-                      <div class="name">{{ m.user.display_name || m.user.email }}</div>
-                      <div class="email">{{ m.user.email }}</div>
+                      <div class="name">{{ name }}</div>
+                      <!-- E-mail sent to managers (and for one's own row) only. -->
+                      @if (m.user.email) {
+                        <div class="email">{{ m.user.email }}</div>
+                      }
                     </div>
                     @if (m.role === 'owner') {
                       <p-tag [value]="'teams.role.owner' | transloco" />
@@ -491,6 +496,7 @@ export class TeamDetailComponent implements OnInit {
   readonly starting = signal(false);
   readonly team = signal<Team | null>(null);
   readonly members = signal<Membership[]>([]);
+  readonly memberName = memberName;
   readonly invitations = signal<Invitation[]>([]);
   readonly isManager = computed(() => ['owner', 'manager'].includes(this.team()?.my_role ?? ''));
   readonly isOwner = computed(() => this.team()?.my_role === 'owner');
