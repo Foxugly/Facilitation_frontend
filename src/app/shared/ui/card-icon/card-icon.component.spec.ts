@@ -45,4 +45,10 @@ describe('CardIconComponent', () => {
     const mask = el.querySelector('span.mask') as HTMLElement;
     expect(mask.style.getPropertyValue('--icon')).toContain("l\\'ete.png");
   });
+
+  it('escapes a backslash so it cannot cancel the quote escaping', () => {
+    const el = render("https://poker-api.example/media/x\\'y.png");
+    const mask = el.querySelector('span.mask') as HTMLElement;
+    expect(mask.style.getPropertyValue('--icon')).toContain("x\\\\\\'y.png");
+  });
 });

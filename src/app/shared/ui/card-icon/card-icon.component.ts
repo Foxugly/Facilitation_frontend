@@ -46,7 +46,10 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 export class CardIconComponent {
   readonly src = input.required<string>();
 
-  /** Les guillemets simples de l'URL sont echappes : une apostrophe dans un nom de
-   * fichier televerse casserait sinon la declaration CSS. */
-  readonly cssUrl = computed(() => `url('${this.src().replace(/'/g, "\\'")}')`);
+  /** Les antislashs puis les guillemets simples de l'URL sont echappes : une
+   * apostrophe dans un nom de fichier televerse casserait sinon la declaration CSS,
+   * et un antislash non echappe annulerait l'echappement de l'apostrophe. */
+  readonly cssUrl = computed(
+    () => `url('${this.src().replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')`,
+  );
 }
