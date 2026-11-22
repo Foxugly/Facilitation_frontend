@@ -42,15 +42,7 @@
     "typescript": "~5.9.2",
     "vitest": "^4.1.12"
   },
-  "//overrides": [
-    "Derogation CIBLEE et non globale : le SDK MCP (tire par l'Angular CLI) accepte",
-    "les DEUX branches de @hono/node-server et npm y retenait la 1.x : la derogation",
-    "imbriquee impose la 2.x. A retirer des que l'amont aura suivi."
-  ],
   "overrides": {
-    "@modelcontextprotocol/sdk": {
-      "@hono/node-server": "^2.0.5"
-    },
     "vite": "7.3.7"
   }
 }
