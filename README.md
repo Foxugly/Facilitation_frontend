@@ -1,62 +1,21 @@
-# PokerFrontend
+# Facilitation_frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.8.
+Angular 21 SPA (standalone components, PrimeNG, Transloco) for **facilitation.foxugly.com**,
+the Collaborative Facilitation Toolbox. It talks to `Facilitation_server` (REST on
+`facilitation-api.foxugly.com`, WebSocket on `wss://facilitation-api.foxugly.com/ws/`).
+Forked from `Poker_frontend` (see `FORK.md`). Deployment: `deploy/DEPLOY.md` — CI builds the
+bundle, ships it via S3, nginx serves it statically and injects the runtime config
+(`window.__FACILITATION__`, from SSM via `facilitation-frontend-runtime-fetch`).
 
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Commands
 
 ```bash
-ng generate component component-name
+npm ci
+npm start          # ng serve on http://localhost:4200 (API: http://localhost:8000)
+npm test           # Vitest (ng test)
+npm run build      # production build -> dist/Facilitation_frontend/browser
+npm run e2e        # Playwright; needs the Django backend too (see playwright.config.ts)
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
 ## Auth: HttpOnly refresh cookie
 
