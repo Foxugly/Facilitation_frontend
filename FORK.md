@@ -30,22 +30,9 @@ est une décision produit, et la refonte de la home est déjà au programme.
 Les composants `shared/ui/delegation-*` restent tels quels : ce sont les composants
 visuels de l'activité Delegation Poker.
 
-## Non vérifié
+## Mise en production — faite
 
-Le build et les tests front n'ont pas été lancés (pas de `npm install` ici).
-`npm ci && npm run build && npm test` avant le premier push.
-
-## À faire
-
-1. `deploy/nginx/facilitation-frontend.conf` injecte `window.__FACILITATION__` —
-   vérifier que le script d'injection a bien suivi le renommage.
-2. Paramètres SSM `/facilitation-frontend/prod/*`.
-3. Clé Turnstile propre au nouveau domaine.
-
-## Pousser vers GitHub
-
-```
-cd Facilitation_frontend
-git remote add origin https://github.com/Foxugly/Facilitation_frontend.git
-git push -u origin main
-```
+Build et tests passent en CI à chaque push ; l'injection `window.__FACILITATION__`
+(`deploy/nginx/facilitation-frontend.conf`), les paramètres SSM `/facilitation-frontend/prod/*`
+et la clé Turnstile du domaine sont en place — le site est en prod
+(`facilitation.foxugly.com`). Ce document est conservé comme trace du fork.
