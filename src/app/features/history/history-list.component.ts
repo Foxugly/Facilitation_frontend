@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -21,6 +21,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
     EmptyStateComponent,
   ],
   styleUrl: '../teams/teams.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="page">
       <app-page-header [icon]="'pi-history'" [title]="'history.title' | transloco">

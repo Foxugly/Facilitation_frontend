@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -119,6 +119,7 @@ function errorCode(err: unknown): string | undefined {
       </ng-template>
     </p-confirmdialog>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .delete-account__actions {
       display: flex;

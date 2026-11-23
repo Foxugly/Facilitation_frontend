@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -13,6 +13,7 @@ import { IdentityService } from '../../core/identity/identity.service';
   selector: 'app-join',
   standalone: true,
   imports: [FormsModule, TranslocoModule, ButtonModule, InputTextModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './join.component.html',
 })
 export class JoinComponent implements OnInit {

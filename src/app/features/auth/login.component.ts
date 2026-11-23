@@ -1,4 +1,13 @@
-import { Component, ElementRef, OnDestroy, effect, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  effect,
+  inject,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
@@ -28,6 +37,7 @@ import { authErrorKey } from './auth-errors';
     AuthCardComponent,
   ],
   styleUrl: './auth.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-auth-card icon="pi pi-sign-in" [title]="'auth.login.title' | transloco">
       @if (!magicMode()) {

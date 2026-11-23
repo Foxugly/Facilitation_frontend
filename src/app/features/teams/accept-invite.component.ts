@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
 
@@ -9,14 +9,19 @@ import { TeamsService } from '../../core/teams/teams.service';
   standalone: true,
   imports: [RouterLink, TranslocoModule],
   styleUrl: '../auth/auth.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="auth">
       @switch (state()) {
-        @case ('pending') { <h1>{{ 'teams.accept.pending' | transloco }}</h1> }
+        @case ('pending') {
+          <h1>{{ 'teams.accept.pending' | transloco }}</h1>
+        }
         @case ('error') {
           <h1>{{ 'teams.accept.error_title' | transloco }}</h1>
           <p class="lead err">{{ error() | transloco }}</p>
-          <div class="links"><a routerLink="/teams">{{ 'teams.title' | transloco }}</a></div>
+          <div class="links">
+            <a routerLink="/teams">{{ 'teams.title' | transloco }}</a>
+          </div>
         }
       }
     </section>

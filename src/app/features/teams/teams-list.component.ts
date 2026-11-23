@@ -1,4 +1,11 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -46,6 +53,7 @@ interface PlanOption {
     EmptyStateComponent,
   ],
   styleUrl: './teams.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="page">
       <app-page-header [icon]="'pi-users'" [title]="'teams.title' | transloco">

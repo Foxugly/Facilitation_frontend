@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
@@ -24,6 +24,7 @@ import { passwordsMatch } from './passwords-match';
     AuthCardComponent,
   ],
   styleUrl: './auth.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-auth-card icon="pi pi-lock" [title]="'auth.reset.title' | transloco">
       @if (done()) {

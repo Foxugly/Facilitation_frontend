@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -40,6 +40,7 @@ const AVATAR_COLORS = [
     DeleteAccountComponent,
   ],
   styleUrl: './account.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="page page--narrow">
       <app-page-header [icon]="'pi-user'" [title]="'me.title' | transloco" />

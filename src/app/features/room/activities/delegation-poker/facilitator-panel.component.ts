@@ -1,4 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -45,6 +52,7 @@ const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
     ToggleSwitchModule,
   ],
   templateUrl: './facilitator-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './facilitator-panel.component.scss',
 })
 export class DelegationPokerFacilitatorPanelComponent {

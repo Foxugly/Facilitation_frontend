@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -16,6 +16,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
   standalone: true,
   imports: [TranslocoModule, ButtonModule, TagModule, PageHeaderComponent],
   styleUrl: './history-detail.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="page">
       <app-page-header [icon]="'pi-history'" [title]="date()">

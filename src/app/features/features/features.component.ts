@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TranslocoModule } from '@jsverse/transloco';
 
 interface FeatureRow {
@@ -17,6 +17,7 @@ interface FeatureRow {
   standalone: true,
   imports: [TranslocoModule],
   templateUrl: './features.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './features.component.scss',
 })
 export class FeaturesComponent {

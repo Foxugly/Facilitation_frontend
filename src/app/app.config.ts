@@ -7,7 +7,7 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import * as Sentry from '@sentry/angular';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, TitleStrategy } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
@@ -54,7 +54,7 @@ export const appConfig: ApplicationConfig = {
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideAnimationsAsync(),
     provideOptimus({ theme: { preset: AuraEmerald, options: { darkModeSelector: '.dark-mode' } } }),
-    provideHttpClient(withInterceptors([authInterceptor, languageHeaderInterceptor])),
+    provideHttpClient(withXhr(), withInterceptors([authInterceptor, languageHeaderInterceptor])),
     provideTransloco({
       config: {
         availableLangs: [...AVAILABLE_LANGS],

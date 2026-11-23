@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -11,6 +11,7 @@ import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.c
   standalone: true,
   imports: [RouterLink, TranslocoModule, MessageModule, AuthCardComponent],
   styleUrl: './auth.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-auth-card
       icon="pi pi-link"
