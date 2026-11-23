@@ -1,7 +1,7 @@
 import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { TranslocoModule } from '@jsverse/transloco';
-import { TagModule } from 'primeng/tag';
-import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from '@openng/optimus-ui/tag';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 
 import { LanguageService } from '../../../../core/i18n/language.service';
 import { secondsLeft } from '../../../../core/realtime/countdown';
@@ -15,7 +15,7 @@ interface Seat {
   username: string;
   role: string;
   card: SnapshotCard | null;
-  show: boolean;     // la personne a vote
+  show: boolean; // la personne a vote
   revealed: boolean; // carte face visible — revelation nominative seulement
 }
 
@@ -41,7 +41,13 @@ const BADGE_SEVERITY: Record<RoundState, 'secondary' | 'success' | 'warn' | 'inf
 @Component({
   selector: 'app-delegation-poker-table',
   standalone: true,
-  imports: [TranslocoModule, TagModule, TooltipModule, DelegationDeckComponent, DelegationCardComponent],
+  imports: [
+    TranslocoModule,
+    TagModule,
+    TooltipModule,
+    DelegationDeckComponent,
+    DelegationCardComponent,
+  ],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
 })
@@ -62,7 +68,10 @@ export class DelegationPokerTableComponent {
       this.stopCountdown();
       if (deadline) {
         this.remainingSeconds.set(secondsLeft(deadline));
-        this.countdownHandle = setInterval(() => this.remainingSeconds.set(secondsLeft(this.socket.deadline())), 1000);
+        this.countdownHandle = setInterval(
+          () => this.remainingSeconds.set(secondsLeft(this.socket.deadline())),
+          1000,
+        );
       } else {
         this.remainingSeconds.set(null);
       }
@@ -92,8 +101,9 @@ export class DelegationPokerTableComponent {
   });
 
   /** L'ecart de l'item courant, une fois revele — remplace `socket.spread()`. */
-  readonly spread = computed(() => this.socket.currentItemResult()?.spread ?? { min: null, max: null });
-
+  readonly spread = computed(
+    () => this.socket.currentItemResult()?.spread ?? { min: null, max: null },
+  );
 
   // --- Round timer (contract §timer): the countdown is purely cosmetic, the
   // interval only runs while a deadline exists and stops on reveal/destroy.
@@ -121,7 +131,10 @@ export class DelegationPokerTableComponent {
     });
   });
   readonly cardBackColor = computed(
-    () => this.socket.deckSnapshot()?.cardBack?.color ?? this.socket.deckSnapshot()?.theme?.cardBackColor ?? null,
+    () =>
+      this.socket.deckSnapshot()?.cardBack?.color ??
+      this.socket.deckSnapshot()?.theme?.cardBackColor ??
+      null,
   );
 
   /** Null when the team chose a flat colour: the card then shows the colour alone. */
@@ -130,9 +143,6 @@ export class DelegationPokerTableComponent {
     return back?.style === 'image' ? back.image : null;
   });
 
-
-
-
   /** The hand only appears once a round has been prepared (subject announced) —
    * before that there is nothing to vote on and the cards would just be noise.
    * Elle disparait a la revelation : les cartes cessent d'etre jouables, et le
@@ -140,7 +150,6 @@ export class DelegationPokerTableComponent {
   readonly handVisible = computed(
     () => this.socket.subject().trim().length > 0 && !this.outcomeVisible(),
   );
-
 
   /** Le depouillement occupe la bande de la main des que les votes sont reveles, puis
    * cede a la carte retenue une fois la decision prise. Il tenait jusqu'ici dans un
@@ -184,22 +193,25 @@ export class DelegationPokerTableComponent {
 
   readonly decidedCard = computed(() => this.cardByValue(this.socket.result() ?? ''));
 
-
   readonly resultLayout = this.socket.resultLayout;
-
 
   readonly resultName = computed(() => {
     const v = this.socket.result();
     return v ? this.cardName(this.cardByValue(v)) || v : '';
   });
 
-
-
   readonly cardValues = computed(() => this.socket.deckSnapshot()?.cards.map((c) => c.value) ?? []);
 
   // --- Imposed avatar (free): deterministic initials + colour. Custom upload = Phase 2 (paid).
   private readonly AVATAR_COLORS = [
-    '#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6', '#6366f1',
+    '#0ea5e9',
+    '#8b5cf6',
+    '#ec4899',
+    '#f59e0b',
+    '#10b981',
+    '#ef4444',
+    '#14b8a6',
+    '#6366f1',
   ];
 
   cardName(card: SnapshotCard | null): string {
@@ -218,7 +230,7 @@ export class DelegationPokerTableComponent {
   initials(name: string): string {
     const parts = (name || '?').trim().split(/\s+/);
     const a = parts[0]?.[0] ?? '?';
-    const b = parts.length > 1 ? parts[1][0] : parts[0]?.[1] ?? '';
+    const b = parts.length > 1 ? parts[1][0] : (parts[0]?.[1] ?? '');
     return (a + b).toUpperCase();
   }
 

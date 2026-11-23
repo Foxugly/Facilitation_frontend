@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from '@openng/optimus-ui/confirmdialog';
+import { ToastModule } from '@openng/optimus-ui/toast';
 
 import { FooterComponent } from './footer/footer.component';
 import { TopmenuComponent } from './topmenu/topmenu.component';
@@ -10,7 +10,14 @@ import { TopmenuComponent } from './topmenu/topmenu.component';
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, TranslocoModule, ConfirmDialogModule, ToastModule, TopmenuComponent, FooterComponent],
+  imports: [
+    RouterOutlet,
+    TranslocoModule,
+    ConfirmDialogModule,
+    ToastModule,
+    TopmenuComponent,
+    FooterComponent,
+  ],
   template: `
     <div class="fox-shell">
       <a href="#main-content" class="fox-skip-link">{{ 'common.skip_to_content' | transloco }}</a>

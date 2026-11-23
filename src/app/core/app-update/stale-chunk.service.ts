@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { NavigationError, Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
+import { MessageService } from '@openng/optimus-ui/api';
 import { TranslocoService } from '@jsverse/transloco';
 
 /**

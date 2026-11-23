@@ -2,9 +2,9 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ButtonModule } from 'primeng/button';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { PasswordModule } from '@openng/optimus-ui/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -14,13 +14,23 @@ import { passwordsMatch } from './passwords-match';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, TranslocoModule, ButtonModule, MessageModule, PasswordModule, AuthCardComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslocoModule,
+    ButtonModule,
+    MessageModule,
+    PasswordModule,
+    AuthCardComponent,
+  ],
   styleUrl: './auth.scss',
   template: `
     <app-auth-card icon="pi pi-lock" [title]="'auth.reset.title' | transloco">
       @if (done()) {
         <p-message severity="success" [text]="'auth.reset.done' | transloco" />
-        <div class="links"><a routerLink="/login">{{ 'auth.login.cta' | transloco }}</a></div>
+        <div class="links">
+          <a routerLink="/login">{{ 'auth.login.cta' | transloco }}</a>
+        </div>
       } @else {
         <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
           <div class="field">
@@ -53,10 +63,19 @@ import { passwordsMatch } from './passwords-match';
               <p class="err">{{ 'auth.errors.password_mismatch' | transloco }}</p>
             }
           </div>
-          @if (error()) { <p-message severity="error" [text]="error()! | transloco" /> }
-          <p-button type="submit" [label]="'auth.reset.cta' | transloco" [loading]="busy()" styleClass="u-full" />
+          @if (error()) {
+            <p-message severity="error" [text]="error()! | transloco" />
+          }
+          <p-button
+            type="submit"
+            [label]="'auth.reset.cta' | transloco"
+            [loading]="busy()"
+            styleClass="u-full"
+          />
         </form>
-        <div class="links"><a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a></div>
+        <div class="links">
+          <a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a>
+        </div>
       }
     </app-auth-card>
   `,

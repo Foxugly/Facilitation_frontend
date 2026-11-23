@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
+import { MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { TagModule } from '@openng/optimus-ui/tag';
 
 import { HistoryService } from '../../core/history/history.service';
 import { HistoryEntry } from '../../core/history/history.models';
@@ -19,9 +19,22 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
   template: `
     <section class="page">
       <app-page-header [icon]="'pi-history'" [title]="date()">
-        <p-button slot="left" [label]="'action.back' | transloco" icon="pi pi-arrow-left" [text]="true" severity="secondary" (onClick)="back()" />
+        <p-button
+          slot="left"
+          [label]="'action.back' | transloco"
+          icon="pi pi-arrow-left"
+          [text]="true"
+          severity="secondary"
+          (onClick)="back()"
+        />
         @if (isManager()) {
-          <p-button slot="right" [label]="'history.email' | transloco" icon="pi pi-envelope" [loading]="sending()" (onClick)="sendEmail()" />
+          <p-button
+            slot="right"
+            [label]="'history.email' | transloco"
+            icon="pi pi-envelope"
+            [loading]="sending()"
+            (onClick)="sendEmail()"
+          />
         }
       </app-page-header>
 
@@ -68,7 +81,10 @@ export class HistoryDetailComponent implements OnInit {
     this.teamId.set(id);
     this.date.set(date);
     try {
-      const [detail, team] = await Promise.all([this.history.getDay(id, date), this.teams.getTeam(id)]);
+      const [detail, team] = await Promise.all([
+        this.history.getDay(id, date),
+        this.teams.getTeam(id),
+      ]);
       this.entries.set(detail.entries);
       this.isManager.set(team.my_role === 'owner' || team.my_role === 'manager');
     } finally {

@@ -1,15 +1,26 @@
-import { Component, computed, DestroyRef, effect, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { TagModule } from 'primeng/tag';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { TooltipModule } from 'primeng/tooltip';
+import { MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { SelectModule } from '@openng/optimus-ui/select';
+import { TagModule } from '@openng/optimus-ui/tag';
+import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 
 import QRCode from 'qrcode';
 import { firstValueFrom } from 'rxjs';
@@ -42,13 +53,21 @@ const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
  * ellipse of radii (rx, ry). Equal angle steps would crowd the wide sides; equal
  * arc keeps neighbours a uniform distance apart so their cards never overlap. */
 
-
 @Component({
   selector: 'app-room',
   standalone: true,
   imports: [
-    FormsModule, TranslocoModule, ButtonModule, InputNumberModule, InputTextModule, SelectModule, TagModule, ToggleSwitchModule,
-    TooltipModule, DelegationDeckComponent, DelegationCardComponent,
+    FormsModule,
+    TranslocoModule,
+    ButtonModule,
+    InputNumberModule,
+    InputTextModule,
+    SelectModule,
+    TagModule,
+    ToggleSwitchModule,
+    TooltipModule,
+    DelegationDeckComponent,
+    DelegationCardComponent,
     NgComponentOutlet,
   ],
   templateUrl: './room.component.html',
@@ -75,7 +94,6 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   private countdownHandle: ReturnType<typeof setInterval> | null = null;
 
-
   readonly isFacilitator = computed(() => this.socket.myRole() === 'facilitator');
 
   /** Y a-t-il un panneau lateral a afficher ?
@@ -90,7 +108,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   // Appearance: each surface says whether it renders a colour or an image. The
   // legacy theme.* is the fallback while older snapshots are still around.
   readonly feltColor = computed(
-    () => this.socket.deckSnapshot()?.felt?.color ?? this.socket.deckSnapshot()?.theme?.feltColor ?? null,
+    () =>
+      this.socket.deckSnapshot()?.felt?.color ??
+      this.socket.deckSnapshot()?.theme?.feltColor ??
+      null,
   );
   readonly feltImage = computed(() => {
     const felt = this.socket.deckSnapshot()?.felt;
@@ -115,8 +136,9 @@ export class RoomComponent implements OnInit, OnDestroy {
    * `activities/activity-registry.ts`. */
   readonly activity = computed(() => resolveActivity(this.socket.deckSnapshot()?.voteType));
 
-  readonly hasCustomBackground = computed(() => this.backgroundColor() !== null || this.backgroundImage() !== null);
-
+  readonly hasCustomBackground = computed(
+    () => this.backgroundColor() !== null || this.backgroundImage() !== null,
+  );
 
   constructor() {
     // Surface server rejections / connection errors as toasts (pattern flotte).
@@ -133,16 +155,6 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.countdownHandle = null;
     }
   }
-
-
-
-
-
-
-
-
-
-
 
   async ngOnInit(): Promise<void> {
     document.addEventListener('fullscreenchange', this.onFsChange);
@@ -174,7 +186,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-
   private readonly onFsChange = () => this.isFullscreen.set(!!document.fullscreenElement);
 
   async toggleFullscreen(): Promise<void> {
@@ -192,16 +203,20 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.socket.disconnect();
   }
 
-
-
   copyCode(): void {
     navigator.clipboard?.writeText(this.code());
-    this.messages.add({ severity: 'success', summary: this.transloco.translate('room.code_copied') });
+    this.messages.add({
+      severity: 'success',
+      summary: this.transloco.translate('room.code_copied'),
+    });
   }
 
   shareLink(): void {
     navigator.clipboard?.writeText(this.joinUrl());
-    this.messages.add({ severity: 'success', summary: this.transloco.translate('room.link_copied') });
+    this.messages.add({
+      severity: 'success',
+      summary: this.transloco.translate('room.link_copied'),
+    });
   }
 
   private joinUrl(): string {
@@ -214,7 +229,10 @@ export class RoomComponent implements OnInit, OnDestroy {
       // se re-encode en blob pour le presse-papier sans dependre du DOM rendu.
       this.qrDataUrl.set(await QRCode.toDataURL(this.joinUrl(), { width: 320, margin: 2 }));
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -230,10 +248,16 @@ export class RoomComponent implements OnInit, OnDestroy {
     try {
       const blob = await (await fetch(src)).blob();
       await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('room.qr.copied') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('room.qr.copied'),
+      });
     } catch {
       navigator.clipboard?.writeText(this.joinUrl());
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('room.link_copied') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('room.link_copied'),
+      });
     }
   }
 
@@ -241,5 +265,4 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.socket.disconnect();
     this.router.navigate(['/']);
   }
-
 }

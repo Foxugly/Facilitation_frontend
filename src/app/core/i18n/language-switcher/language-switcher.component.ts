@@ -8,7 +8,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { TranslocoModule } from '@jsverse/transloco';
-import { TooltipModule } from 'primeng/tooltip';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 
 import { LanguageService } from '../language.service';
 import { AVAILABLE_LANGS, AppLang, LANG_LABELS } from '../available-languages';
@@ -47,9 +47,7 @@ export class LanguageSwitcherComponent {
   }));
   protected readonly current = this.languageService.active;
   /** Native name of the active language — shown as the trigger tooltip. */
-  protected readonly currentName = computed(
-    () => LANG_LABELS[this.current()] ?? '',
-  );
+  protected readonly currentName = computed(() => LANG_LABELS[this.current()] ?? '');
   protected readonly open = signal(false);
   protected readonly focusedIndex = signal<number | null>(null);
 

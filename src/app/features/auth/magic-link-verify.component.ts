@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { MessageModule } from 'primeng/message';
+import { MessageModule } from '@openng/optimus-ui/message';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -14,7 +14,9 @@ import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.c
   template: `
     <app-auth-card
       icon="pi pi-link"
-      [title]="(state() === 'error' ? 'auth.magic.error_title' : 'auth.magic.verifying') | transloco"
+      [title]="
+        (state() === 'error' ? 'auth.magic.error_title' : 'auth.magic.verifying') | transloco
+      "
     >
       @if (state() === 'error') {
         <p-message severity="error" [text]="'auth.magic.error_lead' | transloco" />

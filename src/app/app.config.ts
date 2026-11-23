@@ -11,10 +11,10 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, TitleStrategy } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { providePrimeNG } from 'primeng/config';
-import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
+import { provideOptimus } from '@openng/optimus-ui/config';
+import { definePreset } from '@openng/optimus-ui-themes';
+import Aura from '@openng/optimus-ui-themes/aura';
 
 import { routes } from './app.routes';
 import { TranslocoHttpLoader } from './transloco-loader';
@@ -30,9 +30,17 @@ import { AppTitleStrategy } from './core/title/app-title.strategy';
 // Aura preset with Emerald as primary; `green` primitive → emerald so `success`
 // buttons match `primary` (one green across the UI, §3.15). Dark via `.dark-mode`.
 const emeraldScale = {
-  50: '{emerald.50}', 100: '{emerald.100}', 200: '{emerald.200}', 300: '{emerald.300}',
-  400: '{emerald.400}', 500: '{emerald.500}', 600: '{emerald.600}', 700: '{emerald.700}',
-  800: '{emerald.800}', 900: '{emerald.900}', 950: '{emerald.950}',
+  50: '{emerald.50}',
+  100: '{emerald.100}',
+  200: '{emerald.200}',
+  300: '{emerald.300}',
+  400: '{emerald.400}',
+  500: '{emerald.500}',
+  600: '{emerald.600}',
+  700: '{emerald.700}',
+  800: '{emerald.800}',
+  900: '{emerald.900}',
+  950: '{emerald.950}',
 };
 const AuraEmerald = definePreset(Aura, {
   primitive: { green: emeraldScale },
@@ -45,7 +53,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideAnimationsAsync(),
-    providePrimeNG({ theme: { preset: AuraEmerald, options: { darkModeSelector: '.dark-mode' } } }),
+    provideOptimus({ theme: { preset: AuraEmerald, options: { darkModeSelector: '.dark-mode' } } }),
     provideHttpClient(withInterceptors([authInterceptor, languageHeaderInterceptor])),
     provideTransloco({
       config: {

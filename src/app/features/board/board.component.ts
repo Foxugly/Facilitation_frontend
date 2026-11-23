@@ -2,10 +2,10 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectButtonModule } from 'primeng/selectbutton';
+import { MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
 
 import { BoardsService } from '../../core/boards/boards.service';
 import { Board, BoardLevel, BoardRow, Dimension } from '../../core/boards/boards.models';
@@ -17,7 +17,14 @@ import { exportBoardCsv, exportBoardPdf } from './board-export';
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [FormsModule, TranslocoModule, ButtonModule, InputTextModule, SelectButtonModule, PageHeaderComponent],
+  imports: [
+    FormsModule,
+    TranslocoModule,
+    ButtonModule,
+    InputTextModule,
+    SelectButtonModule,
+    PageHeaderComponent,
+  ],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -122,7 +129,10 @@ export class BoardComponent implements OnInit {
         topic: this.transloco.translate('board.topic'),
       });
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('board.export_failed') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('board.export_failed'),
+      });
     }
   }
 

@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
+import { MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { TagModule } from '@openng/optimus-ui/tag';
 
 import {
   BillingHistory,
@@ -51,19 +51,31 @@ const LIVE_STATUSES = new Set(['active', 'trialing']);
                 <dd>
                   {{ 'pricing.' + st.plan + '_title' | transloco }} ·
                   {{ 'subscription.interval_' + st.interval | transloco }}
-                  <p-tag [severity]="'success'" [value]="'subscription.status_' + st.status | transloco" />
+                  <p-tag
+                    [severity]="'success'"
+                    [value]="'subscription.status_' + st.status | transloco"
+                  />
                 </dd>
                 <dt>{{ 'subscription.quota' | transloco }}</dt>
                 <dd>{{ st.teamsUsed }} / {{ st.quota }}</dd>
               </dl>
               @if (st.canManage) {
-                <p-button [label]="'billing.manage' | transloco" icon="pi pi-external-link"
-                          [outlined]="true" severity="secondary" (onClick)="manage()" />
+                <p-button
+                  [label]="'billing.manage' | transloco"
+                  icon="pi pi-external-link"
+                  [outlined]="true"
+                  severity="secondary"
+                  (onClick)="manage()"
+                />
               }
             } @else {
               <p class="meta-hint">{{ 'subscription.none' | transloco }}</p>
-              <p-button [label]="'subscription.see_plans' | transloco" icon="pi pi-tag"
-                        severity="success" (onClick)="goToPlans()" />
+              <p-button
+                [label]="'subscription.see_plans' | transloco"
+                icon="pi pi-tag"
+                severity="success"
+                (onClick)="goToPlans()"
+              />
             }
           </div>
 
@@ -86,11 +98,15 @@ const LIVE_STATUSES = new Set(['active', 'trialing']);
                       <tr>
                         <td>
                           {{ s.plan ? ('pricing.' + s.plan + '_title' | transloco) : '—' }}
-                          @if (s.interval) { · {{ 'subscription.interval_' + s.interval | transloco }} }
+                          @if (s.interval) {
+                            · {{ 'subscription.interval_' + s.interval | transloco }}
+                          }
                         </td>
                         <td>
-                          <p-tag [severity]="isLive(s) ? 'success' : 'secondary'"
-                                 [value]="'subscription.status_' + s.status | transloco" />
+                          <p-tag
+                            [severity]="isLive(s) ? 'success' : 'secondary'"
+                            [value]="'subscription.status_' + s.status | transloco"
+                          />
                         </td>
                         <td>{{ s.startedAt ? (s.startedAt | date: 'mediumDate') : '—' }}</td>
                         <td>{{ endDate(s) ? (endDate(s) | date: 'mediumDate') : '—' }}</td>
@@ -126,18 +142,31 @@ const LIVE_STATUSES = new Set(['active', 'trialing']);
                         <td>{{ inv.createdAt ? (inv.createdAt | date: 'mediumDate') : '—' }}</td>
                         <td>{{ money(inv) }}</td>
                         <td>
-                          <p-tag [severity]="inv.status === 'paid' ? 'success' : 'secondary'"
-                                 [value]="'subscription.invoice_' + inv.status | transloco" />
+                          <p-tag
+                            [severity]="inv.status === 'paid' ? 'success' : 'secondary'"
+                            [value]="'subscription.invoice_' + inv.status | transloco"
+                          />
                         </td>
                         <td class="actions">
                           @if (inv.pdfUrl) {
-                            <a class="link" [href]="inv.pdfUrl" target="_blank" rel="noreferrer noopener">
+                            <a
+                              class="link"
+                              [href]="inv.pdfUrl"
+                              target="_blank"
+                              rel="noreferrer noopener"
+                            >
                               <i class="pi pi-file-pdf"></i> {{ 'subscription.pdf' | transloco }}
                             </a>
                           }
                           @if (inv.hostedUrl) {
-                            <a class="link" [href]="inv.hostedUrl" target="_blank" rel="noreferrer noopener">
-                              <i class="pi pi-external-link"></i> {{ 'subscription.view' | transloco }}
+                            <a
+                              class="link"
+                              [href]="inv.hostedUrl"
+                              target="_blank"
+                              rel="noreferrer noopener"
+                            >
+                              <i class="pi pi-external-link"></i>
+                              {{ 'subscription.view' | transloco }}
                             </a>
                           }
                         </td>
@@ -199,7 +228,10 @@ export class SubscriptionComponent implements OnInit {
     try {
       await this.billing.manage();
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 }

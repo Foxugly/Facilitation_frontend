@@ -1,12 +1,12 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { CheckboxModule } from '@openng/optimus-ui/checkbox';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { SelectModule } from '@openng/optimus-ui/select';
+import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 
 import { LanguageService } from '../../../../core/i18n/language.service';
 import { RoomSocketService } from '../../../../core/realtime/room-socket.service';
@@ -35,8 +35,14 @@ const TIMER_DURATIONS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
   selector: 'app-delegation-poker-facilitator-panel',
   standalone: true,
   imports: [
-    FormsModule, TranslocoModule, ButtonModule, CheckboxModule, InputNumberModule, InputTextModule,
-    SelectModule, ToggleSwitchModule,
+    FormsModule,
+    TranslocoModule,
+    ButtonModule,
+    CheckboxModule,
+    InputNumberModule,
+    InputTextModule,
+    SelectModule,
+    ToggleSwitchModule,
   ],
   templateUrl: './facilitator-panel.component.html',
   styleUrl: './facilitator-panel.component.scss',
@@ -71,8 +77,12 @@ export class DelegationPokerFacilitatorPanelComponent {
   readonly editing = signal(false);
 
   // --- Etats derives ---------------------------------------------------------
-  readonly canOpen = computed(() => this.state() === 'idle' && this.socket.subject().trim().length > 0);
-  readonly canReveal = computed(() => this.state() === 'open' && this.socket.participation().voted >= 1);
+  readonly canOpen = computed(
+    () => this.state() === 'idle' && this.socket.subject().trim().length > 0,
+  );
+  readonly canReveal = computed(
+    () => this.state() === 'open' && this.socket.participation().voted >= 1,
+  );
 
   readonly availableDecks = computed(() => this.socket.availableDecks());
   readonly currentDeckId = computed(() => this.socket.deckSnapshot()?.deckId ?? null);
@@ -122,9 +132,15 @@ export class DelegationPokerFacilitatorPanelComponent {
    * compatibilite reelle (registre consumes/produces), que ce composant ne
    * connait pas round par round. */
   readonly chainSourceOptions = computed(() =>
-    this.socket.agenda()
+    this.socket
+      .agenda()
       .filter((a) => a.id !== this.socket.currentRoundId())
-      .map((a) => ({ value: a.id, label: a.text || `#${a.id}`, everDecided: a.everDecided, canRank: a.canRank })),
+      .map((a) => ({
+        value: a.id,
+        label: a.text || `#${a.id}`,
+        everDecided: a.everDecided,
+        canRank: a.canRank,
+      })),
   );
   /** Cette activite consomme-t-elle quelque chose ? Une activite future
    * `consumes: 'none'` n'a rien ou poser une copie — le geste ne doit alors
@@ -137,7 +153,9 @@ export class DelegationPokerFacilitatorPanelComponent {
    * expose au front) : `take: "results"` n'est offert que si oui, pour ne pas
    * proposer un geste que le serveur refuserait presque a coup sur. */
   readonly chainSourceEverDecided = computed(
-    () => this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.everDecided ?? false,
+    () =>
+      this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.everDecided ??
+      false,
   );
   /** La source choisie sait-elle classer (`AgendaItem.canRank`, round de
    * correction 1) ? Vient du registre serveur (`ActivitySpec.rank_value`) —
@@ -146,14 +164,20 @@ export class DelegationPokerFacilitatorPanelComponent {
    * depuis l'agenda plutot que code en dur : le jour ou une activite classera,
    * le champ « top N » s'affichera de lui-meme, sans readaptation du front. */
   readonly chainSourceCanRank = computed(
-    () => this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.canRank ?? false,
+    () =>
+      this.chainSourceOptions().find((o) => o.value === this.chainSourceDraft())?.canRank ?? false,
   );
   readonly canBindChain = computed(() => this.chainSourceDraft() !== null);
   /** `results` n'apparait dans la liste que si la source l'autorise (voir
    * `chainSourceEverDecided`) — le geste ne doit pas etre offert sinon. */
   readonly chainTakeOptions = computed(() => {
-    const values: ('items' | 'results')[] = this.chainSourceEverDecided() ? ['items', 'results'] : ['items'];
-    return values.map((value) => ({ value, label: this.transloco.translate(`room.chain.take.${value}`) }));
+    const values: ('items' | 'results')[] = this.chainSourceEverDecided()
+      ? ['items', 'results']
+      : ['items'];
+    return values.map((value) => ({
+      value,
+      label: this.transloco.translate(`room.chain.take.${value}`),
+    }));
   });
   /** La valeur EFFECTIVEMENT applicable de `take` — jamais "results" si la
    * source choisie ne l'autorise pas (voir `chainSourceEverDecided`), meme si
@@ -169,10 +193,17 @@ export class DelegationPokerFacilitatorPanelComponent {
    * un `top` pose sans classement disponible (`bind_round`). Purement derive,
    * comme `effectiveChainTake` : affichage et `bindChain` s'y referent tous
    * les deux, le geste impossible n'est donc jamais ni montre ni envoye. */
-  readonly offersChainTop = computed(() => this.effectiveChainTake() === 'results' && this.chainSourceCanRank());
-  readonly effectiveChainTop = computed<number | null>(() => (this.offersChainTop() ? this.chainTopDraft() : null));
+  readonly offersChainTop = computed(
+    () => this.effectiveChainTake() === 'results' && this.chainSourceCanRank(),
+  );
+  readonly effectiveChainTop = computed<number | null>(() =>
+    this.offersChainTop() ? this.chainTopDraft() : null,
+  );
   readonly chainModeOptions = computed(() =>
-    (['auto', 'manual'] as const).map((value) => ({ value, label: this.transloco.translate(`room.chain.mode.${value}`) })),
+    (['auto', 'manual'] as const).map((value) => ({
+      value,
+      label: this.transloco.translate(`room.chain.mode.${value}`),
+    })),
   );
   /** Les candidats du round courant, s'il est lie en mode manuel et pas encore
    * resolu (contrat §8.5.a) — pilote l'affichage de l'ecran de selection,
@@ -258,7 +289,10 @@ export class DelegationPokerFacilitatorPanelComponent {
 
   /** On acte sur le NOM du niveau, pas sur le nombre. */
   readonly cardOptions = computed(() =>
-    (this.socket.deckSnapshot()?.cards ?? []).map((c) => ({ value: c.value, label: this.cardName(c) })),
+    (this.socket.deckSnapshot()?.cards ?? []).map((c) => ({
+      value: c.value,
+      label: this.cardName(c),
+    })),
   );
 
   /** Unite localisee affichee dans le champ du timer. Depend de la revision de
@@ -337,7 +371,7 @@ export class DelegationPokerFacilitatorPanelComponent {
   private roundDetails() {
     const isTeam = this.socket.isTeam();
     return {
-      deckId: (this.deckDraft() ?? this.currentDeckId()) ?? undefined,
+      deckId: this.deckDraft() ?? this.currentDeckId() ?? undefined,
       anonymous: this.socket.revealMode().canAnonymise ? this.anonymousDraft() : undefined,
       timerEnabled: isTeam ? this.timerEnabledDraft() : undefined,
       timerSeconds: isTeam ? this.timerSecondsDraft() : undefined,
@@ -358,7 +392,11 @@ export class DelegationPokerFacilitatorPanelComponent {
     if (!text) return;
     const editingRoundId = this.editing() ? this.socket.currentRoundId() : null;
     const { deckId, ...details } = this.roundDetails();
-    this.socket.prepareRound({ subjectText: text, ...details, ...(editingRoundId == null ? { deckId } : {}) });
+    this.socket.prepareRound({
+      subjectText: text,
+      ...details,
+      ...(editingRoundId == null ? { deckId } : {}),
+    });
     if (editingRoundId != null && deckId != null && deckId !== this.currentDeckId()) {
       this.socket.configureRound({ roundId: editingRoundId, deckId });
     }

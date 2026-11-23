@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { TableModule } from '@openng/optimus-ui/table';
+import { TagModule } from '@openng/optimus-ui/tag';
+import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 
 import { bypassPatch } from '../../core/staff/bypass-patch';
 import { StaffService } from '../../core/staff/staff.service';
@@ -70,7 +70,11 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
                 [disabled]="busy() === user.id"
               />
               @if (user.subscription_bypass) {
-                <p-tag severity="success" icon="pi pi-gift" [value]="'billing.offered_access' | transloco" />
+                <p-tag
+                  severity="success"
+                  icon="pi pi-gift"
+                  [value]="'billing.offered_access' | transloco"
+                />
               }
             </td>
             <td>
@@ -94,10 +98,23 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
   `,
   styles: [
     `
-      :host { display: block; }
-      .staff-users__search { display: flex; gap: var(--s-2); margin-bottom: var(--s-4); }
-      .staff-users__note { width: 100%; min-width: 12rem; }
-      .staff-users__empty { text-align: center; padding-block: var(--s-4); color: var(--muted); }
+      :host {
+        display: block;
+      }
+      .staff-users__search {
+        display: flex;
+        gap: var(--s-2);
+        margin-bottom: var(--s-4);
+      }
+      .staff-users__note {
+        width: 100%;
+        min-width: 12rem;
+      }
+      .staff-users__empty {
+        text-align: center;
+        padding-block: var(--s-4);
+        color: var(--muted);
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

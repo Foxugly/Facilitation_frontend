@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { TranslocoModule } from '@jsverse/transloco';
-import { TagModule } from 'primeng/tag';
+import { TagModule } from '@openng/optimus-ui/tag';
 
 import { RoomSocketService } from '../../../../core/realtime/room-socket.service';
 import { ItemResult, RoundItem, RoundState } from '../../../../core/realtime/protocol';
@@ -97,7 +97,9 @@ export class DotVotingTableComponent {
         // afficher ici.
         voters: r.anonymous
           ? ''
-          : (r.votes ?? []).map((v) => `${noms.get(v.participantId) ?? '?'} (${v.points ?? 0})`).join(', '),
+          : (r.votes ?? [])
+              .map((v) => `${noms.get(v.participantId) ?? '?'} (${v.points ?? 0})`)
+              .join(', '),
       }))
       .sort((a, b) => a.rank - b.rank);
   });
@@ -129,12 +131,19 @@ export class DotVotingTableComponent {
    * d'entree ne peut signifier qu'"personne n'a encore rien pose". */
   totalsDisplay(
     item: RoundItem,
-  ): { kind: 'hidden' } | { kind: 'unknown' } | { kind: 'visible'; totalPoints: number; responseCount: number } {
+  ):
+    | { kind: 'hidden' }
+    | { kind: 'unknown' }
+    | { kind: 'visible'; totalPoints: number; responseCount: number } {
     const visibility = this.socket.roundConfig()['liveTotals'];
     if (visibility === false) return { kind: 'hidden' };
     if (visibility !== true) return { kind: 'unknown' };
     const total = this.liveTotalsByItem().get(item.id);
-    return { kind: 'visible', totalPoints: total?.totalPoints ?? 0, responseCount: total?.responseCount ?? 0 };
+    return {
+      kind: 'visible',
+      totalPoints: total?.totalPoints ?? 0,
+      responseCount: total?.responseCount ?? 0,
+    };
   }
 
   /** Aucun geste impossible ne doit etre propose : ni au-dela du budget total,

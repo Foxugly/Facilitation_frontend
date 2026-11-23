@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideTranslocoScope, TranslocoTestingModule } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
+import { MessageService } from '@openng/optimus-ui/api';
 import { describe, expect, it, vi } from 'vitest';
 
 import fr from '../../../../public/i18n/fr.json';
@@ -15,7 +15,10 @@ function setup(authenticated: boolean) {
   TestBed.configureTestingModule({
     imports: [
       HomeComponent,
-      TranslocoTestingModule.forRoot({ langs: { fr }, translocoConfig: { availableLangs: ['fr'], defaultLang: 'fr' } }),
+      TranslocoTestingModule.forRoot({
+        langs: { fr },
+        translocoConfig: { availableLangs: ['fr'], defaultLang: 'fr' },
+      }),
     ],
     providers: [
       provideRouter([]),
@@ -32,7 +35,8 @@ function setup(authenticated: boolean) {
   return { el, cmp: fixture.componentInstance };
 }
 
-const text = (el: HTMLElement, sel: string) => Array.from(el.querySelectorAll(sel)).map((n) => n.textContent?.trim());
+const text = (el: HTMLElement, sel: string) =>
+  Array.from(el.querySelectorAll(sel)).map((n) => n.textContent?.trim());
 
 describe('HomeComponent hero', () => {
   it('has no eyebrow above the title', () => {
@@ -44,7 +48,11 @@ describe('HomeComponent hero', () => {
 
   it('shows the side panel with three stats, mode = visitor when anonymous', () => {
     const { el } = setup(false);
-    expect(text(el, '.hero__panel .hero-stat__label')).toEqual([fr.home.stat_mode, fr.home.stat_languages, fr.home.stat_activities]);
+    expect(text(el, '.hero__panel .hero-stat__label')).toEqual([
+      fr.home.stat_mode,
+      fr.home.stat_languages,
+      fr.home.stat_activities,
+    ]);
     expect(text(el, '.hero__panel .hero-stat strong')).toEqual([
       fr.home.stat_mode_visitor,
       'FR · EN · NL · IT · ES',

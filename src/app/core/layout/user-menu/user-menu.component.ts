@@ -14,7 +14,7 @@ import { AuthService } from '../../auth/auth.service';
  * Polymorphic user slot — the last of the topmenu actions (fleet standard §6).
  * Logged out → a "Se connecter" link (outlined emerald) routing to /login.
  * Logged in  → a right-anchored dropdown (name + Déconnexion), hand-rolled (no
- *              PrimeNG p-menu) so it uses the fleet tokens. Closes on outside
+ *              Optimus UI p-menu) so it uses the fleet tokens. Closes on outside
  *              click and on Escape, like the sibling language-switcher.
  */
 @Component({

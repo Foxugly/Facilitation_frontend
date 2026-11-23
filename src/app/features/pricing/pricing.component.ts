@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { MessageModule } from 'primeng/message';
+import { MessageModule } from '@openng/optimus-ui/message';
 
 import { BillingService, SubscriptionStatus } from '../../core/billing/billing.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
@@ -24,45 +24,59 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
         <p-message severity="success" [text]="'billing.offered_access_hint' | transloco" />
       }
       <div class="tiers">
-          <!-- Free -->
-          <article class="tier">
-            <h3>{{ 'pricing.free_title' | transloco }}</h3>
-            <div class="price">0 €</div>
-            <ul>
-              <li><i class="pi pi-check"></i>{{ 'pricing.free_f1' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.free_f2' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.free_f3' | transloco }}</li>
-            </ul>
-            <a class="tier-cta ghost" routerLink="/">{{ 'pricing.cta_free' | transloco }}</a>
-          </article>
+        <!-- Free -->
+        <article class="tier">
+          <h3>{{ 'pricing.free_title' | transloco }}</h3>
+          <div class="price">0 €</div>
+          <ul>
+            <li><i class="pi pi-check"></i>{{ 'pricing.free_f1' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.free_f2' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.free_f3' | transloco }}</li>
+          </ul>
+          <a class="tier-cta ghost" routerLink="/">{{ 'pricing.cta_free' | transloco }}</a>
+        </article>
 
-          <!-- 1 team -->
-          <article class="tier featured">
-            <h3>{{ 'pricing.team1_title' | transloco }}</h3>
-            <div class="price">5 €<span class="excl-vat">{{ 'pricing.excl_vat' | transloco }}</span><span>{{ 'pricing.per_month' | transloco }}</span></div>
-            <div class="price-alt">{{ 'pricing.or' | transloco }} 50 € {{ 'pricing.excl_vat' | transloco }}{{ 'pricing.per_year' | transloco }} <span class="save">{{ 'pricing.save' | transloco }}</span></div>
-            <ul>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f1' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f2' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f3' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f4' | transloco }}</li>
-            </ul>
-            <a class="tier-cta" routerLink="/teams">{{ 'pricing.cta_paid' | transloco }}</a>
-          </article>
+        <!-- 1 team -->
+        <article class="tier featured">
+          <h3>{{ 'pricing.team1_title' | transloco }}</h3>
+          <div class="price">
+            5 €<span class="excl-vat">{{ 'pricing.excl_vat' | transloco }}</span
+            ><span>{{ 'pricing.per_month' | transloco }}</span>
+          </div>
+          <div class="price-alt">
+            {{ 'pricing.or' | transloco }} 50 € {{ 'pricing.excl_vat' | transloco
+            }}{{ 'pricing.per_year' | transloco }}
+            <span class="save">{{ 'pricing.save' | transloco }}</span>
+          </div>
+          <ul>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f1' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f2' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f3' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f4' | transloco }}</li>
+          </ul>
+          <a class="tier-cta" routerLink="/teams">{{ 'pricing.cta_paid' | transloco }}</a>
+        </article>
 
-          <!-- 5 teams -->
-          <article class="tier">
-            <h3>{{ 'pricing.team5_title' | transloco }}</h3>
-            <div class="price">20 €<span class="excl-vat">{{ 'pricing.excl_vat' | transloco }}</span><span>{{ 'pricing.per_month' | transloco }}</span></div>
-            <div class="price-alt">{{ 'pricing.or' | transloco }} 200 € {{ 'pricing.excl_vat' | transloco }}{{ 'pricing.per_year' | transloco }} <span class="save">{{ 'pricing.save' | transloco }}</span></div>
-            <ul>
-              <li><i class="pi pi-check"></i>{{ 'pricing.team5_f1' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f1' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f2' | transloco }}</li>
-              <li><i class="pi pi-check"></i>{{ 'pricing.paid_f3' | transloco }}</li>
-            </ul>
-            <a class="tier-cta" routerLink="/teams">{{ 'pricing.cta_paid' | transloco }}</a>
-          </article>
+        <!-- 5 teams -->
+        <article class="tier">
+          <h3>{{ 'pricing.team5_title' | transloco }}</h3>
+          <div class="price">
+            20 €<span class="excl-vat">{{ 'pricing.excl_vat' | transloco }}</span
+            ><span>{{ 'pricing.per_month' | transloco }}</span>
+          </div>
+          <div class="price-alt">
+            {{ 'pricing.or' | transloco }} 200 € {{ 'pricing.excl_vat' | transloco
+            }}{{ 'pricing.per_year' | transloco }}
+            <span class="save">{{ 'pricing.save' | transloco }}</span>
+          </div>
+          <ul>
+            <li><i class="pi pi-check"></i>{{ 'pricing.team5_f1' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f1' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f2' | transloco }}</li>
+            <li><i class="pi pi-check"></i>{{ 'pricing.paid_f3' | transloco }}</li>
+          </ul>
+          <a class="tier-cta" routerLink="/teams">{{ 'pricing.cta_paid' | transloco }}</a>
+        </article>
       </div>
 
       <p class="vat-note">{{ 'pricing.vat_note' | transloco }}</p>
@@ -106,7 +120,9 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
       }
       .tier.featured {
         border-color: var(--accent);
-        box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent), var(--shadow-card);
+        box-shadow:
+          0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent),
+          var(--shadow-card);
       }
       .tier h3 {
         margin: 0;
