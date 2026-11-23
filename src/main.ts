@@ -16,7 +16,22 @@ if (sentry.dsn) {
     dsn: sentry.dsn,
     environment: sentry.environment,
     release: sentry.release || undefined,
-    sendDefaultPii: false,
+    // Sentry 11 replaced `sendDefaultPii` with `dataCollection`, whose defaults are
+    // more permissive: pin the restrictive v10 baseline explicitly.
+    dataCollection: {
+      userInfo: false,
+      cookies: false,
+      httpHeaders: {
+        request: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+        response: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      },
+      httpBodies: [],
+      urlQueryParams: { deny: ['forwarded', '-ip', 'remote-', 'via', '-user'] },
+      genAI: { inputs: false, outputs: false },
+      databaseQueryData: false,
+      queues: false,
+      graphQL: { document: false, variables: false },
+    },
     // One-time tokens (reset / confirm-email / magic-link / team invite) and room
     // codes are masked in URLs, messages and breadcrumbs (sentry-scrub.ts).
     beforeSend: (event) => scrubEvent(event),
