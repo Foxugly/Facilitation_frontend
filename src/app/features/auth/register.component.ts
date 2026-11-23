@@ -6,6 +6,7 @@ import {
   inject,
   signal,
   viewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -35,6 +36,7 @@ import { passwordsMatch } from './passwords-match';
     AuthCardComponent,
   ],
   styleUrl: './auth.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-auth-card
       icon="pi pi-user-plus"

@@ -1,4 +1,11 @@
-import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
 
@@ -26,6 +33,7 @@ import { UserMenuComponent } from '../user-menu/user-menu.component';
   ],
   host: { '(document:click)': 'closeMobile($event)' },
   templateUrl: './topmenu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './topmenu.component.scss',
 })
 export class TopmenuComponent {

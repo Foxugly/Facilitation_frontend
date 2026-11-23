@@ -1,4 +1,12 @@
-import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TranslocoModule } from '@jsverse/transloco';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
@@ -49,6 +57,7 @@ const BADGE_SEVERITY: Record<RoundState, 'secondary' | 'success' | 'warn' | 'inf
     DelegationCardComponent,
   ],
   templateUrl: './table.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './table.component.scss',
 })
 export class DelegationPokerTableComponent {

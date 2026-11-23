@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -53,6 +53,7 @@ interface PendingRow {
     ToggleSwitchModule,
   ],
   templateUrl: './facilitator-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './facilitator-panel.component.scss',
 })
 export class DotVotingFacilitatorPanelComponent {

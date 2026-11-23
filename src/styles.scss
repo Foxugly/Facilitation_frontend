@@ -4,6 +4,14 @@
 
 @import '@openng/icons/openng-icons.css';
 
+/* Optimus UI 2 made .p-tab a flex container (display:flex + align-items:center); the
+   theme's tab gap (0.5rem) then adds to the .tab-icon margins the tabs were laid out
+   with. Keep the Optimus 1 / PrimeNG 21 tab layout (a blockified flex item of the tab
+   list). `p-tab.p-tab` outranks the library's runtime-injected `.p-tab` rule. */
+p-tab.p-tab {
+  display: block;
+}
+
 body {
   margin: 0;
   color: var(--ink);

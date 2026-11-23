@@ -1,4 +1,11 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -67,6 +74,7 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
     PageHeaderComponent,
   ],
   styleUrl: './teams.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (team(); as team) {
       <section class="page">

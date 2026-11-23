@@ -6,6 +6,7 @@ import {
   inject,
   signal,
   viewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -32,6 +33,7 @@ import { authErrorKey } from './auth-errors';
     AuthCardComponent,
   ],
   styleUrl: './auth.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <app-auth-card icon="pi pi-key" [title]="'auth.forgot.title' | transloco">
       @if (sent()) {

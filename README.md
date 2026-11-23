@@ -1,6 +1,6 @@
 # Facilitation_frontend
 
-Angular 21 SPA (standalone components, Optimus UI, Transloco) for **facilitation.foxugly.com**,
+Angular 22 SPA (standalone components, Optimus UI 2, Transloco) for **facilitation.foxugly.com**,
 the Collaborative Facilitation Toolbox. It talks to `Facilitation_server` (REST on
 `facilitation-api.foxugly.com`, WebSocket on `wss://facilitation-api.foxugly.com/ws/`).
 Forked from `Poker_frontend` (see `FORK.md`). Deployment: `deploy/DEPLOY.md` — CI builds the

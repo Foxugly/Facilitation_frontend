@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -27,6 +27,7 @@ const LIVE_STATUSES = new Set(['active', 'trialing']);
   standalone: true,
   imports: [DatePipe, TranslocoModule, ButtonModule, TagModule, PageHeaderComponent],
   styleUrl: './account.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section class="page page--narrow">
       <app-page-header [icon]="'pi-credit-card'" [title]="'subscription.title' | transloco" />
