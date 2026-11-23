@@ -2,25 +2,34 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideTranslocoScope, TranslocoTestingModule } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
+import { MessageService } from '@openng/optimus-ui/api';
 import { describe, expect, it, vi } from 'vitest';
 
 import fr from '../../../../public/i18n/fr.json';
 import { AuthService } from '../../core/auth/auth.service';
 import { DeleteAccountComponent } from './delete-account.component';
 
-function setup(deleteAccount: (pw: string) => Promise<void>, exportData: () => Promise<void> = () => Promise.resolve()) {
+function setup(
+  deleteAccount: (pw: string) => Promise<void>,
+  exportData: () => Promise<void> = () => Promise.resolve(),
+) {
   const messages = { add: vi.fn() };
   TestBed.configureTestingModule({
     imports: [
       DeleteAccountComponent,
-      TranslocoTestingModule.forRoot({ langs: { fr }, translocoConfig: { availableLangs: ['fr'], defaultLang: 'fr' } }),
+      TranslocoTestingModule.forRoot({
+        langs: { fr },
+        translocoConfig: { availableLangs: ['fr'], defaultLang: 'fr' },
+      }),
     ],
     providers: [
       provideRouter([]),
       provideTranslocoScope({ scope: '' }),
       { provide: MessageService, useValue: messages },
-      { provide: AuthService, useValue: { deleteAccount: vi.fn(deleteAccount), exportData: vi.fn(exportData) } },
+      {
+        provide: AuthService,
+        useValue: { deleteAccount: vi.fn(deleteAccount), exportData: vi.fn(exportData) },
+      },
     ],
   });
   const fixture = TestBed.createComponent(DeleteAccountComponent);
@@ -29,7 +38,8 @@ function setup(deleteAccount: (pw: string) => Promise<void>, exportData: () => P
   return { cmp: fixture.componentInstance, auth: TestBed.inject(AuthService), messages, navigate };
 }
 
-const httpError = (status: number, error: unknown = null) => new HttpErrorResponse({ status, error });
+const httpError = (status: number, error: unknown = null) =>
+  new HttpErrorResponse({ status, error });
 
 describe('DeleteAccountComponent', () => {
   it('asks for the password before calling the API', async () => {
@@ -45,7 +55,9 @@ describe('DeleteAccountComponent', () => {
     await cmp.submit();
     expect(auth.deleteAccount).toHaveBeenCalledWith('pw');
     expect(navigate).toHaveBeenCalledWith(['/home']);
-    expect(messages.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success', summary: fr.me.delete.success }));
+    expect(messages.add).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: 'success', summary: fr.me.delete.success }),
+    );
   });
 
   it.each([
@@ -76,9 +88,14 @@ describe('DeleteAccountComponent', () => {
     [httpError(429), fr.me.export.throttled],
     [httpError(500), fr.me.export.failed],
   ])('shows a toast when the export fails (%#)', async (err, expected) => {
-    const { cmp, messages } = setup(() => Promise.resolve(), () => Promise.reject(err));
+    const { cmp, messages } = setup(
+      () => Promise.resolve(),
+      () => Promise.reject(err),
+    );
     await cmp.exportData();
-    expect(messages.add).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error', summary: expected }));
+    expect(messages.add).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: 'error', summary: expected }),
+    );
     expect(cmp.exporting()).toBe(false);
   });
 });

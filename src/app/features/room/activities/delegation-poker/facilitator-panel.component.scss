@@ -92,7 +92,7 @@
   width: auto;
   min-width: 0;
 }
-/* The inner <input> (rendered by PrimeNG, so its rule lives in global styles.scss —
+/* The inner <input> (rendered by Optimus UI, so its rule lives in global styles.scss —
    emulated encapsulation can't reach a child component's internals) is constrained
    there to stop it overflowing this fixed-width control. */
 .add-subject-row .grow,

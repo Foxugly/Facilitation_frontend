@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { MessageModule } from 'primeng/message';
+import { MessageModule } from '@openng/optimus-ui/message';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -19,7 +19,9 @@ import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.c
         }
         @case ('error') {
           <p-message severity="error" [text]="'auth.confirm.error_lead' | transloco" />
-          <div class="links"><a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a></div>
+          <div class="links">
+            <a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a>
+          </div>
         }
       }
     </app-auth-card>

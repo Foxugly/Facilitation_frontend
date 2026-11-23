@@ -1,8 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ButtonModule } from 'primeng/button';
-import { SkeletonModule } from 'primeng/skeleton';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 
 import { HistoryService } from '../../core/history/history.service';
 import { HistoryDay } from '../../core/history/history.models';
@@ -12,12 +12,26 @@ import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.com
 @Component({
   selector: 'app-history-list',
   standalone: true,
-  imports: [RouterLink, TranslocoModule, ButtonModule, SkeletonModule, PageHeaderComponent, EmptyStateComponent],
+  imports: [
+    RouterLink,
+    TranslocoModule,
+    ButtonModule,
+    SkeletonModule,
+    PageHeaderComponent,
+    EmptyStateComponent,
+  ],
   styleUrl: '../teams/teams.scss',
   template: `
     <section class="page">
       <app-page-header [icon]="'pi-history'" [title]="'history.title' | transloco">
-        <p-button slot="left" [label]="'action.back' | transloco" icon="pi pi-arrow-left" [text]="true" severity="secondary" (onClick)="back()" />
+        <p-button
+          slot="left"
+          [label]="'action.back' | transloco"
+          icon="pi pi-arrow-left"
+          [text]="true"
+          severity="secondary"
+          (onClick)="back()"
+        />
       </app-page-header>
 
       @if (loading()) {

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideTranslocoScope, TranslocoTestingModule } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
+import { MessageService } from '@openng/optimus-ui/api';
 import { describe, expect, it } from 'vitest';
 
 import fr from '../../../../public/i18n/fr.json';
@@ -48,29 +48,50 @@ async function render(fixture: ReturnType<typeof setup>) {
 }
 
 const PAID_STATUS = {
-  billingEnabled: true, isPaid: true, bypass: false, status: 'active',
-  plan: 'team5', interval: 'yearly', quota: 5, teamsUsed: 2, canManage: true,
+  billingEnabled: true,
+  isPaid: true,
+  bypass: false,
+  status: 'active',
+  plan: 'team5',
+  interval: 'yearly',
+  quota: 5,
+  teamsUsed: 2,
+  canManage: true,
 };
 
 const HISTORY = {
   billingEnabled: true,
   subscriptions: [
     {
-      id: 'sub_1', status: 'canceled', plan: 'team1', interval: 'monthly',
-      startedAt: '2026-01-15T10:00:00Z', currentPeriodEnd: '2026-02-15T10:00:00Z',
+      id: 'sub_1',
+      status: 'canceled',
+      plan: 'team1',
+      interval: 'monthly',
+      startedAt: '2026-01-15T10:00:00Z',
+      currentPeriodEnd: '2026-02-15T10:00:00Z',
       canceledAt: '2026-02-15T10:00:00Z',
     },
   ],
   invoices: [
     {
-      id: 'in_1', number: 'F-2026-001', status: 'paid', amountPaid: 20000,
-      currency: 'EUR', createdAt: '2026-03-01T10:00:00Z',
-      hostedUrl: 'https://stripe.test/i/1', pdfUrl: 'https://stripe.test/i/1.pdf',
+      id: 'in_1',
+      number: 'F-2026-001',
+      status: 'paid',
+      amountPaid: 20000,
+      currency: 'EUR',
+      createdAt: '2026-03-01T10:00:00Z',
+      hostedUrl: 'https://stripe.test/i/1',
+      pdfUrl: 'https://stripe.test/i/1.pdf',
     },
     {
-      id: 'in_2', number: 'F-2026-002', status: 'open', amountPaid: 500,
-      currency: 'EUR', createdAt: '2026-04-01T10:00:00Z',
-      hostedUrl: 'https://stripe.test/i/2', pdfUrl: '',
+      id: 'in_2',
+      number: 'F-2026-002',
+      status: 'open',
+      amountPaid: 500,
+      currency: 'EUR',
+      createdAt: '2026-04-01T10:00:00Z',
+      hostedUrl: 'https://stripe.test/i/2',
+      pdfUrl: '',
     },
   ],
 };

@@ -1,11 +1,16 @@
 # Facilitation_frontend
 
-Angular 21 SPA (standalone components, PrimeNG, Transloco) for **facilitation.foxugly.com**,
+Angular 21 SPA (standalone components, Optimus UI, Transloco) for **facilitation.foxugly.com**,
 the Collaborative Facilitation Toolbox. It talks to `Facilitation_server` (REST on
 `facilitation-api.foxugly.com`, WebSocket on `wss://facilitation-api.foxugly.com/ws/`).
 Forked from `Poker_frontend` (see `FORK.md`). Deployment: `deploy/DEPLOY.md` — CI builds the
 bundle, ships it via S3, nginx serves it statically and injects the runtime config
 (`window.__FACILITATION__`, from SSM via `facilitation-frontend-runtime-fetch`).
+
+UI library: **Optimus UI** (`@openng/optimus-ui`, MIT community fork of PrimeNG 21: same components,
+selectors and Aura theme via `@openng/optimus-ui-themes`, `pi pi-*` icons via `@openng/icons`, `provideOptimus`).
+**PrimeNG >= 22 is banned in the fleet** (commercial licence key, banner without one); see foxugly-ops
+`STANDARD-frontend-layout.md` « Bibliothèque UI ».
 
 ## Commands
 

@@ -155,7 +155,7 @@ const FR: AboutUiText = {
       description: 'Application temps réel (SPA).',
       items: [
         'Angular 21, TypeScript et signals',
-        'PrimeNG 21 et SCSS/BEM',
+        'Optimus UI 1 et SCSS/BEM',
         'Transloco (5 langues)',
         'Tests Vitest',
       ],
@@ -273,7 +273,7 @@ const EN: AboutUiText = {
       description: 'Real-time single-page app.',
       items: [
         'Angular 21, TypeScript and signals',
-        'PrimeNG 21 and SCSS/BEM',
+        'Optimus UI 1 and SCSS/BEM',
         'Transloco (5 languages)',
         'Vitest tests',
       ],
@@ -391,7 +391,7 @@ const NL: AboutUiText = {
       description: 'Realtime single-page app.',
       items: [
         'Angular 21, TypeScript en signals',
-        'PrimeNG 21 en SCSS/BEM',
+        'Optimus UI 1 en SCSS/BEM',
         'Transloco (5 talen)',
         'Vitest-tests',
       ],
@@ -509,7 +509,7 @@ const IT: AboutUiText = {
       description: 'App single-page in tempo reale.',
       items: [
         'Angular 21, TypeScript e signals',
-        'PrimeNG 21 e SCSS/BEM',
+        'Optimus UI 1 e SCSS/BEM',
         'Transloco (5 lingue)',
         'Test Vitest',
       ],
@@ -627,7 +627,7 @@ const ES: AboutUiText = {
       description: 'Aplicacion de una sola pagina en tiempo real.',
       items: [
         'Angular 21, TypeScript y signals',
-        'PrimeNG 21 y SCSS/BEM',
+        'Optimus UI 1 y SCSS/BEM',
         'Transloco (5 idiomas)',
         'Pruebas Vitest',
       ],

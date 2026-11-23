@@ -2,11 +2,11 @@ import { Component, ElementRef, OnDestroy, effect, inject, signal, viewChild } f
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { CheckboxModule } from '@openng/optimus-ui/checkbox';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { PasswordModule } from '@openng/optimus-ui/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -34,7 +34,14 @@ import { authErrorKey } from './auth-errors';
         <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
           <div class="field">
             <label for="email">{{ 'auth.email' | transloco }}</label>
-            <input id="email" pInputText type="email" formControlName="email" autocomplete="email" required />
+            <input
+              id="email"
+              pInputText
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              required
+            />
           </div>
           <div class="field">
             <label for="password">{{ 'auth.password' | transloco }}</label>
@@ -50,12 +57,18 @@ import { authErrorKey } from './auth-errors';
             />
           </div>
 
-          @if (error()) { <p-message severity="error" [text]="error()! | transloco" /> }
-          @if (info()) { <p-message severity="success" [text]="info()! | transloco" /> }
+          @if (error()) {
+            <p-message severity="error" [text]="error()! | transloco" />
+          }
+          @if (info()) {
+            <p-message severity="success" [text]="info()! | transloco" />
+          }
           @if (needsConfirm()) {
             <p-message severity="warn">
               {{ 'auth.login.not_confirmed' | transloco }}
-              <button type="button" class="link-btn" (click)="resend()">{{ 'auth.login.resend' | transloco }}</button>
+              <button type="button" class="link-btn" (click)="resend()">
+                {{ 'auth.login.resend' | transloco }}
+              </button>
             </p-message>
           }
 
@@ -76,7 +89,9 @@ import { authErrorKey } from './auth-errors';
             [disabled]="busy() || form.invalid"
           />
 
-          <div class="auth-divider"><span>{{ 'auth.or' | transloco }}</span></div>
+          <div class="auth-divider">
+            <span>{{ 'auth.or' | transloco }}</span>
+          </div>
 
           <p-button
             [label]="'auth.login.magic' | transloco"
@@ -90,11 +105,24 @@ import { authErrorKey } from './auth-errors';
         <form [formGroup]="magicForm" (ngSubmit)="sendMagic()" class="auth-form">
           <div class="field">
             <label for="magicEmail">{{ 'auth.email' | transloco }}</label>
-            <input id="magicEmail" pInputText type="email" formControlName="email" autocomplete="email" required />
+            <input
+              id="magicEmail"
+              pInputText
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              required
+            />
           </div>
-          @if (magicSent()) { <p-message severity="success" [text]="'auth.magic.sent' | transloco" /> }
-          @if (error()) { <p-message severity="error" [text]="error()! | transloco" /> }
-          @if (turnstile.enabled) { <div #magicTurnstileEl class="turnstile-widget"></div> }
+          @if (magicSent()) {
+            <p-message severity="success" [text]="'auth.magic.sent' | transloco" />
+          }
+          @if (error()) {
+            <p-message severity="error" [text]="error()! | transloco" />
+          }
+          @if (turnstile.enabled) {
+            <div #magicTurnstileEl class="turnstile-widget"></div>
+          }
           <p-button
             type="submit"
             [label]="'auth.magic.cta' | transloco"
@@ -228,7 +256,11 @@ export class LoginComponent implements OnDestroy {
       );
       this.magicSent.set(true);
     } catch (e) {
-      if (this.turnstile.enabled && (e as { error?: { code?: string } })?.error?.code === 'captcha_failed') this.turnstile.reset();
+      if (
+        this.turnstile.enabled &&
+        (e as { error?: { code?: string } })?.error?.code === 'captcha_failed'
+      )
+        this.turnstile.reset();
       this.error.set(authErrorKey(e));
     } finally {
       this.magicBusy.set(false);

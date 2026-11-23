@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 const THEME_KEY = 'theme';
 type Theme = 'light' | 'dark';
 
-/** Dark/light toggle. Adds `.dark-mode` on <html> (PrimeNG darkModeSelector). */
+/** Dark/light toggle. Adds `.dark-mode` on <html> (Optimus UI darkModeSelector). */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   readonly theme = signal<Theme>('light');

@@ -2,14 +2,14 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { TabsModule } from 'primeng/tabs';
-import { TooltipModule } from 'primeng/tooltip';
-import { TagModule } from 'primeng/tag';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { SelectModule } from '@openng/optimus-ui/select';
+import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
+import { TabsModule } from '@openng/optimus-ui/tabs';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
+import { TagModule } from '@openng/optimus-ui/tag';
 
 import { firstValueFrom } from 'rxjs';
 
@@ -18,11 +18,32 @@ import { RoomApiService } from '../../core/api/room-api.service';
 import { IdentityService } from '../../core/identity/identity.service';
 import { LanguageService } from '../../core/i18n/language.service';
 import { TeamsService } from '../../core/teams/teams.service';
-import { Background, BackgroundStyle, CardBack, Deck, Felt, Invitation, Membership, ResultLayout, SurfaceStyle, Team, TeamRole } from '../../core/teams/teams.models';
+import {
+  Background,
+  BackgroundStyle,
+  CardBack,
+  Deck,
+  Felt,
+  Invitation,
+  Membership,
+  ResultLayout,
+  SurfaceStyle,
+  Team,
+  TeamRole,
+} from '../../core/teams/teams.models';
 import { memberName } from '../../core/teams/member-name';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
 
-const AVATAR_COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6', '#6366f1'];
+const AVATAR_COLORS = [
+  '#0ea5e9',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#ef4444',
+  '#14b8a6',
+  '#6366f1',
+];
 
 // Les couleurs d'usine des deux surfaces : elles doivent rester alignees sur les
 // defauts du modele Team cote serveur, que le bouton de reset rend a l'identique.
@@ -33,45 +54,124 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
 @Component({
   selector: 'app-team-detail',
   standalone: true,
-  imports: [FormsModule, TranslocoModule, ButtonModule, InputTextModule, SelectModule, SelectButtonModule, TabsModule, TagModule, TooltipModule, PageHeaderComponent],
+  imports: [
+    FormsModule,
+    TranslocoModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
+    SelectButtonModule,
+    TabsModule,
+    TagModule,
+    TooltipModule,
+    PageHeaderComponent,
+  ],
   styleUrl: './teams.scss',
   template: `
     @if (team(); as team) {
       <section class="page">
         <app-page-header [icon]="'pi-users'" [title]="editingName() ? '' : team.name">
-          <p-button slot="left" [label]="'action.back' | transloco" icon="pi pi-arrow-left" [text]="true" severity="secondary" (onClick)="back()" />
+          <p-button
+            slot="left"
+            [label]="'action.back' | transloco"
+            icon="pi pi-arrow-left"
+            [text]="true"
+            severity="secondary"
+            (onClick)="back()"
+          />
           <!-- Static slot element (projection doesn't reach a slot node placed directly
                inside @if); the rename toggle lives inside it. -->
           <span slot="title-after" class="name-slot">
             @if (isManager()) {
               @if (editingName()) {
                 <span class="name-edit">
-                  <input pInputText [(ngModel)]="renameValue" (keyup.enter)="confirmRename()" (keyup.escape)="cancelRename()" autofocus />
-                  <p-button icon="pi pi-save" severity="success" [ariaLabel]="'action.save' | transloco" [loading]="savingName()" (onClick)="confirmRename()" />
-                  <p-button icon="pi pi-times" [outlined]="true" severity="secondary" [ariaLabel]="'action.cancel' | transloco" (onClick)="cancelRename()" />
+                  <input
+                    pInputText
+                    [(ngModel)]="renameValue"
+                    (keyup.enter)="confirmRename()"
+                    (keyup.escape)="cancelRename()"
+                    autofocus
+                  />
+                  <p-button
+                    icon="pi pi-save"
+                    severity="success"
+                    [ariaLabel]="'action.save' | transloco"
+                    [loading]="savingName()"
+                    (onClick)="confirmRename()"
+                  />
+                  <p-button
+                    icon="pi pi-times"
+                    [outlined]="true"
+                    severity="secondary"
+                    [ariaLabel]="'action.cancel' | transloco"
+                    (onClick)="cancelRename()"
+                  />
                 </span>
               } @else {
-                <button type="button" class="name-edit-btn" [attr.aria-label]="'teams.rename_action' | transloco" (click)="startEditName(team.name)"><i class="pi pi-pencil"></i></button>
+                <button
+                  type="button"
+                  class="name-edit-btn"
+                  [attr.aria-label]="'teams.rename_action' | transloco"
+                  (click)="startEditName(team.name)"
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
               }
             }
           </span>
-          <p-button slot="right" icon="pi pi-th-large" [outlined]="true" severity="secondary"
-                    [pTooltip]="'board.title' | transloco" tooltipPosition="bottom" [ariaLabel]="'board.title' | transloco" (onClick)="openBoard()" />
-          <p-button slot="right" icon="pi pi-history" [outlined]="true" severity="secondary"
-                    [pTooltip]="'history.title' | transloco" tooltipPosition="bottom" [ariaLabel]="'history.title' | transloco" (onClick)="openHistory()" />
-          <p-button slot="right" icon="pi pi-play" severity="success" [loading]="starting()"
-                    [pTooltip]="'teams.new_session' | transloco" tooltipPosition="bottom" [ariaLabel]="'teams.new_session' | transloco" (onClick)="startSession()" />
+          <p-button
+            slot="right"
+            icon="pi pi-th-large"
+            [outlined]="true"
+            severity="secondary"
+            [pTooltip]="'board.title' | transloco"
+            tooltipPosition="bottom"
+            [ariaLabel]="'board.title' | transloco"
+            (onClick)="openBoard()"
+          />
+          <p-button
+            slot="right"
+            icon="pi pi-history"
+            [outlined]="true"
+            severity="secondary"
+            [pTooltip]="'history.title' | transloco"
+            tooltipPosition="bottom"
+            [ariaLabel]="'history.title' | transloco"
+            (onClick)="openHistory()"
+          />
+          <p-button
+            slot="right"
+            icon="pi pi-play"
+            severity="success"
+            [loading]="starting()"
+            [pTooltip]="'teams.new_session' | transloco"
+            tooltipPosition="bottom"
+            [ariaLabel]="'teams.new_session' | transloco"
+            (onClick)="startSession()"
+          />
         </app-page-header>
 
         <p-tabs [(value)]="activeTab">
           <p-tablist>
-            <p-tab value="members"><span class="pi pi-users tab-icon"></span><span>{{ 'teams.tab_members' | transloco }}</span></p-tab>
+            <p-tab value="members"
+              ><span class="pi pi-users tab-icon"></span
+              ><span>{{ 'teams.tab_members' | transloco }}</span></p-tab
+            >
             @if (isManager()) {
-              <p-tab value="appearance"><span class="pi pi-palette tab-icon"></span><span>{{ 'teams.appearance' | transloco }}</span></p-tab>
-              <p-tab value="deck"><span class="pi pi-clone tab-icon"></span><span>{{ 'teams.deck.tab' | transloco }}</span></p-tab>
+              <p-tab value="appearance"
+                ><span class="pi pi-palette tab-icon"></span
+                ><span>{{ 'teams.appearance' | transloco }}</span></p-tab
+              >
+              <p-tab value="deck"
+                ><span class="pi pi-clone tab-icon"></span
+                ><span>{{ 'teams.deck.tab' | transloco }}</span></p-tab
+              >
             }
             @if (isOwner()) {
-              <p-tab value="manage"><span class="pi pi-trash tab-icon"></span><span>{{ 'teams.delete' | transloco }}</span></p-tab>
+              <p-tab value="manage"
+                ><span class="pi pi-trash tab-icon"></span
+                ><span>{{ 'teams.delete' | transloco }}</span></p-tab
+              >
             }
           </p-tablist>
 
@@ -80,12 +180,14 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
               <!-- Members -->
               <div class="section">
                 @for (m of members(); track m.id; let i = $index) {
-                  @let name = memberName(m.user, ('teams.member_fallback' | transloco: { n: i + 1 }));
+                  @let name = memberName(m.user, 'teams.member_fallback' | transloco: { n: i + 1 });
                   <div class="member-row">
                     @if (m.user.avatar_url) {
                       <img class="avatar avatar--img" [src]="m.user.avatar_url" alt="" />
                     } @else {
-                      <div class="avatar" [style.background]="color('user-' + m.user.id)">{{ initials(name) }}</div>
+                      <div class="avatar" [style.background]="color('user-' + m.user.id)">
+                        {{ initials(name) }}
+                      </div>
                     }
                     <div class="who">
                       <div class="name">{{ name }}</div>
@@ -97,8 +199,21 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                     @if (m.role === 'owner') {
                       <p-tag [value]="'teams.role.owner' | transloco" />
                     } @else if (isManager()) {
-                      <p-select [options]="roleOptions()" optionLabel="label" optionValue="value" [ngModel]="m.role" (ngModelChange)="setRole(m, $event)" appendTo="body" />
-                      <p-button icon="pi pi-times" [text]="true" severity="danger" [ariaLabel]="'teams.remove' | transloco" (onClick)="remove(m)" />
+                      <p-select
+                        [options]="roleOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="m.role"
+                        (ngModelChange)="setRole(m, $event)"
+                        appendTo="body"
+                      />
+                      <p-button
+                        icon="pi pi-times"
+                        [text]="true"
+                        severity="danger"
+                        [ariaLabel]="'teams.remove' | transloco"
+                        (onClick)="remove(m)"
+                      />
                     } @else {
                       <p-tag [value]="'teams.role.' + m.role | transloco" severity="secondary" />
                     }
@@ -111,14 +226,36 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                 <div class="section">
                   <h3>{{ 'teams.invitations' | transloco }}</h3>
                   <div class="invite-row">
-                    <input pInputText [placeholder]="'auth.email' | transloco" [(ngModel)]="inviteEmail" style="min-width:220px" />
-                    <p-select [options]="roleOptions()" optionLabel="label" optionValue="value" [(ngModel)]="inviteRole" appendTo="body" />
-                    <p-button [label]="'teams.invite' | transloco" icon="pi pi-send" [loading]="inviting()" (onClick)="invite()" />
+                    <input
+                      pInputText
+                      [placeholder]="'auth.email' | transloco"
+                      [(ngModel)]="inviteEmail"
+                      style="min-width:220px"
+                    />
+                    <p-select
+                      [options]="roleOptions()"
+                      optionLabel="label"
+                      optionValue="value"
+                      [(ngModel)]="inviteRole"
+                      appendTo="body"
+                    />
+                    <p-button
+                      [label]="'teams.invite' | transloco"
+                      icon="pi pi-send"
+                      [loading]="inviting()"
+                      (onClick)="invite()"
+                    />
                   </div>
                   @for (inv of invitations(); track inv.id) {
                     <div class="pending">
                       <span>{{ inv.email }} · {{ 'teams.role.' + inv.role | transloco }}</span>
-                      <p-button icon="pi pi-times" [text]="true" severity="secondary" [ariaLabel]="'teams.revoke' | transloco" (onClick)="revoke(inv)" />
+                      <p-button
+                        icon="pi pi-times"
+                        [text]="true"
+                        severity="secondary"
+                        [ariaLabel]="'teams.revoke' | transloco"
+                        (onClick)="revoke(inv)"
+                      />
                     </div>
                   }
                 </div>
@@ -133,10 +270,22 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                   <div class="appearance-main">
                     <p-tabs [(value)]="appearanceTab">
                       <p-tablist>
-                        <p-tab value="table"><span class="pi pi-table tab-icon"></span><span>{{ 'teams.surface.table' | transloco }}</span></p-tab>
-                        <p-tab value="back"><span class="pi pi-id-card tab-icon"></span><span>{{ 'teams.deck.backs_title' | transloco }}</span></p-tab>
-                        <p-tab value="background"><span class="pi pi-image tab-icon"></span><span>{{ 'teams.background.tab' | transloco }}</span></p-tab>
-                        <p-tab value="result"><span class="pi pi-chart-bar tab-icon"></span><span>{{ 'teams.result_layout.tab' | transloco }}</span></p-tab>
+                        <p-tab value="table"
+                          ><span class="pi pi-table tab-icon"></span
+                          ><span>{{ 'teams.surface.table' | transloco }}</span></p-tab
+                        >
+                        <p-tab value="back"
+                          ><span class="pi pi-id-card tab-icon"></span
+                          ><span>{{ 'teams.deck.backs_title' | transloco }}</span></p-tab
+                        >
+                        <p-tab value="background"
+                          ><span class="pi pi-image tab-icon"></span
+                          ><span>{{ 'teams.background.tab' | transloco }}</span></p-tab
+                        >
+                        <p-tab value="result"
+                          ><span class="pi pi-chart-bar tab-icon"></span
+                          ><span>{{ 'teams.result_layout.tab' | transloco }}</span></p-tab
+                        >
                       </p-tablist>
 
                       <p-tabpanels>
@@ -144,27 +293,59 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                         <p-tabpanel value="table">
                           <div class="section">
                             <div class="style-row">
-                              <p-selectbutton [options]="styleOptions()" optionLabel="label" optionValue="value"
-                                              [ngModel]="feltStyle()" (ngModelChange)="setStyle('felt', $event)" [allowEmpty]="false" />
-                              <p-button icon="pi pi-eraser" [outlined]="true" severity="secondary" [rounded]="true"
-                                        [pTooltip]="'teams.surface.reset' | transloco" tooltipPosition="left"
-                                        [ariaLabel]="'teams.surface.reset' | transloco"
-                                        [disabled]="!canResetFelt()" [loading]="savingFelt()" (onClick)="resetSurface('felt')" />
+                              <p-selectbutton
+                                [options]="styleOptions()"
+                                optionLabel="label"
+                                optionValue="value"
+                                [ngModel]="feltStyle()"
+                                (ngModelChange)="setStyle('felt', $event)"
+                                [allowEmpty]="false"
+                              />
+                              <p-button
+                                icon="pi pi-eraser"
+                                [outlined]="true"
+                                severity="secondary"
+                                [rounded]="true"
+                                [pTooltip]="'teams.surface.reset' | transloco"
+                                tooltipPosition="left"
+                                [ariaLabel]="'teams.surface.reset' | transloco"
+                                [disabled]="!canResetFelt()"
+                                [loading]="savingFelt()"
+                                (onClick)="resetSurface('felt')"
+                              />
                             </div>
                             @if (feltStyle() === 'color') {
                               <div class="appearance-row">
                                 <label>
                                   <span>{{ 'teams.felt_color' | transloco }}</span>
-                                  <input type="color" [value]="feltColor()"
-                                         (input)="feltColor.set($any($event.target).value)" (change)="saveAppearance()" />
+                                  <input
+                                    type="color"
+                                    [value]="feltColor()"
+                                    (input)="feltColor.set($any($event.target).value)"
+                                    (change)="saveAppearance()"
+                                  />
                                 </label>
                               </div>
                             } @else {
                               @if (canCustomize()) {
                                 <div class="upload-row">
-                                  <input #feltFile type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onUploadFelt(feltFile)" />
-                                  <p-button [label]="'teams.surface.upload' | transloco" icon="pi pi-upload" [outlined]="true" [loading]="uploadingFelt()" (onClick)="feltFile.click()" />
-                                  <span class="muted">{{ 'teams.surface.upload_hint' | transloco }}</span>
+                                  <input
+                                    #feltFile
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    hidden
+                                    (change)="onUploadFelt(feltFile)"
+                                  />
+                                  <p-button
+                                    [label]="'teams.surface.upload' | transloco"
+                                    icon="pi pi-upload"
+                                    [outlined]="true"
+                                    [loading]="uploadingFelt()"
+                                    (onClick)="feltFile.click()"
+                                  />
+                                  <span class="muted">{{
+                                    'teams.surface.upload_hint' | transloco
+                                  }}</span>
                                 </div>
                               }
                               @if (decksLoading()) {
@@ -175,26 +356,54 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                                 <div class="deck-grid">
                                   @for (f of felts(); track f.id) {
                                     <div class="deck-card-wrap">
-                                      <button type="button" class="deck-card"
-                                              [class.deck-card--selected]="f.id === selectedFeltId()"
-                                              [disabled]="savingFelt()" (click)="selectFelt(f)">
+                                      <button
+                                        type="button"
+                                        class="deck-card"
+                                        [class.deck-card--selected]="f.id === selectedFeltId()"
+                                        [disabled]="savingFelt()"
+                                        (click)="selectFelt(f)"
+                                      >
                                         <span class="deck-card__cards">
-                                          <span class="deck-card__mini deck-card__mini--felt"
-                                                [style.background-image]="f.image ? 'url(' + f.image + ')' : null"></span>
+                                          <span
+                                            class="deck-card__mini deck-card__mini--felt"
+                                            [style.background-image]="
+                                              f.image ? 'url(' + f.image + ')' : null
+                                            "
+                                          ></span>
                                           @if (f.id === selectedFeltId()) {
-                                            <span class="deck-card__check" [attr.aria-label]="'teams.deck.in_use' | transloco"><i class="pi pi-check"></i></span>
+                                            <span
+                                              class="deck-card__check"
+                                              [attr.aria-label]="'teams.deck.in_use' | transloco"
+                                              ><i class="pi pi-check"></i
+                                            ></span>
                                           }
                                         </span>
                                         <span class="deck-card__name">{{ f.name }}</span>
                                         @if (f.is_custom) {
-                                          <span class="deck-card__meta">{{ 'teams.deck.custom' | transloco }}</span>
+                                          <span class="deck-card__meta">{{
+                                            'teams.deck.custom' | transloco
+                                          }}</span>
                                         }
                                       </button>
                                       @if (f.image) {
-                                        <button type="button" class="deck-card__zoom" [attr.aria-label]="'teams.surface.zoom' | transloco" (click)="zoom(f.image, $event)"><i class="pi pi-search-plus"></i></button>
+                                        <button
+                                          type="button"
+                                          class="deck-card__zoom"
+                                          [attr.aria-label]="'teams.surface.zoom' | transloco"
+                                          (click)="zoom(f.image, $event)"
+                                        >
+                                          <i class="pi pi-search-plus"></i>
+                                        </button>
                                       }
                                       @if (f.is_custom) {
-                                        <button type="button" class="deck-card__delete" [attr.aria-label]="'teams.surface.delete' | transloco" (click)="deleteFelt(f, $event)"><i class="pi pi-trash"></i></button>
+                                        <button
+                                          type="button"
+                                          class="deck-card__delete"
+                                          [attr.aria-label]="'teams.surface.delete' | transloco"
+                                          (click)="deleteFelt(f, $event)"
+                                        >
+                                          <i class="pi pi-trash"></i>
+                                        </button>
                                       }
                                     </div>
                                   }
@@ -208,27 +417,59 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                         <p-tabpanel value="back">
                           <div class="section">
                             <div class="style-row">
-                              <p-selectbutton [options]="styleOptions()" optionLabel="label" optionValue="value"
-                                              [ngModel]="cardBackStyle()" (ngModelChange)="setStyle('card_back', $event)" [allowEmpty]="false" />
-                              <p-button icon="pi pi-eraser" [outlined]="true" severity="secondary" [rounded]="true"
-                                        [pTooltip]="'teams.surface.reset' | transloco" tooltipPosition="left"
-                                        [ariaLabel]="'teams.surface.reset' | transloco"
-                                        [disabled]="!canResetBack()" [loading]="savingBack()" (onClick)="resetSurface('card_back')" />
+                              <p-selectbutton
+                                [options]="styleOptions()"
+                                optionLabel="label"
+                                optionValue="value"
+                                [ngModel]="cardBackStyle()"
+                                (ngModelChange)="setStyle('card_back', $event)"
+                                [allowEmpty]="false"
+                              />
+                              <p-button
+                                icon="pi pi-eraser"
+                                [outlined]="true"
+                                severity="secondary"
+                                [rounded]="true"
+                                [pTooltip]="'teams.surface.reset' | transloco"
+                                tooltipPosition="left"
+                                [ariaLabel]="'teams.surface.reset' | transloco"
+                                [disabled]="!canResetBack()"
+                                [loading]="savingBack()"
+                                (onClick)="resetSurface('card_back')"
+                              />
                             </div>
                             @if (cardBackStyle() === 'color') {
                               <div class="appearance-row">
                                 <label>
                                   <span>{{ 'teams.back_color' | transloco }}</span>
-                                  <input type="color" [value]="backColor()"
-                                         (input)="backColor.set($any($event.target).value)" (change)="saveAppearance()" />
+                                  <input
+                                    type="color"
+                                    [value]="backColor()"
+                                    (input)="backColor.set($any($event.target).value)"
+                                    (change)="saveAppearance()"
+                                  />
                                 </label>
                               </div>
                             } @else {
                               @if (canCustomize()) {
                                 <div class="upload-row">
-                                  <input #backFile type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onUploadBack(backFile)" />
-                                  <p-button [label]="'teams.surface.upload' | transloco" icon="pi pi-upload" [outlined]="true" [loading]="uploadingBack()" (onClick)="backFile.click()" />
-                                  <span class="muted">{{ 'teams.surface.upload_hint' | transloco }}</span>
+                                  <input
+                                    #backFile
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    hidden
+                                    (change)="onUploadBack(backFile)"
+                                  />
+                                  <p-button
+                                    [label]="'teams.surface.upload' | transloco"
+                                    icon="pi pi-upload"
+                                    [outlined]="true"
+                                    [loading]="uploadingBack()"
+                                    (onClick)="backFile.click()"
+                                  />
+                                  <span class="muted">{{
+                                    'teams.surface.upload_hint' | transloco
+                                  }}</span>
                                 </div>
                               }
                               @if (decksLoading()) {
@@ -239,26 +480,56 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                                 <div class="deck-grid">
                                   @for (back of cardBacks(); track back.id) {
                                     <div class="deck-card-wrap">
-                                      <button type="button" class="deck-card"
-                                              [class.deck-card--selected]="back.id === selectedCardBackId()"
-                                              [disabled]="savingBack()" (click)="selectCardBack(back)">
+                                      <button
+                                        type="button"
+                                        class="deck-card"
+                                        [class.deck-card--selected]="
+                                          back.id === selectedCardBackId()
+                                        "
+                                        [disabled]="savingBack()"
+                                        (click)="selectCardBack(back)"
+                                      >
                                         <span class="deck-card__cards">
-                                          <span class="deck-card__mini deck-card__mini--back"
-                                                [style.background-image]="back.image ? 'url(' + back.image + ')' : null"></span>
+                                          <span
+                                            class="deck-card__mini deck-card__mini--back"
+                                            [style.background-image]="
+                                              back.image ? 'url(' + back.image + ')' : null
+                                            "
+                                          ></span>
                                           @if (back.id === selectedCardBackId()) {
-                                            <span class="deck-card__check" [attr.aria-label]="'teams.deck.in_use' | transloco"><i class="pi pi-check"></i></span>
+                                            <span
+                                              class="deck-card__check"
+                                              [attr.aria-label]="'teams.deck.in_use' | transloco"
+                                              ><i class="pi pi-check"></i
+                                            ></span>
                                           }
                                         </span>
                                         <span class="deck-card__name">{{ back.name }}</span>
                                         @if (back.is_custom) {
-                                          <span class="deck-card__meta">{{ 'teams.deck.custom' | transloco }}</span>
+                                          <span class="deck-card__meta">{{
+                                            'teams.deck.custom' | transloco
+                                          }}</span>
                                         }
                                       </button>
                                       @if (back.image) {
-                                        <button type="button" class="deck-card__zoom" [attr.aria-label]="'teams.surface.zoom' | transloco" (click)="zoom(back.image, $event)"><i class="pi pi-search-plus"></i></button>
+                                        <button
+                                          type="button"
+                                          class="deck-card__zoom"
+                                          [attr.aria-label]="'teams.surface.zoom' | transloco"
+                                          (click)="zoom(back.image, $event)"
+                                        >
+                                          <i class="pi pi-search-plus"></i>
+                                        </button>
                                       }
                                       @if (back.is_custom) {
-                                        <button type="button" class="deck-card__delete" [attr.aria-label]="'teams.surface.delete' | transloco" (click)="deleteBack(back, $event)"><i class="pi pi-trash"></i></button>
+                                        <button
+                                          type="button"
+                                          class="deck-card__delete"
+                                          [attr.aria-label]="'teams.surface.delete' | transloco"
+                                          (click)="deleteBack(back, $event)"
+                                        >
+                                          <i class="pi pi-trash"></i>
+                                        </button>
                                       }
                                     </div>
                                   }
@@ -274,12 +545,26 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                         <p-tabpanel value="background">
                           <div class="section">
                             <div class="style-row">
-                              <p-selectbutton [options]="backgroundStyleOptions()" optionLabel="label" optionValue="value"
-                                              [ngModel]="backgroundStyle()" (ngModelChange)="setBackgroundStyle($event)" [allowEmpty]="false" />
-                              <p-button icon="pi pi-eraser" [outlined]="true" severity="secondary" [rounded]="true"
-                                        [pTooltip]="'teams.surface.reset' | transloco" tooltipPosition="left"
-                                        [ariaLabel]="'teams.surface.reset' | transloco"
-                                        [disabled]="!canResetBackground()" [loading]="savingBackground()" (onClick)="resetBackground()" />
+                              <p-selectbutton
+                                [options]="backgroundStyleOptions()"
+                                optionLabel="label"
+                                optionValue="value"
+                                [ngModel]="backgroundStyle()"
+                                (ngModelChange)="setBackgroundStyle($event)"
+                                [allowEmpty]="false"
+                              />
+                              <p-button
+                                icon="pi pi-eraser"
+                                [outlined]="true"
+                                severity="secondary"
+                                [rounded]="true"
+                                [pTooltip]="'teams.surface.reset' | transloco"
+                                tooltipPosition="left"
+                                [ariaLabel]="'teams.surface.reset' | transloco"
+                                [disabled]="!canResetBackground()"
+                                [loading]="savingBackground()"
+                                (onClick)="resetBackground()"
+                              />
                             </div>
                             @if (backgroundStyle() === 'theme') {
                               <p class="muted">{{ 'teams.background.theme_hint' | transloco }}</p>
@@ -287,16 +572,34 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                               <div class="appearance-row">
                                 <label>
                                   <span>{{ 'teams.background.color' | transloco }}</span>
-                                  <input type="color" [value]="backgroundColor()"
-                                         (input)="backgroundColor.set($any($event.target).value)" (change)="saveAppearance()" />
+                                  <input
+                                    type="color"
+                                    [value]="backgroundColor()"
+                                    (input)="backgroundColor.set($any($event.target).value)"
+                                    (change)="saveAppearance()"
+                                  />
                                 </label>
                               </div>
                             } @else {
                               @if (canCustomize()) {
                                 <div class="upload-row">
-                                  <input #bgFile type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onUploadBackground(bgFile)" />
-                                  <p-button [label]="'teams.surface.upload' | transloco" icon="pi pi-upload" [outlined]="true" [loading]="uploadingBackground()" (onClick)="bgFile.click()" />
-                                  <span class="muted">{{ 'teams.background.upload_hint' | transloco }}</span>
+                                  <input
+                                    #bgFile
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp"
+                                    hidden
+                                    (change)="onUploadBackground(bgFile)"
+                                  />
+                                  <p-button
+                                    [label]="'teams.surface.upload' | transloco"
+                                    icon="pi pi-upload"
+                                    [outlined]="true"
+                                    [loading]="uploadingBackground()"
+                                    (onClick)="bgFile.click()"
+                                  />
+                                  <span class="muted">{{
+                                    'teams.background.upload_hint' | transloco
+                                  }}</span>
                                 </div>
                               }
                               @if (decksLoading()) {
@@ -307,26 +610,56 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                                 <div class="deck-grid">
                                   @for (bg of backgrounds(); track bg.id) {
                                     <div class="deck-card-wrap">
-                                      <button type="button" class="deck-card"
-                                              [class.deck-card--selected]="bg.id === selectedBackgroundId()"
-                                              [disabled]="savingBackground()" (click)="selectBackground(bg)">
+                                      <button
+                                        type="button"
+                                        class="deck-card"
+                                        [class.deck-card--selected]="
+                                          bg.id === selectedBackgroundId()
+                                        "
+                                        [disabled]="savingBackground()"
+                                        (click)="selectBackground(bg)"
+                                      >
                                         <span class="deck-card__cards">
-                                          <span class="deck-card__mini deck-card__mini--bg"
-                                                [style.background-image]="bg.image ? 'url(' + bg.image + ')' : null"></span>
+                                          <span
+                                            class="deck-card__mini deck-card__mini--bg"
+                                            [style.background-image]="
+                                              bg.image ? 'url(' + bg.image + ')' : null
+                                            "
+                                          ></span>
                                           @if (bg.id === selectedBackgroundId()) {
-                                            <span class="deck-card__check" [attr.aria-label]="'teams.deck.in_use' | transloco"><i class="pi pi-check"></i></span>
+                                            <span
+                                              class="deck-card__check"
+                                              [attr.aria-label]="'teams.deck.in_use' | transloco"
+                                              ><i class="pi pi-check"></i
+                                            ></span>
                                           }
                                         </span>
                                         <span class="deck-card__name">{{ bg.name }}</span>
                                         @if (bg.is_custom) {
-                                          <span class="deck-card__meta">{{ 'teams.deck.custom' | transloco }}</span>
+                                          <span class="deck-card__meta">{{
+                                            'teams.deck.custom' | transloco
+                                          }}</span>
                                         }
                                       </button>
                                       @if (bg.image) {
-                                        <button type="button" class="deck-card__zoom" [attr.aria-label]="'teams.surface.zoom' | transloco" (click)="zoom(bg.image, $event)"><i class="pi pi-search-plus"></i></button>
+                                        <button
+                                          type="button"
+                                          class="deck-card__zoom"
+                                          [attr.aria-label]="'teams.surface.zoom' | transloco"
+                                          (click)="zoom(bg.image, $event)"
+                                        >
+                                          <i class="pi pi-search-plus"></i>
+                                        </button>
                                       }
                                       @if (bg.is_custom) {
-                                        <button type="button" class="deck-card__delete" [attr.aria-label]="'teams.surface.delete' | transloco" (click)="deleteBackground(bg, $event)"><i class="pi pi-trash"></i></button>
+                                        <button
+                                          type="button"
+                                          class="deck-card__delete"
+                                          [attr.aria-label]="'teams.surface.delete' | transloco"
+                                          (click)="deleteBackground(bg, $event)"
+                                        >
+                                          <i class="pi pi-trash"></i>
+                                        </button>
                                       }
                                     </div>
                                   }
@@ -343,10 +676,14 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                             <p class="deck-intro">{{ 'teams.result_layout.intro' | transloco }}</p>
                             <div class="deck-grid">
                               @for (choice of resultLayoutChoices(); track choice.value) {
-                                <button type="button" class="deck-card layout-card"
-                                        [class.deck-card--selected]="resultLayout() === choice.value"
-                                        [attr.aria-pressed]="resultLayout() === choice.value"
-                                        [disabled]="savingResultLayout()" (click)="selectResultLayout(choice.value)">
+                                <button
+                                  type="button"
+                                  class="deck-card layout-card"
+                                  [class.deck-card--selected]="resultLayout() === choice.value"
+                                  [attr.aria-pressed]="resultLayout() === choice.value"
+                                  [disabled]="savingResultLayout()"
+                                  (click)="selectResultLayout(choice.value)"
+                                >
                                   <span class="deck-card__cards">
                                     <!-- Schema, pas une capture : il doit rester juste
                                          quel que soit le jeu de cartes de l'equipe. -->
@@ -362,7 +699,11 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                                       </span>
                                     }
                                     @if (resultLayout() === choice.value) {
-                                      <span class="deck-card__check" [attr.aria-label]="'teams.deck.in_use' | transloco"><i class="pi pi-check"></i></span>
+                                      <span
+                                        class="deck-card__check"
+                                        [attr.aria-label]="'teams.deck.in_use' | transloco"
+                                        ><i class="pi pi-check"></i
+                                      ></span>
                                     }
                                   </span>
                                   <span class="deck-card__name">{{ choice.label }}</span>
@@ -385,10 +726,21 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                       <legend>{{ 'teams.surface.preview' | transloco }}</legend>
                       <!-- Le fond se peint derriere la table, comme dans la salle.
                            En mode Theme il ne pose rien et l'apercu garde le sien. -->
-                      <span class="preview-stage" [style.background-color]="backgroundPreviewColor()"
-                            [style.background-image]="backgroundPreviewImage()">
-                        <span class="table-preview table-preview--lg" [style.--table-felt]="feltColor()" [style.--table-felt-image]="feltPreviewImage()">
-                          <span class="card-preview" [style.background-color]="backColor()" [style.background-image]="backPreviewImage()"></span>
+                      <span
+                        class="preview-stage"
+                        [style.background-color]="backgroundPreviewColor()"
+                        [style.background-image]="backgroundPreviewImage()"
+                      >
+                        <span
+                          class="table-preview table-preview--lg"
+                          [style.--table-felt]="feltColor()"
+                          [style.--table-felt-image]="feltPreviewImage()"
+                        >
+                          <span
+                            class="card-preview"
+                            [style.background-color]="backColor()"
+                            [style.background-image]="backPreviewImage()"
+                          ></span>
                         </span>
                       </span>
                     </fieldset>
@@ -424,12 +776,21 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                         >
                           <span class="deck-card__cards">
                             @for (card of deck.cards.slice(0, 5); track card.slug) {
-                              <span class="deck-card__mini" [style.background-image]="card.image ? 'url(' + card.image + ')' : null">
+                              <span
+                                class="deck-card__mini"
+                                [style.background-image]="
+                                  card.image ? 'url(' + card.image + ')' : null
+                                "
+                              >
                                 {{ card.value }}
                               </span>
                             }
                             @if (isEnabled(deck.id)) {
-                              <span class="deck-card__check" [attr.aria-label]="'teams.deck.enabled' | transloco"><i class="pi pi-check"></i></span>
+                              <span
+                                class="deck-card__check"
+                                [attr.aria-label]="'teams.deck.enabled' | transloco"
+                                ><i class="pi pi-check"></i
+                              ></span>
                             }
                           </span>
                           <span class="deck-card__name">{{ deck.name }}</span>
@@ -455,7 +816,10 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
                         [disabled]="true"
                       />
                       <span class="muted">
-                        {{ (canCustomize() ? 'teams.deck.create_soon' : 'teams.deck.create_paid') | transloco }}
+                        {{
+                          (canCustomize() ? 'teams.deck.create_soon' : 'teams.deck.create_paid')
+                            | transloco
+                        }}
                       </span>
                     </div>
                   }
@@ -468,7 +832,13 @@ const DEFAULT_BACKGROUND_COLOR = '#0f172a';
               <p-tabpanel value="manage">
                 <div class="section">
                   <p class="deck-intro">{{ 'teams.delete_intro' | transloco }}</p>
-                  <p-button [label]="'teams.delete' | transloco" icon="pi pi-trash" severity="danger" [outlined]="true" (onClick)="remove_team()" />
+                  <p-button
+                    [label]="'teams.delete' | transloco"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [outlined]="true"
+                    (onClick)="remove_team()"
+                  />
                 </div>
               </p-tabpanel>
             }
@@ -548,8 +918,14 @@ export class TeamDetailComponent implements OnInit {
   readonly styleOptions = computed(() => {
     this.language.revision();
     return [
-      { value: 'color' as SurfaceStyle, label: this.transloco.translate('teams.surface.style_color') },
-      { value: 'image' as SurfaceStyle, label: this.transloco.translate('teams.surface.style_image') },
+      {
+        value: 'color' as SurfaceStyle,
+        label: this.transloco.translate('teams.surface.style_color'),
+      },
+      {
+        value: 'image' as SurfaceStyle,
+        label: this.transloco.translate('teams.surface.style_image'),
+      },
     ];
   });
   readonly feltPreviewImage = computed(() => {
@@ -572,9 +948,18 @@ export class TeamDetailComponent implements OnInit {
   readonly backgroundStyleOptions = computed(() => {
     this.language.revision();
     return [
-      { value: 'theme' as BackgroundStyle, label: this.transloco.translate('teams.background.style_theme') },
-      { value: 'color' as BackgroundStyle, label: this.transloco.translate('teams.surface.style_color') },
-      { value: 'image' as BackgroundStyle, label: this.transloco.translate('teams.surface.style_image') },
+      {
+        value: 'theme' as BackgroundStyle,
+        label: this.transloco.translate('teams.background.style_theme'),
+      },
+      {
+        value: 'color' as BackgroundStyle,
+        label: this.transloco.translate('teams.surface.style_color'),
+      },
+      {
+        value: 'image' as BackgroundStyle,
+        label: this.transloco.translate('teams.surface.style_image'),
+      },
     ];
   });
   readonly backgroundPreviewColor = computed(() =>
@@ -598,7 +983,9 @@ export class TeamDetailComponent implements OnInit {
 
   // Etat d'usine du mode Image : aucun tapis choisi cote table, et le premier dos
   // livre cote cartes — le meme repli que loadDecks applique a une equipe neuve.
-  readonly defaultCardBackId = computed(() => this.cardBacks().find((b) => b.is_standard)?.id ?? null);
+  readonly defaultCardBackId = computed(
+    () => this.cardBacks().find((b) => b.is_standard)?.id ?? null,
+  );
   // Le reset ne porte que sur le mode affiche, donc il n'a rien a faire quand ce
   // mode-la est deja d'usine ; le bouton reste alors eteint.
   readonly canResetFelt = computed(() =>
@@ -611,7 +998,6 @@ export class TeamDetailComponent implements OnInit {
       ? this.backColor().toLowerCase() !== DEFAULT_BACK_COLOR
       : this.selectedCardBackId() !== this.defaultCardBackId(),
   );
-
 
   // Computed, not a field initialiser: translate() at construction runs before the
   // catalogue is loaded and bakes in the raw key — which is what the role selects
@@ -679,7 +1065,10 @@ export class TeamDetailComponent implements OnInit {
       this.team.set(team);
     } catch {
       target.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -694,10 +1083,16 @@ export class TeamDetailComponent implements OnInit {
     saving.set(true);
     try {
       this.team.set(await reset.request());
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.appearance_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.appearance_saved'),
+      });
     } catch {
       reset.revert();
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       saving.set(false);
     }
@@ -705,13 +1100,17 @@ export class TeamDetailComponent implements OnInit {
 
   // Pose l'etat d'usine tout de suite et rend de quoi appeler le serveur puis, si
   // l'appel echoue, revenir a la valeur precedente.
-  private applyDefault(surface: 'felt' | 'card_back'): { request: () => Promise<Team>; revert: () => void } {
+  private applyDefault(surface: 'felt' | 'card_back'): {
+    request: () => Promise<Team>;
+    revert: () => void;
+  } {
     if (surface === 'felt') {
       if (this.feltStyle() === 'color') {
         const previous = this.feltColor();
         this.feltColor.set(DEFAULT_FELT_COLOR);
         return {
-          request: () => this.teamsService.setAppearance(this.id, { felt_color: DEFAULT_FELT_COLOR }),
+          request: () =>
+            this.teamsService.setAppearance(this.id, { felt_color: DEFAULT_FELT_COLOR }),
           revert: () => this.feltColor.set(previous),
         };
       }
@@ -726,7 +1125,8 @@ export class TeamDetailComponent implements OnInit {
       const previous = this.backColor();
       this.backColor.set(DEFAULT_BACK_COLOR);
       return {
-        request: () => this.teamsService.setAppearance(this.id, { card_back_color: DEFAULT_BACK_COLOR }),
+        request: () =>
+          this.teamsService.setAppearance(this.id, { card_back_color: DEFAULT_BACK_COLOR }),
         revert: () => this.backColor.set(previous),
       };
     }
@@ -749,7 +1149,10 @@ export class TeamDetailComponent implements OnInit {
       this.team.set(await this.teamsService.setBackgroundStyle(this.id, style));
     } catch {
       this.backgroundStyle.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -760,10 +1163,16 @@ export class TeamDetailComponent implements OnInit {
     this.savingBackground.set(true);
     try {
       this.team.set(await this.teamsService.setBackground(this.id, background.id));
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.appearance_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.appearance_saved'),
+      });
     } catch {
       this.selectedBackgroundId.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingBackground.set(false);
     }
@@ -793,7 +1202,10 @@ export class TeamDetailComponent implements OnInit {
       if (background.id === this.selectedBackgroundId()) this.selectedBackgroundId.set(null);
       await this.loadDecks();
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -810,14 +1222,22 @@ export class TeamDetailComponent implements OnInit {
     try {
       this.team.set(
         byColour
-          ? await this.teamsService.setAppearance(this.id, { background_color: DEFAULT_BACKGROUND_COLOR })
+          ? await this.teamsService.setAppearance(this.id, {
+              background_color: DEFAULT_BACKGROUND_COLOR,
+            })
           : await this.teamsService.setBackground(this.id, null),
       );
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.appearance_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.appearance_saved'),
+      });
     } catch {
       if (byColour) this.backgroundColor.set(previousColor);
       else this.selectedBackgroundId.set(previousId);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingBackground.set(false);
     }
@@ -830,10 +1250,16 @@ export class TeamDetailComponent implements OnInit {
     this.savingResultLayout.set(true);
     try {
       this.team.set(await this.teamsService.setResultLayout(this.id, layout));
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.appearance_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.appearance_saved'),
+      });
     } catch {
       this.resultLayout.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingResultLayout.set(false);
     }
@@ -847,10 +1273,16 @@ export class TeamDetailComponent implements OnInit {
     try {
       const team = await this.teamsService.setFelt(this.id, felt.id);
       this.team.set(team);
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.appearance_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.appearance_saved'),
+      });
     } catch {
       this.selectedFeltId.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingFelt.set(false);
     }
@@ -899,7 +1331,10 @@ export class TeamDetailComponent implements OnInit {
       await this.teamsService.deleteCardBack(back.id);
       await this.loadDecks();
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -910,7 +1345,10 @@ export class TeamDetailComponent implements OnInit {
       await this.teamsService.deleteFelt(felt.id);
       await this.loadDecks();
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -936,10 +1374,16 @@ export class TeamDetailComponent implements OnInit {
       if (wasColour) await this.setStyle('card_back', 'image');
       const team = await this.teamsService.setCardBack(this.id, back.id);
       this.team.set(team);
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.deck.back_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.deck.back_saved'),
+      });
     } catch {
       this.selectedCardBackId.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingBack.set(false);
     }
@@ -959,10 +1403,16 @@ export class TeamDetailComponent implements OnInit {
     try {
       const team = await this.teamsService.setDecks(this.id, next);
       this.team.set(team);
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.deck.saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.deck.saved'),
+      });
     } catch {
       this.enabledDeckIds.set(previous);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingDeck.set(false);
     }
@@ -989,9 +1439,15 @@ export class TeamDetailComponent implements OnInit {
         background_color: this.backgroundColor(),
       });
       this.team.set(team);
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.appearance_saved') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.appearance_saved'),
+      });
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingAppearance.set(false);
     }
@@ -1026,10 +1482,18 @@ export class TeamDetailComponent implements OnInit {
       const inv = await this.teamsService.invite(this.id, email, this.inviteRole);
       this.invitations.update((list) => [...list, inv]);
       this.inviteEmail = '';
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('teams.invited') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('teams.invited'),
+      });
     } catch (e: unknown) {
       const code = (e as { error?: { code?: string } }).error?.code;
-      this.messages.add({ severity: 'warn', summary: this.transloco.translate(code === 'already_member' ? 'teams.already_member' : 'auth.errors.generic') });
+      this.messages.add({
+        severity: 'warn',
+        summary: this.transloco.translate(
+          code === 'already_member' ? 'teams.already_member' : 'auth.errors.generic',
+        ),
+      });
     } finally {
       this.inviting.set(false);
     }
@@ -1058,7 +1522,10 @@ export class TeamDetailComponent implements OnInit {
       this.team.set(team);
       this.editingName.set(false);
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.savingName.set(false);
     }
@@ -1098,7 +1565,7 @@ export class TeamDetailComponent implements OnInit {
 
   initials(name: string): string {
     const p = (name || '?').trim().split(/\s+/);
-    return ((p[0]?.[0] ?? '?') + (p.length > 1 ? p[1][0] : p[0]?.[1] ?? '')).toUpperCase();
+    return ((p[0]?.[0] ?? '?') + (p.length > 1 ? p[1][0] : (p[0]?.[1] ?? ''))).toUpperCase();
   }
   color(seed: string): string {
     let h = 0;

@@ -1,10 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ButtonModule } from 'primeng/button';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { InputTextModule } from 'primeng/inputtext';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 
 import { RoomSocketService } from '../../../../core/realtime/room-socket.service';
 import { resolveActivity } from '../activity-registry';
@@ -44,7 +44,14 @@ interface PendingRow {
 @Component({
   selector: 'app-dot-voting-facilitator-panel',
   standalone: true,
-  imports: [FormsModule, TranslocoModule, ButtonModule, InputNumberModule, InputTextModule, ToggleSwitchModule],
+  imports: [
+    FormsModule,
+    TranslocoModule,
+    ButtonModule,
+    InputNumberModule,
+    InputTextModule,
+    ToggleSwitchModule,
+  ],
   templateUrl: './facilitator-panel.component.html',
   styleUrl: './facilitator-panel.component.scss',
 })
@@ -172,7 +179,9 @@ export class DotVotingFacilitatorPanelComponent {
   }
 
   // --- Etape 3 : le round est ouvert -------------------------------------------
-  readonly canReveal = computed(() => this.state() === 'open' && this.socket.participation().voted >= 1);
+  readonly canReveal = computed(
+    () => this.state() === 'open' && this.socket.participation().voted >= 1,
+  );
 
   /** Ce qu'il reste a placer par participant (contrat §8.7, design §4) --
    * `null` tant qu'aucune reponse n'a encore ete posee sur ce round (le

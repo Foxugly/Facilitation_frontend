@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { TranslocoModule } from '@jsverse/transloco';
-import { TabsModule } from 'primeng/tabs';
+import { TabsModule } from '@openng/optimus-ui/tabs';
 
 import { LanguageService } from '../../core/i18n/language.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
@@ -23,9 +23,16 @@ import { CONTACT_INFO, emailDisplay, openContactEmail, phoneDisplay } from './co
 
       <p-tabs [(value)]="activeTab" class="about-tabs">
         <p-tablist>
-          <p-tab value="company"><span class="pi pi-building tab-icon"></span><span>{{ ui().tabs.company }}</span></p-tab>
-          <p-tab value="legal"><span class="pi pi-shield tab-icon"></span><span>{{ ui().tabs.legal }}</span></p-tab>
-          <p-tab value="technical"><span class="pi pi-code tab-icon"></span><span>{{ ui().tabs.technical }}</span></p-tab>
+          <p-tab value="company"
+            ><span class="pi pi-building tab-icon"></span
+            ><span>{{ ui().tabs.company }}</span></p-tab
+          >
+          <p-tab value="legal"
+            ><span class="pi pi-shield tab-icon"></span><span>{{ ui().tabs.legal }}</span></p-tab
+          >
+          <p-tab value="technical"
+            ><span class="pi pi-code tab-icon"></span><span>{{ ui().tabs.technical }}</span></p-tab
+          >
         </p-tablist>
 
         <p-tabpanels>
@@ -42,7 +49,10 @@ import { CONTACT_INFO, emailDisplay, openContactEmail, phoneDisplay } from './co
                 <dt>{{ ui().company.addressLabel }}</dt>
                 <dd>
                   @for (line of contact.addressLines; track line; let last = $last) {
-                    <span>{{ line }}</span>@if (!last) {<br />}
+                    <span>{{ line }}</span>
+                    @if (!last) {
+                      <br />
+                    }
                   }
                 </dd>
                 <dt>{{ ui().company.emailLabel }}</dt>
@@ -56,7 +66,13 @@ import { CONTACT_INFO, emailDisplay, openContactEmail, phoneDisplay } from './co
                 <dd class="mono">{{ phoneShown }}</dd>
                 <dt>{{ ui().company.websiteLabel }}</dt>
                 <dd>
-                  <a [href]="contact.websiteUrl" class="mono mono-link" rel="noreferrer noopener" target="_blank">{{ contact.websiteLabel }}</a>
+                  <a
+                    [href]="contact.websiteUrl"
+                    class="mono mono-link"
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    >{{ contact.websiteLabel }}</a
+                  >
                 </dd>
               </dl>
             </article>
@@ -95,7 +111,13 @@ import { CONTACT_INFO, emailDisplay, openContactEmail, phoneDisplay } from './co
                     @if (key === 'repository') {
                       <div class="meta-block">
                         <span class="meta-label">{{ ui().repositoryUrlLabel }}</span>
-                        <a class="mono mono-link" [href]="repositoryUrl" rel="noreferrer" target="_blank">{{ repositoryUrl }}</a>
+                        <a
+                          class="mono mono-link"
+                          [href]="repositoryUrl"
+                          rel="noreferrer"
+                          target="_blank"
+                          >{{ repositoryUrl }}</a
+                        >
                       </div>
                     }
                     <ul>

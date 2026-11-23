@@ -2,14 +2,22 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { SkeletonModule } from 'primeng/skeleton';
-import { TagModule } from 'primeng/tag';
+import { MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { SkeletonModule } from '@openng/optimus-ui/skeleton';
+import { TagModule } from '@openng/optimus-ui/tag';
 
-import { BillingService, Interval, Plan, SubscriptionStatus } from '../../core/billing/billing.service';
-import { needsSubscription as needsSubscriptionRule, quotaReached as quotaReachedRule } from '../../core/billing/gating';
+import {
+  BillingService,
+  Interval,
+  Plan,
+  SubscriptionStatus,
+} from '../../core/billing/billing.service';
+import {
+  needsSubscription as needsSubscriptionRule,
+  quotaReached as quotaReachedRule,
+} from '../../core/billing/gating';
 import { TeamsService } from '../../core/teams/teams.service';
 import { Team } from '../../core/teams/teams.models';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
@@ -42,15 +50,32 @@ interface PlanOption {
     <section class="page">
       <app-page-header [icon]="'pi-users'" [title]="'teams.title' | transloco">
         @if (canCreate()) {
-          <p-button slot="right" [label]="'teams.create' | transloco" icon="pi pi-plus" severity="success" (onClick)="toggleCreate()" />
+          <p-button
+            slot="right"
+            [label]="'teams.create' | transloco"
+            icon="pi pi-plus"
+            severity="success"
+            (onClick)="toggleCreate()"
+          />
         }
         @if (sub()?.canManage) {
-          <p-button slot="right" [label]="'billing.manage' | transloco" icon="pi pi-credit-card" [outlined]="true" severity="secondary" (onClick)="manage()" />
+          <p-button
+            slot="right"
+            [label]="'billing.manage' | transloco"
+            icon="pi pi-credit-card"
+            [outlined]="true"
+            severity="secondary"
+            (onClick)="manage()"
+          />
         }
       </app-page-header>
 
       @if (sub()?.bypass) {
-        <p-tag severity="success" icon="pi pi-gift" [value]="'billing.offered_access' | transloco" />
+        <p-tag
+          severity="success"
+          icon="pi pi-gift"
+          [value]="'billing.offered_access' | transloco"
+        />
       }
 
       <!-- No subscription yet (billing live): show the plans -->
@@ -59,25 +84,46 @@ interface PlanOption {
         <div class="grid">
           @for (p of plans; track p.plan + p.interval) {
             <div class="plan-card">
-              <span class="plan-quota"><i class="pi pi-users"></i> {{ p.quota }} {{ 'billing.teams' | transloco }}</span>
-              <div class="plan-price">{{ p.price }}<span class="plan-per">/{{ p.per | transloco }}</span></div>
-              <p-button [label]="'billing.subscribe' | transloco" icon="pi pi-star" severity="success" styleClass="w-full"
-                        [loading]="busy()" (onClick)="subscribe(p)" />
+              <span class="plan-quota"
+                ><i class="pi pi-users"></i> {{ p.quota }} {{ 'billing.teams' | transloco }}</span
+              >
+              <div class="plan-price">
+                {{ p.price }}<span class="plan-per">/{{ p.per | transloco }}</span>
+              </div>
+              <p-button
+                [label]="'billing.subscribe' | transloco"
+                icon="pi pi-star"
+                severity="success"
+                styleClass="w-full"
+                [loading]="busy()"
+                (onClick)="subscribe(p)"
+              />
             </div>
           }
         </div>
       } @else {
         @if (showCreate()) {
           <div class="create-row">
-            <input pInputText [placeholder]="'teams.name' | transloco" [(ngModel)]="name" (keyup.enter)="create()" />
-            <p-button [label]="'teams.create' | transloco" [loading]="busy()" (onClick)="create()" />
+            <input
+              pInputText
+              [placeholder]="'teams.name' | transloco"
+              [(ngModel)]="name"
+              (keyup.enter)="create()"
+            />
+            <p-button
+              [label]="'teams.create' | transloco"
+              [loading]="busy()"
+              (onClick)="create()"
+            />
           </div>
         }
 
         @if (sub()?.billingEnabled && sub()?.isPaid) {
           <p class="meta quota-line">
             {{ 'billing.quota' | transloco }}: {{ sub()!.teamsUsed }} / {{ sub()!.quota }}
-            @if (quotaReached()) { · {{ 'billing.quota_reached' | transloco }} }
+            @if (quotaReached()) {
+              · {{ 'billing.quota_reached' | transloco }}
+            }
           </p>
         }
 
@@ -139,16 +185,25 @@ export class TeamsListComponent implements OnInit {
     await this.reload();
     const billing = this.route.snapshot.queryParamMap.get('billing');
     if (billing === 'success') {
-      this.messages.add({ severity: 'success', summary: this.transloco.translate('billing.success') });
+      this.messages.add({
+        severity: 'success',
+        summary: this.transloco.translate('billing.success'),
+      });
     } else if (billing === 'cancel') {
-      this.messages.add({ severity: 'info', summary: this.transloco.translate('billing.canceled') });
+      this.messages.add({
+        severity: 'info',
+        summary: this.transloco.translate('billing.canceled'),
+      });
     }
   }
 
   private async reload(): Promise<void> {
     this.loading.set(true);
     try {
-      const [teams, sub] = await Promise.all([this.teamsService.listTeams(), this.billing.status()]);
+      const [teams, sub] = await Promise.all([
+        this.teamsService.listTeams(),
+        this.billing.status(),
+      ]);
       this.teams.set(teams);
       this.sub.set(sub);
     } finally {
@@ -171,7 +226,10 @@ export class TeamsListComponent implements OnInit {
       this.showCreate.set(false);
       await this.reload();
     } catch {
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     } finally {
       this.busy.set(false);
     }
@@ -183,7 +241,10 @@ export class TeamsListComponent implements OnInit {
       await this.billing.subscribe(p.plan, p.interval);
     } catch {
       this.busy.set(false);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 
@@ -193,7 +254,10 @@ export class TeamsListComponent implements OnInit {
       await this.billing.manage();
     } catch {
       this.busy.set(false);
-      this.messages.add({ severity: 'error', summary: this.transloco.translate('auth.errors.generic') });
+      this.messages.add({
+        severity: 'error',
+        summary: this.transloco.translate('auth.errors.generic'),
+      });
     }
   }
 }

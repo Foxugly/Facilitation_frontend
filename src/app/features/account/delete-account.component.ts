@@ -3,11 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ButtonModule } from 'primeng/button';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { ConfirmDialogModule } from '@openng/optimus-ui/confirmdialog';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { PasswordModule } from '@openng/optimus-ui/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -35,7 +35,14 @@ function errorCode(err: unknown): string | undefined {
 @Component({
   selector: 'app-delete-account',
   standalone: true,
-  imports: [FormsModule, TranslocoModule, ButtonModule, ConfirmDialogModule, MessageModule, PasswordModule],
+  imports: [
+    FormsModule,
+    TranslocoModule,
+    ButtonModule,
+    ConfirmDialogModule,
+    MessageModule,
+    PasswordModule,
+  ],
   providers: [ConfirmationService],
   template: `
     <div class="section delete-account" data-testid="delete-account">
@@ -43,41 +50,89 @@ function errorCode(err: unknown): string | undefined {
       <p class="meta-hint">{{ 'me.delete.lead' | transloco }}</p>
       <p class="meta-hint">{{ 'me.export.hint' | transloco }}</p>
       <div class="delete-account__actions">
-        <p-button [label]="'me.export.button' | transloco" icon="pi pi-download" severity="secondary"
-                  [outlined]="true" data-testid="export-data" [loading]="exporting()" [disabled]="exporting()"
-                  (onClick)="exportData()" />
-        <p-button [label]="'me.delete.button' | transloco" icon="pi pi-trash" severity="danger"
-                  data-testid="delete-account-open" (onClick)="open()" />
+        <p-button
+          [label]="'me.export.button' | transloco"
+          icon="pi pi-download"
+          severity="secondary"
+          [outlined]="true"
+          data-testid="export-data"
+          [loading]="exporting()"
+          [disabled]="exporting()"
+          (onClick)="exportData()"
+        />
+        <p-button
+          [label]="'me.delete.button' | transloco"
+          icon="pi pi-trash"
+          severity="danger"
+          data-testid="delete-account-open"
+          (onClick)="open()"
+        />
       </div>
     </div>
 
-    <p-confirmdialog [key]="confirmKey" [closable]="!pending()" [closeOnEscape]="!pending()"
-                     [style]="{ width: '34rem' }" [breakpoints]="{ '640px': '94vw' }">
+    <p-confirmdialog
+      [key]="confirmKey"
+      [closable]="!pending()"
+      [closeOnEscape]="!pending()"
+      [style]="{ width: '34rem' }"
+      [breakpoints]="{ '640px': '94vw' }"
+    >
       <ng-template #message>
         <form class="delete-account__dialog" (submit)="$event.preventDefault(); submit()">
           <p>{{ 'me.delete.dialog_intro' | transloco }}</p>
           <p>{{ 'me.delete.dialog_teams' | transloco }}</p>
           <label for="delete-account-password">{{ 'me.delete.password' | transloco }}</label>
-          <p-password inputId="delete-account-password" name="current_password" autocomplete="current-password"
-                      [ngModel]="password()" (ngModelChange)="password.set($event)"
-                      [feedback]="false" [toggleMask]="true" [fluid]="true" />
+          <p-password
+            inputId="delete-account-password"
+            name="current_password"
+            autocomplete="current-password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            [feedback]="false"
+            [toggleMask]="true"
+            [fluid]="true"
+          />
           @if (error(); as message) {
             <p-message severity="error" data-testid="delete-account-error">{{ message }}</p-message>
           }
         </form>
       </ng-template>
       <ng-template #footer>
-        <p-button type="button" severity="secondary" [outlined]="true" [label]="'action.cancel' | transloco"
-                  [disabled]="pending()" (onClick)="cancel()" />
-        <p-button type="button" severity="danger" icon="pi pi-trash" [label]="'me.delete.confirm' | transloco"
-                  data-testid="delete-account-confirm" [loading]="pending()" [disabled]="pending()" (onClick)="submit()" />
+        <p-button
+          type="button"
+          severity="secondary"
+          [outlined]="true"
+          [label]="'action.cancel' | transloco"
+          [disabled]="pending()"
+          (onClick)="cancel()"
+        />
+        <p-button
+          type="button"
+          severity="danger"
+          icon="pi pi-trash"
+          [label]="'me.delete.confirm' | transloco"
+          data-testid="delete-account-confirm"
+          [loading]="pending()"
+          [disabled]="pending()"
+          (onClick)="submit()"
+        />
       </ng-template>
     </p-confirmdialog>
   `,
   styles: `
-    .delete-account__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .delete-account__dialog { display: flex; flex-direction: column; gap: 0.75rem; }
-    .delete-account__dialog p { margin: 0; }
+    .delete-account__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .delete-account__dialog {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .delete-account__dialog p {
+      margin: 0;
+    }
   `,
 })
 export class DeleteAccountComponent {
@@ -101,7 +156,8 @@ export class DeleteAccountComponent {
     try {
       await this.auth.exportData();
     } catch (err) {
-      const key = (err as HttpErrorResponse)?.status === 429 ? 'me.export.throttled' : 'me.export.failed';
+      const key =
+        (err as HttpErrorResponse)?.status === 429 ? 'me.export.throttled' : 'me.export.failed';
       this.messages.add({ severity: 'error', summary: this.transloco.translate(key), life: 8000 });
     } finally {
       this.exporting.set(false);
@@ -111,7 +167,10 @@ export class DeleteAccountComponent {
   open(): void {
     this.password.set('');
     this.error.set(null);
-    this.confirmation.confirm({ key: this.confirmKey, header: this.transloco.translate('me.delete.dialog_title') });
+    this.confirmation.confirm({
+      key: this.confirmKey,
+      header: this.transloco.translate('me.delete.dialog_title'),
+    });
   }
 
   cancel(): void {
@@ -139,14 +198,20 @@ export class DeleteAccountComponent {
     this.confirmation.close();
     this.password.set('');
     await this.router.navigate(['/home']);
-    this.messages.add({ severity: 'success', summary: this.transloco.translate('me.delete.success'), life: 8000 });
+    this.messages.add({
+      severity: 'success',
+      summary: this.transloco.translate('me.delete.success'),
+      life: 8000,
+    });
   }
 
   private errorMessage(err: unknown): string {
     const status = (err as HttpErrorResponse)?.status;
     const code = errorCode(err);
-    if (code === 'owns_teams' || status === 409) return this.transloco.translate('me.delete.owns_teams');
-    if (code === 'current_password_invalid' || status === 400) return this.transloco.translate('me.delete.password_invalid');
+    if (code === 'owns_teams' || status === 409)
+      return this.transloco.translate('me.delete.owns_teams');
+    if (code === 'current_password_invalid' || status === 400)
+      return this.transloco.translate('me.delete.password_invalid');
     if (status === 429) return this.transloco.translate('me.delete.throttled');
     return this.transloco.translate('auth.errors.generic');
   }

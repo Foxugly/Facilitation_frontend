@@ -192,7 +192,7 @@
     "tab_technical": "Technical",
     "company_body": "Facilitation is published by Foxugly SRL, a Belgian company. We build simple tools for teams that decide together.",
     "legal_body": "Publisher: Foxugly SRL — Belgium. Contact: info@foxugly.com. Hosting: Amazon Web Services (Ireland, eu-west-1 region). Anonymous rooms are temporary and expire after a period of inactivity.",
-    "technical_body": "A real-time application: Django and Django Channels (WebSocket) backend, Angular and PrimeNG frontend. Multilingual (5 languages), light and dark themes."
+    "technical_body": "A real-time application: Django and Django Channels (WebSocket) backend, Angular and Optimus UI frontend. Multilingual (5 languages), light and dark themes."
   },
   "privacy": {
     "title": "Privacy",

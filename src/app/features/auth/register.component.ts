@@ -1,11 +1,19 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, inject, signal, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { PasswordModule } from '@openng/optimus-ui/password';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { AuthCardComponent } from '../../shared/components/auth-card/auth-card.component';
@@ -34,16 +42,30 @@ import { passwordsMatch } from './passwords-match';
     >
       @if (done()) {
         <p-message severity="success" [text]="'auth.register.done_lead' | transloco" />
-        <div class="links"><a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a></div>
+        <div class="links">
+          <a routerLink="/login">{{ 'auth.back_to_login' | transloco }}</a>
+        </div>
       } @else {
         <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form" novalidate>
           <div class="field">
             <label for="displayName">{{ 'auth.display_name' | transloco }}</label>
-            <input id="displayName" pInputText formControlName="displayName" autocomplete="nickname" />
+            <input
+              id="displayName"
+              pInputText
+              formControlName="displayName"
+              autocomplete="nickname"
+            />
           </div>
           <div class="field">
             <label for="email">{{ 'auth.email' | transloco }}</label>
-            <input id="email" pInputText type="email" formControlName="email" autocomplete="email" required />
+            <input
+              id="email"
+              pInputText
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              required
+            />
           </div>
           <div class="field">
             <label for="password">{{ 'auth.password' | transloco }}</label>
@@ -75,8 +97,12 @@ import { passwordsMatch } from './passwords-match';
               <p class="err">{{ 'auth.errors.password_mismatch' | transloco }}</p>
             }
           </div>
-          @if (error()) { <p-message severity="error" [text]="error()! | transloco" /> }
-          @if (turnstile.enabled) { <div #turnstileEl class="turnstile-widget"></div> }
+          @if (error()) {
+            <p-message severity="error" [text]="error()! | transloco" />
+          }
+          @if (turnstile.enabled) {
+            <div #turnstileEl class="turnstile-widget"></div>
+          }
           <p-button
             type="submit"
             [label]="'auth.register.cta' | transloco"
@@ -127,18 +153,27 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
     let token = '';
     if (this.turnstile.enabled) {
       token = this.turnstile.readToken();
-      if (!token) { this.error.set('auth.errors.captcha'); return; }
+      if (!token) {
+        this.error.set('auth.errors.captcha');
+        return;
+      }
     }
     this.busy.set(true);
     try {
       const { email, password, displayName } = this.form.getRawValue();
       await this.auth.register(
-        email.trim().toLowerCase(), password, displayName.trim(),
+        email.trim().toLowerCase(),
+        password,
+        displayName.trim(),
         this.turnstile.enabled ? token : undefined,
       );
       this.done.set(true);
     } catch (e) {
-      if (this.turnstile.enabled && (e as { error?: { code?: string } })?.error?.code === 'captcha_failed') this.turnstile.reset();
+      if (
+        this.turnstile.enabled &&
+        (e as { error?: { code?: string } })?.error?.code === 'captcha_failed'
+      )
+        this.turnstile.reset();
       this.error.set(authErrorKey(e));
     } finally {
       this.busy.set(false);
