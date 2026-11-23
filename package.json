@@ -34,10 +34,10 @@
     "@angular/build": "^22.3.0",
     "@angular/cli": "^22.3.0",
     "@angular/compiler-cli": "^22.3.0",
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@types/qrcode": "^1.5.6",
     "jsdom": "^28.1.0",
-    "postcss": "^8.5.32",
+    "postcss": "^8.5.33",
     "prettier": "^3.10.1",
     "typescript": "~6.0.3",
     "vitest": "^4.1.12"
