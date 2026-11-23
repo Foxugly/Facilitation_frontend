@@ -23,7 +23,7 @@
     "@openng/icons": "^1.0.0",
     "@openng/optimus-ui": "^2.0.2",
     "@openng/optimus-ui-themes": "^2.0.2",
-    "@sentry/angular": "^11.16.0",
+    "@sentry/angular": "^11.17.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.9",
     "qrcode": "^1.5.4",
