@@ -20,15 +20,15 @@
     "@angular/platform-browser": "^22.3.0",
     "@angular/router": "^22.3.0",
     "@jsverse/transloco": "^8.4.0",
-    "@sentry/angular": "^10.78.0",
+    "@openng/icons": "^1.0.0",
+    "@openng/optimus-ui": "^2.0.2",
+    "@openng/optimus-ui-themes": "^2.0.2",
+    "@sentry/angular": "^11.16.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.9",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
-    "tslib": "^2.9.1",
-    "@openng/optimus-ui": "^2.0.2",
-    "@openng/icons": "^1.0.0",
-    "@openng/optimus-ui-themes": "^2.0.2"
+    "tslib": "^2.9.1"
   },
   "devDependencies": {
     "@angular/build": "^22.3.0",
@@ -36,10 +36,10 @@
     "@angular/compiler-cli": "^22.3.0",
     "@playwright/test": "^1.65.1",
     "@types/qrcode": "^1.5.6",
-    "jsdom": "^28.1.0",
+    "jsdom": "^31.0.1",
     "postcss": "^8.5.33",
     "prettier": "^3.10.1",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.12"
+    "vitest": "^5.1.1"
   }
 }
